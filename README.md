@@ -1,36 +1,197 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StaffHub - Time Off Portal
+
+A modern, mobile-first employee time-off request and management portal built with Next.js 14, Supabase, and shadcn/ui.
+
+## Features
+
+- **Employee Dashboard**: Submit time-off requests with date selection, reason, and optional co-worker coverage
+- **Team Calendar**: View approved time-off across the organization
+- **Admin Dashboard**: Review, approve, or deny pending requests with one-click actions
+- **Email Notifications**: 
+  - Admins notified when new requests are submitted
+  - Employees notified when requests are approved/denied
+- **Role-based Access**: Staff and Admin roles with appropriate permissions
+- **Mobile-First Design**: Responsive design that works beautifully on phones, tablets, and desktops
+- **Dark/Light Mode**: Toggle between themes based on preference
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router) with TypeScript
+- **Database & Auth**: Supabase (PostgreSQL + Auth with Google OAuth)
+- **Styling**: Tailwind CSS v4 + shadcn/ui components
+- **Date Handling**: date-fns
+- **Calendar**: react-big-calendar
+- **Email**: Gmail SMTP via Nodemailer + React Email templates
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Supabase account
+- Gmail account (for email notifications)
+
+### 1. Clone and Install
+
+```bash
+cd hr-employee-portal
+npm install
+```
+
+### 2. Set Up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the contents of `supabase/schema.sql`
+3. This creates all tables, types, indexes, RLS policies, and seeds leave types + pay periods
+
+### 3. Configure Authentication
+
+1. In Supabase Dashboard, go to **Authentication > Providers**
+2. Enable **Email** provider (confirm email can be disabled for development)
+3. For Google OAuth:
+   - Enable **Google** provider
+   - Set up OAuth credentials in [Google Cloud Console](https://console.cloud.google.com)
+   - Add redirect URL: `https://your-project.supabase.co/auth/v1/callback`
+
+### 4. Set Up Gmail for Notifications
+
+1. Create a Gmail account for sending notifications (e.g., `yourcompany.hr@gmail.com`)
+2. Enable 2-Factor Authentication on the account
+3. Generate an App Password:
+   - Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+   - Select "Mail" and generate a password
+   - Copy the 16-character password
+
+### 5. Environment Variables
+
+Copy `.env.local.example` to `.env.local` and fill in your values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+```env
+# Supabase (from Project Settings > API)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Gmail SMTP
+GMAIL_USER=yourcompany.hr@gmail.com
+GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+NOTIFY_EMAILS=admin@gmail.com,manager@gmail.com
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 6. Create Demo Users (Optional)
+
+To seed demo data:
+
+1. In Supabase Dashboard, go to **Authentication > Users**
+2. Click "Add user" > "Create new user" for each:
+   - `admin@staffhub.demo` (will be admin)
+   - `sarah.johnson@staffhub.demo` (staff)
+   - `michael.chen@staffhub.demo` (staff)
+   - `emily.davis@staffhub.demo` (staff)
+   - `james.wilson@staffhub.demo` (staff)
+
+3. Run the seed script in SQL Editor: `supabase/seed.sql`
+
+### 7. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Push to GitHub
 
-## Learn More
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin main
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Deploy on Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Go to [vercel.com](https://vercel.com) and import your repository
+2. Add environment variables in Vercel project settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `GMAIL_USER`
+   - `GMAIL_APP_PASSWORD`
+   - `NOTIFY_EMAILS`
+   - `NEXT_PUBLIC_APP_URL` (your Vercel URL)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Update OAuth Callback URLs
 
-## Deploy on Vercel
+After deployment, update Google OAuth settings:
+- Add your Vercel URL to authorized redirect URIs in Google Cloud Console
+- Update Supabase Auth redirect URLs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (app)/           # Authenticated app routes
+│   │   ├── admin/       # Admin dashboard & employee management
+│   │   ├── calendar/    # Team calendar
+│   │   └── dashboard/   # Employee dashboard
+│   ├── (auth)/          # Login & register pages
+│   ├── api/             # API routes (notifications)
+│   └── auth/            # OAuth callback
+├── components/
+│   ├── admin/           # Admin-specific components
+│   ├── emails/          # React Email templates
+│   └── ui/              # shadcn/ui components
+├── lib/
+│   ├── supabase/        # Supabase client utilities
+│   ├── types/           # TypeScript types
+│   └── utils.ts         # Utility functions
+└── middleware.ts        # Auth middleware
+```
+
+## Pay Periods
+
+The system includes pre-seeded pay periods following a semi-monthly schedule:
+- 24 periods per year
+- T4 year runs Dec 16 - Dec 15
+- Periods end on the 15th and last day of each month
+
+Pay periods for 2025 and 2026 T4 years are included in the schema.
+
+## Customization
+
+### Leave Types
+
+Modify leave types in `supabase/schema.sql` or via Supabase Dashboard:
+
+```sql
+INSERT INTO leave_types (name, color, is_single_day) VALUES
+  ('Vacation', '#10b981', false),
+  ('Single Day Off', '#f59e0b', true),
+  ('Sick Leave', '#ef4444', true);  -- Add more as needed
+```
+
+### Theme Colors
+
+Customize the teal-focused color palette in `src/app/globals.css`.
+
+### Email Templates
+
+Modify email templates in `src/components/emails/`:
+- `new-request-email.tsx` - Sent to admins when new requests come in
+- `approval-email.tsx` - Sent to employees when approved
+- `denial-email.tsx` - Sent to employees when denied
+
+## License
+
+MIT
