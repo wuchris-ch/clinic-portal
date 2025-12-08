@@ -144,6 +144,9 @@ export function LeaveRequestForm({ leaveTypes, payPeriods = [], userId, userEmai
             endDate: format(endDate, "yyyy-MM-dd"),
             reason,
             totalDays: sortedDates.length,
+            submissionDate: format(submissionDate, "yyyy-MM-dd"),
+            coverageName: hasCoverage ? coverageName : null,
+            coverageEmail: hasCoverage ? coverageEmail : null,
           }),
         });
       } catch (notifyError) {

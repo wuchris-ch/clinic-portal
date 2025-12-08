@@ -20,6 +20,9 @@ interface NewRequestEmailProps {
   isSameDay: boolean;
   reason: string;
   totalDays: number;
+  submissionDate: string;
+  coverageName?: string | null;
+  coverageEmail?: string | null;
   adminUrl: string;
 }
 
@@ -32,6 +35,9 @@ export function NewRequestEmail({
   isSameDay,
   reason,
   totalDays,
+  submissionDate,
+  coverageName,
+  coverageEmail,
   adminUrl,
 }: NewRequestEmailProps) {
   const formatDate = (dateStr: string) => {
@@ -73,6 +79,9 @@ export function NewRequestEmail({
               <Text style={detailLabel}>Type</Text>
               <Text style={detailValue}>{leaveType}</Text>
 
+              <Text style={detailLabel}>Submitted</Text>
+              <Text style={detailValue}>{formatDate(submissionDate)}</Text>
+
               <Text style={detailLabel}>Date(s)</Text>
               <Text style={detailValue}>
                 {isSameDay
@@ -85,6 +94,16 @@ export function NewRequestEmail({
 
               <Text style={detailLabel}>Reason</Text>
               <Text style={{ ...detailValue, marginBottom: 0 }}>{reason}</Text>
+
+              {(coverageName || coverageEmail) && (
+                <>
+                  <Text style={detailLabel}>Coverage</Text>
+                  <Text style={detailValue}>
+                    {coverageName || "N/A"}
+                    {coverageEmail ? ` (${coverageEmail})` : ""}
+                  </Text>
+                </>
+              )}
             </Section>
 
             <Button style={button} href={adminUrl}>
