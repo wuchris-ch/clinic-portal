@@ -199,21 +199,30 @@ const helpTopics = [
 
 function HelpTopicCard({ topic }: { topic: typeof helpTopics[0] }) {
     const Icon = topic.icon;
-    const Wrapper = topic.clickable ? Link : "div";
-    const wrapperProps = topic.clickable ? { href: topic.href } : {};
+    const className = `group flex flex-col items-start p-6 rounded-2xl border border-border/50 bg-white shadow-sm transition-all duration-300 ${topic.clickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : 'opacity-60 cursor-not-allowed'}`;
 
-    return (
-        <Wrapper
-            {...wrapperProps}
-            className={`group flex flex-col items-start p-6 rounded-2xl border border-border/50 bg-white shadow-sm transition-all duration-300 ${topic.clickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : 'opacity-60 cursor-not-allowed'
-                }`}
-        >
+    const content = (
+        <>
             <div className={`p-3 rounded-xl ${topic.bg} ${topic.hoverBg} transition-colors mb-4`}>
                 <Icon className={`w-8 h-8 ${topic.color}`} />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">{topic.title}</h3>
             <p className="text-sm text-gray-500 leading-relaxed">{topic.description}</p>
-        </Wrapper>
+        </>
+    );
+
+    if (topic.clickable) {
+        return (
+            <Link href={topic.href} className={className}>
+                {content}
+            </Link>
+        );
+    }
+
+    return (
+        <div className={className}>
+            {content}
+        </div>
     );
 }
 
