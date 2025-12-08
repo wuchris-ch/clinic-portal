@@ -221,6 +221,35 @@ export interface Database {
           updated_at?: string;
         };
       };
+      announcements: {
+        Row: {
+          id: string;
+          title: string;
+          content: string;
+          pinned: boolean;
+          image_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          content: string;
+          pinned?: boolean;
+          image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          content?: string;
+          pinned?: boolean;
+          image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -243,6 +272,7 @@ export type LeaveRequest = Database["public"]["Tables"]["leave_requests"]["Row"]
 export type LeaveRequestDate = Database["public"]["Tables"]["leave_request_dates"]["Row"];
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 export type NotificationRecipient = Database["public"]["Tables"]["notification_recipients"]["Row"];
+export type Announcement = Database["public"]["Tables"]["announcements"]["Row"];
 
 // Extended types with relations
 export type LeaveRequestWithDetails = LeaveRequest & {
