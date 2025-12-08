@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       const emailResult = await transporter.sendMail({
         from: `StaffHub <${process.env.GMAIL_USER}>`,
         to: notifyEmailsList,
-        subject: `📋 New Time-Off Request from ${employeeName}`,
+        subject: `New Time-Off Request from ${employeeName}`,
         html: emailHtml,
       });
 
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
           dashboardUrl: `${appUrl}/dashboard`,
         })
       );
-      subject = `✅ Time-Off Request Approved - ${leaveType}`;
+      subject = `Time-Off Request Approved - ${leaveType}`;
     } else {
       emailHtml = await render(
         DenialEmail({
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
           dashboardUrl: `${appUrl}/dashboard`,
         })
       );
-      subject = `❌ Time-Off Request Denied - ${leaveType}`;
+      subject = `Time-Off Request Denied - ${leaveType}`;
     }
 
     // Send email via Gmail
