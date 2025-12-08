@@ -80,7 +80,6 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 # Gmail SMTP
 GMAIL_USER=yourcompany.hr@gmail.com
 GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
-NOTIFY_EMAILS=admin@gmail.com,manager@gmail.com
 
 # App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -91,12 +90,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 To seed demo data:
 
 1. In Supabase Dashboard, go to **Authentication > Users**
-2. Click "Add user" > "Create new user" for each:
-   - `admin@staffhub.demo` (will be admin)
-   - `sarah.johnson@staffhub.demo` (staff)
-   - `michael.chen@staffhub.demo` (staff)
-   - `emily.davis@staffhub.demo` (staff)
-   - `james.wilson@staffhub.demo` (staff)
+2. Click "Add user" > "Create new user" for each (matches `supabase/seed.sql`):
+   - `admin@test.com` (will be admin)
+   - `sarah.johnson@test.com` (staff)
+   - `michael.chen@test.com` (staff)
+   - `emily.davis@test.com` (staff)
+   - `james.wilson@test.com` (staff)
 
 3. Run the seed script in SQL Editor: `supabase/seed.sql`
 
@@ -127,8 +126,9 @@ git push origin main
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `GMAIL_USER`
    - `GMAIL_APP_PASSWORD`
-   - `NOTIFY_EMAILS`
    - `NEXT_PUBLIC_APP_URL` (your Vercel URL)
+
+3. **Configure notification recipients** in the Admin Dashboard → Email Notifications section
 
 ### 3. Update OAuth Callback URLs
 

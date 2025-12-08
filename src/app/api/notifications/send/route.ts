@@ -78,6 +78,9 @@ export async function POST(request: Request) {
         endDate,
         reason,
         totalDays,
+        coverageName,
+        coverageEmail,
+        submissionDate,
       } = body;
 
       // Get notification recipients from database (with env var fallback)
@@ -99,6 +102,9 @@ export async function POST(request: Request) {
           isSameDay,
           reason,
           totalDays,
+          submissionDate,
+          coverageName,
+          coverageEmail,
           adminUrl: `${appUrl}/admin`,
         })
       );
