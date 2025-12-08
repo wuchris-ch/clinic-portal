@@ -130,6 +130,10 @@ export function LeaveRequestForm({ leaveTypes, payPeriods = [], userId, userEmai
 
       // Send notification to admin(s)
       const selectedLeaveType = leaveTypes.find(t => t.id === leaveTypeId);
+      const selectedPayPeriod = payPeriods.find(p => p.id === selectedPayPeriodId);
+      const payPeriodLabel = selectedPayPeriod
+        ? `Period ${selectedPayPeriod.period_number} (${format(parseISO(selectedPayPeriod.start_date), "MMM d")} - ${format(parseISO(selectedPayPeriod.end_date), "MMM d, yyyy")})`
+        : null;
       try {
         await fetch("/api/notifications/send", {
           method: "POST",
@@ -147,6 +151,7 @@ export function LeaveRequestForm({ leaveTypes, payPeriods = [], userId, userEmai
             submissionDate: format(submissionDate, "yyyy-MM-dd"),
             coverageName: hasCoverage ? coverageName : null,
             coverageEmail: hasCoverage ? coverageEmail : null,
+            payPeriodLabel,
           }),
         });
       } catch (notifyError) {

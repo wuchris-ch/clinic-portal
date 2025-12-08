@@ -21,6 +21,7 @@ interface NewRequestEmailProps {
   reason: string;
   totalDays: number;
   submissionDate: string;
+  payPeriodLabel?: string | null;
   coverageName?: string | null;
   coverageEmail?: string | null;
   adminUrl: string;
@@ -36,6 +37,7 @@ export function NewRequestEmail({
   reason,
   totalDays,
   submissionDate,
+  payPeriodLabel,
   coverageName,
   coverageEmail,
   adminUrl,
@@ -82,7 +84,14 @@ export function NewRequestEmail({
               <Text style={detailLabel}>Submitted</Text>
               <Text style={detailValue}>{formatDate(submissionDate)}</Text>
 
-              <Text style={detailLabel}>Date(s)</Text>
+              {payPeriodLabel && (
+                <>
+                  <Text style={detailLabel}>Pay Period</Text>
+                  <Text style={detailValue}>{payPeriodLabel}</Text>
+                </>
+              )}
+
+              <Text style={detailLabel}>Date(s) Requested Off</Text>
               <Text style={detailValue}>
                 {isSameDay
                   ? formatDate(startDate)
