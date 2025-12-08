@@ -20,24 +20,75 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   CalendarDays,
   Calendar,
-  LayoutDashboard,
+  CalendarOff,
+  Clock,
+  Timer,
   Shield,
   Users,
   LogOut,
+  Home,
+  Megaphone,
+  FileText,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface AppSidebarProps {
-  user: User;
+  user: User | null;
   profile: Profile | null;
 }
 
+const helpCenterItems = [
+  {
+    title: "Help Center Home",
+    url: "/",
+    icon: Home,
+  },
+  {
+    title: "Announcements",
+    url: "/announcements",
+    icon: Megaphone,
+  },
+  {
+    title: "Documentation",
+    url: "/documentation",
+    icon: FileText,
+  },
+];
+
+const quickFormItems = [
+  {
+    title: "Request 1 Day Off",
+    url: "/forms/day-off",
+    icon: CalendarOff,
+  },
+  {
+    title: "Time Clock Request",
+    url: "/forms/time-clock",
+    icon: Clock,
+  },
+  {
+    title: "Overtime Submission",
+    url: "/forms/overtime",
+    icon: Timer,
+  },
+];
+
 const staffNavItems = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
+    title: "Request 1 Day Off",
+    url: "/dashboard/day-off",
+    icon: CalendarOff,
+  },
+  {
+    title: "Time Clock Request",
+    url: "/dashboard/time-clock",
+    icon: Clock,
+  },
+  {
+    title: "Overtime Submission",
+    url: "/dashboard/overtime",
+    icon: Timer,
   },
   {
     title: "Team Calendar",
@@ -73,11 +124,11 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
   const initials = profile?.full_name
     ? profile.full_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : user.email?.[0]?.toUpperCase() || "U";
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+    : user?.email?.[0]?.toUpperCase() || "U";
 
   return (
     <Sidebar>
@@ -94,10 +145,10 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Help Center</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {staffNavItems.map((item) => (
+              {helpCenterItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -114,7 +165,54 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
+        {/* Quick Forms - always visible, for easy public access */}
+        {!user && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Quick Forms</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {quickFormItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {user && (
+          <SidebarGroup>
+            <SidebarGroupLabel>My Workspace</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {staffNavItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {isAdmin && user && (
           <SidebarGroup>
             <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -139,30 +237,43 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-3 px-2 py-3">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {profile?.full_name || user.email}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {profile?.role === "admin" ? "Administrator" : "Staff"}
-                </p>
-              </div>
-            </div>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleSignOut}>
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {user ? (
+            <>
+              <SidebarMenuItem>
+                <div className="flex items-center gap-3 px-2 py-3">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {profile?.full_name || user.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {profile?.role === "admin" ? "Administrator" : "Staff"}
+                    </p>
+                  </div>
+                </div>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          ) : (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/login">
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign In</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

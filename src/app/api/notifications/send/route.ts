@@ -5,6 +5,8 @@ import { render } from "@react-email/components";
 import { ApprovalEmail } from "@/components/emails/approval-email";
 import { DenialEmail } from "@/components/emails/denial-email";
 import { NewRequestEmail } from "@/components/emails/new-request-email";
+import { TimeClockRequestEmail } from "@/components/emails/time-clock-request-email";
+import { OvertimeRequestEmail } from "@/components/emails/overtime-request-email";
 
 function getMailTransporter() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -23,7 +25,7 @@ function getMailTransporter() {
 async function getNotificationRecipients(): Promise<string[]> {
   try {
     const supabase = await createClient();
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from("notification_recipients")
@@ -119,6 +121,90 @@ export async function POST(request: Request) {
       });
 
       console.log(`Admin notification sent for request ${requestId}`);
+      return NextResponse.json({ success: true, emailSent: true, id: emailResult?.messageId });
+    }
+
+    // Handle time clock request notifications (sent to admins)
+    if (type === "time_clock_request") {
+      const {
+        employeeName,
+        employeeEmail,
+        payPeriodLabel,
+        clockInDate,
+        clockInTime,
+        clockInReason,
+        clockOutDate,
+        clockOutTime,
+        clockOutReason,
+      } = body;
+
+      const notifyEmailsList = await getNotificationRecipients();
+      if (notifyEmailsList.length === 0) {
+        console.log("No notification recipients configured, skipping admin notification");
+        return NextResponse.json({ success: true, emailSent: false });
+      }
+
+      const emailHtml = await render(
+        TimeClockRequestEmail({
+          employeeName,
+          employeeEmail,
+          payPeriodLabel,
+          clockInDate,
+          clockInTime,
+          clockInReason,
+          clockOutDate,
+          clockOutTime,
+          clockOutReason,
+        })
+      );
+
+      const emailResult = await transporter.sendMail({
+        from: `StaffHub <${process.env.GMAIL_USER}>`,
+        to: notifyEmailsList,
+        subject: `Time Clock Request from ${employeeName}`,
+        html: emailHtml,
+      });
+
+      console.log(`Time clock request notification sent for ${employeeName}`);
+      return NextResponse.json({ success: true, emailSent: true, id: emailResult?.messageId });
+    }
+
+    // Handle overtime request notifications (sent to admins)
+    if (type === "overtime_request") {
+      const {
+        employeeName,
+        employeeEmail,
+        payPeriodLabel,
+        overtimeDate,
+        askedDoctor,
+        seniorStaffName,
+      } = body;
+
+      const notifyEmailsList = await getNotificationRecipients();
+      if (notifyEmailsList.length === 0) {
+        console.log("No notification recipients configured, skipping admin notification");
+        return NextResponse.json({ success: true, emailSent: false });
+      }
+
+      const emailHtml = await render(
+        OvertimeRequestEmail({
+          employeeName,
+          employeeEmail,
+          payPeriodLabel,
+          overtimeDate,
+          askedDoctor,
+          seniorStaffName,
+        })
+      );
+
+      const emailResult = await transporter.sendMail({
+        from: `StaffHub <${process.env.GMAIL_USER}>`,
+        to: notifyEmailsList,
+        subject: `Overtime Submission from ${employeeName}`,
+        html: emailHtml,
+      });
+
+      console.log(`Overtime request notification sent for ${employeeName}`);
       return NextResponse.json({ success: true, emailSent: true, id: emailResult?.messageId });
     }
 
