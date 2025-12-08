@@ -21,11 +21,15 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Extract user data after auth check
+  const userId = user.id;
+  const userEmail = user.email ?? "";
+
   // Fetch user profile
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, email")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   // Fetch leave types
@@ -53,7 +57,7 @@ export default async function DashboardPage() {
       *,
       leave_types (*)
     `)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   const requests = (requestsData || []) as RequestWithType[];
@@ -107,8 +111,8 @@ export default async function DashboardPage() {
             <LeaveRequestForm 
               leaveTypes={leaveTypes} 
               payPeriods={payPeriods} 
-              userId={user.id}
-              userEmail={profile?.email || user?.email || ""}
+              userId={userId}
+              userEmail={profile?.email || userEmail}
               userName={profile?.full_name || "Staff Member"}
             />
           </CardContent>
