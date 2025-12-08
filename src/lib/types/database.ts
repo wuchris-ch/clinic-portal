@@ -192,6 +192,35 @@ export interface Database {
           email_sent?: boolean;
         };
       };
+      notification_recipients: {
+        Row: {
+          id: string;
+          email: string;
+          name: string | null;
+          is_active: boolean;
+          added_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          name?: string | null;
+          is_active?: boolean;
+          added_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string | null;
+          is_active?: boolean;
+          added_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -213,6 +242,7 @@ export type PayPeriod = Database["public"]["Tables"]["pay_periods"]["Row"];
 export type LeaveRequest = Database["public"]["Tables"]["leave_requests"]["Row"];
 export type LeaveRequestDate = Database["public"]["Tables"]["leave_request_dates"]["Row"];
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+export type NotificationRecipient = Database["public"]["Tables"]["notification_recipients"]["Row"];
 
 // Extended types with relations
 export type LeaveRequestWithDetails = LeaveRequest & {

@@ -19,6 +19,40 @@ function getMailTransporter() {
   });
 }
 
+// Get notification recipients from database, falling back to env var
+async function getNotificationRecipients(): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("notification_recipients")
+      .select("email")
+      .eq("is_active", true);
+
+    if (error) {
+      console.error("Error fetching notification recipients:", error);
+      // Fall back to env var if database query fails
+      const envEmails = process.env.NOTIFY_EMAILS;
+      return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
+    }
+
+    // If we have recipients in DB, use those
+    if (data && data.length > 0) {
+      return data.map((r: { email: string }) => r.email);
+    }
+
+    // Fall back to env var if no recipients in DB
+    const envEmails = process.env.NOTIFY_EMAILS;
+    return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
+  } catch (err) {
+    console.error("Error in getNotificationRecipients:", err);
+    // Fall back to env var on any error
+    const envEmails = process.env.NOTIFY_EMAILS;
+    return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -46,9 +80,10 @@ export async function POST(request: Request) {
         totalDays,
       } = body;
 
-      const notifyEmails = process.env.NOTIFY_EMAILS;
-      if (!notifyEmails) {
-        console.log("NOTIFY_EMAILS not configured, skipping admin notification");
+      // Get notification recipients from database (with env var fallback)
+      const notifyEmailsList = await getNotificationRecipients();
+      if (notifyEmailsList.length === 0) {
+        console.log("No notification recipients configured, skipping admin notification");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -70,7 +105,7 @@ export async function POST(request: Request) {
 
       const emailResult = await transporter.sendMail({
         from: `StaffHub <${process.env.GMAIL_USER}>`,
-        to: notifyEmails.split(",").map((e) => e.trim()),
+        to: notifyEmailsList,
         subject: `📋 New Time-Off Request from ${employeeName}`,
         html: emailHtml,
       });
