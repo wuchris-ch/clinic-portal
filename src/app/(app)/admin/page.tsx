@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PendingRequestsQueue } from "@/components/admin/pending-requests-queue";
 import { RequestsHistory } from "@/components/admin/requests-history";
+import { NotificationRecipients } from "@/components/admin/notification-recipients";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, History, Shield, Users, CheckCircle, XCircle } from "lucide-react";
-import type { Profile, LeaveRequest, LeaveType } from "@/lib/types/database";
+import { Clock, History, Shield, Users, CheckCircle, XCircle, Bell } from "lucide-react";
+import type { Profile, LeaveRequest, LeaveType, NotificationRecipient } from "@/lib/types/database";
 
 type RequestWithDetails = LeaveRequest & {
   profiles: Pick<Profile, "id" | "full_name" | "email" | "avatar_url">;
@@ -47,6 +48,15 @@ export default async function AdminPage() {
     .order("created_at", { ascending: false });
 
   const allRequests = (requestsData || []) as RequestWithDetails[];
+
+  // Fetch notification recipients
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: recipientsData } = await (supabase as any)
+    .from("notification_recipients")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const notificationRecipients = (recipientsData || []) as NotificationRecipient[];
 
   // Separate pending and processed requests
   const pendingRequests = allRequests.filter((r) => r.status === "pending");
@@ -124,6 +134,29 @@ export default async function AdminPage() {
               <RequestsHistory requests={processedRequests} />
             </TabsContent>
           </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Notification Recipients */}
+      <Card className="border-border/50">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Bell className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Email Notifications</CardTitle>
+              <CardDescription>
+                Manage who receives email notifications for new time-off requests
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <NotificationRecipients 
+            recipients={notificationRecipients} 
+            adminId={user.id} 
+          />
         </CardContent>
       </Card>
     </div>
