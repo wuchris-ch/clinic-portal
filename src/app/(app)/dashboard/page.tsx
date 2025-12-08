@@ -108,7 +108,7 @@ export default async function DashboardPage() {
               leaveTypes={leaveTypes} 
               payPeriods={payPeriods} 
               userId={user.id}
-              userEmail={profile?.email || user.email || ""}
+              userEmail={profile?.email || user?.email || ""}
               userName={profile?.full_name || "Staff Member"}
             />
           </CardContent>
