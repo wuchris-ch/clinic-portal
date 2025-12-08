@@ -81,6 +81,7 @@ export async function POST(request: Request) {
         coverageName,
         coverageEmail,
         submissionDate,
+        payPeriodLabel,
       } = body;
 
       // Get notification recipients from database (with env var fallback)
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
           reason,
           totalDays,
           submissionDate,
+          payPeriodLabel,
           coverageName,
           coverageEmail,
           adminUrl: `${appUrl}/admin`,
