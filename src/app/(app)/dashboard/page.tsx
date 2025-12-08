@@ -30,7 +30,7 @@ export default async function DashboardPage() {
     .from("profiles")
     .select("full_name, email")
     .eq("id", userId)
-    .single();
+    .single() as { data: { full_name: string; email: string } | null };
 
   // Fetch leave types
   const { data: leaveTypesData } = await supabase
