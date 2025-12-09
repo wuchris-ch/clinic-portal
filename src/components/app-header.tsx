@@ -79,6 +79,17 @@ export function AppHeader({ user, profile }: AppHeaderProps) {
             Admin
           </span>
         )}
+        <a
+          href="https://clinic-portal-three.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="md:hidden"
+        >
+          <Button variant="ghost" size="icon" title="Home">
+            <Home className="w-4 h-4" />
+            <span className="sr-only">Home</span>
+          </Button>
+        </a>
         <ThemeToggle />
         {user ? (
           <Button

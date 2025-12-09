@@ -12,7 +12,7 @@ Anyone can access the app and use the quick forms **without creating an account 
 
 When you visit the home page without being logged in, you'll see:
 
-1. **Help Center Home**: The main landing page with employee information, including:
+1. **Home**: The main landing page with employee information, including:
    - Clinic Protocols
    - Employee Handbook info
    - BC Employment Standards links

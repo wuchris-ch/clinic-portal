@@ -41,7 +41,7 @@ interface AppSidebarProps {
 
 const helpCenterItems = [
   {
-    title: "Help Center Home",
+    title: "Home",
     url: "/",
     icon: Home,
   },
@@ -139,7 +139,10 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-3">
+        <a
+          href="https://clinic-portal-three.vercel.app/"
+          className="flex items-center gap-3 px-2 py-3 hover:bg-sidebar-accent rounded-lg transition-colors"
+        >
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <CalendarDays className="w-5 h-5 text-primary" />
           </div>
@@ -147,7 +150,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
             <span className="font-bold text-lg">StaffHub</span>
             <span className="text-xs text-muted-foreground">Time Off Portal</span>
           </div>
-        </div>
+        </a>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
