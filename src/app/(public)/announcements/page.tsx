@@ -55,10 +55,10 @@ export default async function AnnouncementsPage() {
       </div>
 
       {/* Footer link for Dr. Ma */}
-      <div className="py-8 text-center border-t border-gray-100 mt-8">
+      <div className="py-8 text-center border-t border-gray-100 dark:border-gray-800 mt-8">
         <a
           href="mailto:sma.eyemd@gmail.com"
-          className="text-blue-600 hover:underline text-xs"
+          className="text-blue-600 hover:underline text-xs dark:text-blue-400"
         >
           Email Dr. Ma
         </a>

@@ -143,9 +143,9 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
   if (announcements.length === 0 && !isAdmin) {
     return (
       <div className="text-center py-16">
-        <Megaphone className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500">No announcements at this time.</p>
-        <p className="text-gray-400 text-sm mt-2">Check back later for updates.</p>
+        <Megaphone className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+        <p className="text-gray-500 dark:text-gray-400">No announcements at this time.</p>
+        <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Check back later for updates.</p>
       </div>
     );
   }
@@ -208,22 +208,22 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
 
       {/* Announcements List */}
       {announcements.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-gray-200 rounded-lg">
-          <Megaphone className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No announcements yet.</p>
+        <div className="text-center py-16 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+          <Megaphone className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">No announcements yet.</p>
           {isAdmin && (
-            <p className="text-gray-400 text-sm mt-2">Click &quot;New Announcement&quot; to create one.</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Click &quot;New Announcement&quot; to create one.</p>
           )}
         </div>
       ) : (
         <div className="space-y-4">
           {announcements.map((announcement) => (
-            <Card key={announcement.id} className={announcement.pinned ? "border-blue-200 bg-blue-50/30" : ""}>
+            <Card key={announcement.id} className={announcement.pinned ? "border-blue-200 bg-blue-50/30 dark:border-blue-800 dark:bg-blue-900/10" : "dark:border-gray-700 dark:bg-card"}>
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     {announcement.pinned && (
-                      <Pin className="w-4 h-4 text-blue-600" />
+                      <Pin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     )}
                     <CardTitle className="text-lg">{announcement.title}</CardTitle>
                   </div>
@@ -263,7 +263,7 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {formatDate(announcement.created_at)}
                   {announcement.updated_at !== announcement.created_at && (
                     <span className="ml-2">(edited)</span>
@@ -312,7 +312,7 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
                 ) : (
                   <div className="space-y-4">
                     {announcement.image_url && (
-                      <div className="rounded-lg overflow-hidden border border-border/50">
+                      <div className="rounded-lg overflow-hidden border border-border/50 dark:border-border/50">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={announcement.image_url}
@@ -321,7 +321,7 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
                         />
                       </div>
                     )}
-                    <p className="text-gray-700 whitespace-pre-wrap">{announcement.content}</p>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{announcement.content}</p>
                   </div>
                 )}
               </CardContent>

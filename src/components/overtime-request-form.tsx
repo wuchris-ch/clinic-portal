@@ -65,6 +65,11 @@ export function OvertimeRequestForm({ payPeriods = [], userEmail, userName }: Ov
             return;
         }
 
+        if (askedDoctor === false && !seniorStaffName.trim()) {
+            toast.error("Please enter the name of the senior staff who approved your overtime");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -222,6 +227,7 @@ export function OvertimeRequestForm({ payPeriods = [], userEmail, userName }: Ov
                         placeholder="Enter senior staff name"
                         value={seniorStaffName}
                         onChange={(e) => setSeniorStaffName(e.target.value)}
+                        required
                     />
                 </div>
             )}
