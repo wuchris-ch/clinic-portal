@@ -36,8 +36,6 @@ When you submit a form without being logged in:
 - **The request is NOT saved to the database**; it is just emailed for processing
 - You'll see a success message after submitting
 
-This is essentially like a digital version of filling out a paper form and handing it to the office.
-
 ## Signing In as a Regular Employee (Staff)
 
 If you sign in with a regular employee account, you get a few more features.

@@ -7,6 +7,8 @@ import { DenialEmail } from "@/components/emails/denial-email";
 import { NewRequestEmail } from "@/components/emails/new-request-email";
 import { TimeClockRequestEmail } from "@/components/emails/time-clock-request-email";
 import { OvertimeRequestEmail } from "@/components/emails/overtime-request-email";
+import { appendRowToSheet } from "@/lib/google-sheets";
+import { format } from "date-fns";
 
 function getMailTransporter() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -86,6 +88,27 @@ export async function POST(request: Request) {
         payPeriodLabel,
       } = body;
 
+      // Log to Google Sheets FIRST (before email check)
+      try {
+        await appendRowToSheet([
+          submissionDate || format(new Date(), "yyyy-MM-dd"), // A: Submission Date
+          "Leave Request",                                    // B: Type
+          employeeName,                                       // C: Name
+          employeeEmail,                                      // D: Email
+          leaveType,                                          // E: Leave Type
+          startDate,                                          // F: Start Date
+          endDate,                                            // G: End Date
+          totalDays?.toString() || "0",                       // H: Total Days
+          reason,                                             // I: Reason
+          payPeriodLabel || "N/A",                            // J: Pay Period
+          coverageName || "N/A",                              // K: Coverage Name
+          requestId                                           // L: Request ID
+        ], "Leave Requests");
+        console.log("Leave request logged to Google Sheets");
+      } catch (sheetError) {
+        console.error("Failed to log leave request to Sheets:", sheetError);
+      }
+
       // Get notification recipients from database (with env var fallback)
       const notifyEmailsList = await getNotificationRecipients();
       if (notifyEmailsList.length === 0) {
@@ -138,6 +161,28 @@ export async function POST(request: Request) {
         clockOutReason,
       } = body;
 
+      // Log to Google Sheets FIRST (before email check)
+      try {
+        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        const clockInStr = clockInDate ? `${clockInDate} ${clockInTime}` : "N/A";
+        const clockOutStr = clockOutDate ? `${clockOutDate} ${clockOutTime}` : "N/A";
+
+        await appendRowToSheet([
+          timestamp,                  // A: Submission Date
+          "Time Clock Request",       // B: Type
+          employeeName,               // C: Name
+          employeeEmail,              // D: Email
+          clockInStr,                 // E: Clock In
+          clockOutStr,                // F: Clock Out
+          clockInReason || "",        // G: Reason In
+          clockOutReason || "",       // H: Reason Out
+          payPeriodLabel || "N/A"     // I: Pay Period
+        ], "Time Clock");
+        console.log("Time clock request logged to Google Sheets");
+      } catch (sheetError) {
+        console.error("Failed to log time clock to Sheets:", sheetError);
+      }
+
       const notifyEmailsList = await getNotificationRecipients();
       if (notifyEmailsList.length === 0) {
         console.log("No notification recipients configured, skipping admin notification");
@@ -179,6 +224,24 @@ export async function POST(request: Request) {
         askedDoctor,
         seniorStaffName,
       } = body;
+
+      // Log to Google Sheets FIRST (before email check)
+      try {
+        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        await appendRowToSheet([
+          timestamp,                  // A: Submission Date
+          "Overtime Request",         // B: Type
+          employeeName,               // C: Name
+          employeeEmail,              // D: Email
+          overtimeDate,               // E: Overtime Date
+          askedDoctor ? "Yes" : "No", // F: Asked Doctor
+          seniorStaffName || "N/A",   // G: Senior Staff
+          payPeriodLabel || "N/A"     // H: Pay Period
+        ], "Overtime");
+        console.log("Overtime request logged to Google Sheets");
+      } catch (sheetError) {
+        console.error("Failed to log overtime to Sheets:", sheetError);
+      }
 
       const notifyEmailsList = await getNotificationRecipients();
       if (notifyEmailsList.length === 0) {
