@@ -17,7 +17,8 @@ tests/
 │   └── sidebar-navigation.spec.ts # Navigation & responsive layout
 ├── unit/                    # Unit tests (Vitest)
 │   ├── utils.test.ts          # Utility function tests
-│   └── types.test.ts          # Type validation tests
+│   ├── types.test.ts          # Type validation tests
+│   └── google-sheets.test.ts  # Google Sheets integration tests
 ├── playwright.config.ts     # Playwright configuration
 ├── vitest.config.ts         # Vitest configuration
 └── setup.ts                 # Shared test utilities
