@@ -1,22 +1,29 @@
-# StaffHub - Time Off Portal
+# Clinic Employee Portal
 
-A modern, mobile-first employee time-off request and management portal built with Next.js 14, Supabase, and shadcn/ui.
+A modern, mobile-first employee time-off request and management portal built with **Next.js 16**, Supabase, and shadcn/ui.
 
 ## Features
 
-- **Employee Dashboard**: Submit time-off requests with date selection, reason, and optional co-worker coverage
-- **Team Calendar**: View approved time-off across the organization
-- **Admin Dashboard**: Review, approve, or deny pending requests with one-click actions
-- **Email Notifications**: 
-  - Admins notified when new requests are submitted
-  - Employees notified when requests are approved/denied
-- **Role-based Access**: Staff and Admin roles with appropriate permissions
-- **Mobile-First Design**: Responsive design that works beautifully on phones, tablets, and desktops
-- **Dark/Light Mode**: Toggle between themes based on preference
+- **Public Features (No Login)**:
+  - **Quick Forms**: Submit single day off, time clock adjustment, and overtime requests without an account.
+  - **Anonymous Submissions**: Requests are emailed directly to admin; no database record is created for privacy/simplicity.
+  - **Information Access**: View clinic protocols, handbook chapters, and announcements.
+- **Staff Dashboard (Logged In)**:
+  - **Pre-filled Forms**: Name and email auto-populated from profile.
+  - **Database Tracking**: Requests are saved and trackable.
+  - **Team Calendar**: View approved time-off across the organization to coordinate schedules.
+- **Admin Dashboard**: Review, approve, or deny pending requests with one-click actions.
+- **Email Notifications**:
+  - Admins notified immediately upon any request submission (public or private).
+  - Employees notified when requests are approved/denied.
+- **Role-based Access**: Staff and Admin roles with appropriate permissions.
+- **Mobile-First Design**: Responsive design that works beautifully on phones, tablets, and desktops.
+- **Dark/Light Mode**: Toggle between themes based on preference.
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router) with TypeScript
+- **Framework**: Next.js 16 (App Router) with React 19
+- **Language**: TypeScript
 - **Database & Auth**: Supabase (PostgreSQL + Auth with Google OAuth)
 - **Styling**: Tailwind CSS v4 + shadcn/ui components
 - **Date Handling**: date-fns
@@ -27,7 +34,7 @@ A modern, mobile-first employee time-off request and management portal built wit
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm or yarn
 - Supabase account
 - Gmail account (for email notifications)
@@ -48,7 +55,7 @@ npm install
 ### 3. Configure Authentication
 
 1. In Supabase Dashboard, go to **Authentication > Providers**
-2. Enable **Email** provider (confirm email can be disabled for development)
+2. Enable **Email** provider.
 3. For Google OAuth:
    - Enable **Google** provider
    - Set up OAuth credentials in [Google Cloud Console](https://console.cloud.google.com)
@@ -141,14 +148,18 @@ After deployment, update Google OAuth settings:
 ```
 src/
 ├── app/
+│   ├── (public)/        # Public routes (Home, Announcements)
 │   ├── (app)/           # Authenticated app routes
 │   │   ├── admin/       # Admin dashboard & employee management
 │   │   ├── calendar/    # Team calendar
-│   │   └── dashboard/   # Employee dashboard
+│   │   └── dashboard/   # Employee dashboard (My Workspace)
 │   ├── (auth)/          # Login & register pages
 │   ├── api/             # API routes (notifications)
 │   └── auth/            # OAuth callback
 ├── components/
+│   ├── single-day-off-form.tsx  # Dynamic form used in public/private
+│   ├── time-clock-form.tsx
+│   ├── overtime-form.tsx
 │   ├── admin/           # Admin-specific components
 │   ├── emails/          # React Email templates
 │   └── ui/              # shadcn/ui components
@@ -172,7 +183,8 @@ Pay periods for 2025 and 2026 T4 years are included in the schema.
 
 ### Leave Types
 
-Modify leave types in `supabase/schema.sql` or via Supabase Dashboard:
+Modify leave types in `supabase/schema.sql` or via Supabase Dashboard.
+**Note**: The "Vacation" type is currently present in the database but filtered out from the UI forms by default.
 
 ```sql
 INSERT INTO leave_types (name, color, is_single_day) VALUES
@@ -183,14 +195,7 @@ INSERT INTO leave_types (name, color, is_single_day) VALUES
 
 ### Theme Colors
 
-Customize the teal-focused color palette in `src/app/globals.css`.
-
-### Email Templates
-
-Modify email templates in `src/components/emails/`:
-- `new-request-email.tsx` - Sent to admins when new requests come in
-- `approval-email.tsx` - Sent to employees when approved
-- `denial-email.tsx` - Sent to employees when denied
+Customize the color palette in `src/app/globals.css`. It uses Tailwind v4 CSS variables.
 
 ## License
 

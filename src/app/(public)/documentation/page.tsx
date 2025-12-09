@@ -53,14 +53,14 @@ export default async function DocumentationPage() {
         {documentationSections.map((section) => {
           const Icon = section.icon;
           return (
-            <div key={section.id} className="border border-gray-200 rounded-lg p-6">
+            <div key={section.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
-                  <p className="text-gray-600 text-sm mt-1">{section.description}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{section.title}</h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{section.description}</p>
 
                   {section.documents.length > 0 ? (
                     <ul className="mt-4 space-y-2">
@@ -68,7 +68,7 @@ export default async function DocumentationPage() {
                         <li key={doc.id}>
                           <a
                             href={doc.href}
-                            className="text-blue-600 hover:underline text-sm flex items-center gap-2"
+                            className="text-blue-600 hover:underline text-sm flex items-center gap-2 dark:text-blue-400"
                           >
                             <FileText className="w-4 h-4" />
                             {doc.title}
@@ -89,23 +89,23 @@ export default async function DocumentationPage() {
       </div>
 
       {/* Coming Soon Notice */}
-      <div className="mt-4 bg-slate-50 rounded-lg p-6 text-center">
-        <p className="text-gray-600">
+      <div className="mt-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-6 text-center">
+        <p className="text-gray-600 dark:text-gray-400">
           Documentation is being updated. More resources will be added soon.
         </p>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
           Contact Dr. Ma if you need specific documents:{" "}
-          <a href="mailto:sma.eyemd@gmail.com" className="text-blue-600 hover:underline">
+          <a href="mailto:sma.eyemd@gmail.com" className="text-blue-600 hover:underline dark:text-blue-400">
             sma.eyemd@gmail.com
           </a>
         </p>
       </div>
 
       {/* Footer */}
-      <div className="py-8 text-center border-t border-gray-100 mt-8">
+      <div className="py-8 text-center border-t border-gray-100 dark:border-gray-800 mt-8">
         <a
           href="mailto:sma.eyemd@gmail.com"
-          className="text-blue-600 hover:underline text-xs"
+          className="text-blue-600 hover:underline text-xs dark:text-blue-400"
         >
           Email Dr. Ma
         </a>
