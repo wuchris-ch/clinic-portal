@@ -88,28 +88,7 @@ export default async function DocumentationPage() {
         })}
       </div>
 
-      {/* Coming Soon Notice */}
-      <div className="mt-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-6 text-center">
-        <p className="text-gray-600 dark:text-gray-400">
-          Documentation is being updated. More resources will be added soon.
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-          Contact Dr. Ma if you need specific documents:{" "}
-          <a href="mailto:sma.eyemd@gmail.com" className="text-blue-600 hover:underline dark:text-blue-400">
-            sma.eyemd@gmail.com
-          </a>
-        </p>
-      </div>
 
-      {/* Footer */}
-      <div className="py-8 text-center border-t border-gray-100 dark:border-gray-800 mt-8">
-        <a
-          href="mailto:sma.eyemd@gmail.com"
-          className="text-blue-600 hover:underline text-xs dark:text-blue-400"
-        >
-          Email Dr. Ma
-        </a>
-      </div>
     </div>
   );
 }
