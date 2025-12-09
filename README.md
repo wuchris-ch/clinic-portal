@@ -200,3 +200,62 @@ Customize the color palette in `src/app/globals.css`. It uses Tailwind v4 CSS va
 ## License
 
 MIT
+
+## Professional Development Workflow
+
+To ensure stability and reliability in a production environment, we follow a professional development workflow.
+
+### 1. Feature Branch Workflow
+
+**Never work directly on the `main` branch.** Always isolate your changes in a dedicated branch.
+
+1.  **Create a Branch**:
+    ```bash
+    git checkout -b feature/add-overtime-calculator
+    # or
+    git checkout -b fix/login-redirect-issue
+    ```
+    *Naming Convention*: `feature/`, `fix/`, `chore/` followed by a descriptive name.
+
+2.  **Develop & Commit**:
+    Make frequent, small commits.
+    ```bash
+    git commit -m "feat: add initial calculator layout"
+    ```
+
+3.  **Push to Remote**:
+    ```bash
+    git push origin feature/add-overtime-calculator
+    ```
+
+### 2. Vercel Preview Deployments (CI/CD)
+
+Vercel is configured to **automatically build and deploy** every branch you push.
+
+- **Unique Preview URL**: Vercel generates a unique URL for your branch (e.g., `project-name-git-feature-branch.vercel.app`).
+- **Live Testing**: You can click this link on GitHub (in the PR or branch view) or Vercel dashboard to see your feature running in a live production-like environment.
+- **No Impact on Production**: You can break things here safely without affecting the main site users.
+
+### 3. Pull Requests (PR) & Merging
+
+1.  **Open a Pull Request**: On GitHub, open a PR from your feature branch to `main`.
+2.  **Vercel Checks**: Vercel automatically runs a build check on your PR. You'll see a ✅ or ❌ status indicating if the build succeeds. This catches errors before merging.
+3.  **Review**: Check the "Files changed" tab to self-review your code.
+4.  **Merge**: Once satisfied (and Vercel build passes), merge the PR.
+
+### 4. Automatic Production Deployment
+
+Merging code into the `main` branch **automatically triggers a deployment to Production**.
+- The main site (`clinic-portal-three.vercel.app`) will update within minutes.
+- If a build fails, the extensive logs in Vercel will help diagnose the issue.
+
+### 5. Database Migrations
+
+If your feature requires Database changes (Supabase):
+
+1.  Create a local migration or use the Supabase Dashboard.
+2.  **Important**: Since we are in production, apply schema changes carefully on the minimal downtime or backward-compatible manner.
+3.  Update type definitions:
+    ```bash
+    npx supabase gen types typescript --project-id "your-project-id" > src/lib/types/database.types.ts
+    ```

@@ -33,10 +33,9 @@ When you visit the home page without being logged in, you'll see:
 When you submit a form without being logged in:
 - You **must manually enter your name and email** in the form
 - The form sends an **email notification to the admin** (Dr. Ma) with your request
-- **The request is NOT saved to the database**; it is just emailed for processing
+- **The request is automatically logged to Google Sheets** for easy tracking
+- **The request is NOT saved to the database**; it is emailed and logged to Sheets for processing
 - You'll see a success message after submitting
-
-This is essentially like a digital version of filling out a paper form and handing it to the office.
 
 ## Signing In as a Regular Employee (Staff)
 
@@ -89,6 +88,7 @@ Note: This portal is primarily for collecting requests. Final scheduling adjustm
 | Submit Day Off Request | Yes (via Quick Forms) | Yes | Yes |
 | Submit Time Clock Request | Yes (via Quick Forms) | Yes | Yes |
 | Submit Overtime | Yes (via Quick Forms) | Yes | Yes |
+| Syncs to Google Sheets | Yes | Yes | Yes |
 | Pre-filled Name/Email | No | Yes | Yes |
 | View Team Calendar | No | Yes | Yes |
 | View Admin Dashboard | No | No | Yes |
