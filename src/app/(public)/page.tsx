@@ -11,12 +11,12 @@ const sections = [
         icon: AlertCircle,
         content: (
             <>
-                <p className="mb-4 text-slate-600 leading-relaxed">
+                <p className="mb-4 text-muted-foreground leading-relaxed">
                     To adhere to clinic operational standards, our clinic has various protocols to perform clinic duties and responsibilities.
                 </p>
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-                    <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-blue-800">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-lg p-4 flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
                         For documents outlining each clinic protocol, click on the top left corner, and look under <span className="font-semibold">Documentation</span>.
                     </p>
                 </div>
@@ -29,12 +29,12 @@ const sections = [
         icon: BookOpen,
         content: (
             <>
-                <p className="mb-4 text-slate-600 leading-relaxed">
+                <p className="mb-4 text-muted-foreground leading-relaxed">
                     Employers and Employees have duties to each other. For a mutually respectful working relationship, we have included the Employee Handbook.
                 </p>
-                <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 flex items-start gap-3">
-                    <FileText className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-indigo-800">
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30 rounded-lg p-4 flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-indigo-800 dark:text-indigo-200">
                         Click on the top left corner, and look under <span className="font-semibold">Documentation</span> for each chapter of the Employee Handbook.
                     </p>
                 </div>
@@ -47,14 +47,14 @@ const sections = [
         icon: ScaleIcon,
         content: (
             <>
-                <p className="text-slate-600 leading-relaxed mb-4">
+                <p className="text-muted-foreground leading-relaxed mb-4">
                     The full text of the B.C. Employment Standards is available online. If you have specific questions, please contact your employer. Alternatively, you can contact Employment Standards for clarification.
                 </p>
                 <a
                     href="https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96113_01"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                    className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                 >
                     View BC Employment Standards →
                 </a>
@@ -67,7 +67,7 @@ const sections = [
         icon: Award,
         content: (
             <>
-                <p className="mb-4 text-slate-600">
+                <p className="mb-4 text-muted-foreground">
                     Excellent patient service depends on efficient clinic flow and teamwork. Outstanding staff will earn merit points for the following:
                 </p>
                 <ul className="grid gap-3 mb-6">
@@ -77,13 +77,13 @@ const sections = [
                         "Dependability in attendance and following protocols",
                         "Taking on additional responsibilities during shortages"
                     ].map((item, i) => (
-                        <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50">
+                        <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-muted/50">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                            <span className="text-sm text-slate-700">{item}</span>
+                            <span className="text-sm text-foreground">{item}</span>
                         </li>
                     ))}
                 </ul>
-                <p className="text-sm text-slate-500 italic border-t pt-4">
+                <p className="text-sm text-muted-foreground italic border-t border-border pt-4">
                     The Employee Merit System will be combined with the Employee Evaluation from time to time to recognize employee(s) for their work.
                 </p>
             </>
@@ -95,7 +95,7 @@ const sections = [
         icon: Quote,
         content: (
             <>
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                     To maintain performance standards and provide feedback to you about your strengths and weaknesses, we will perform periodic evaluations. This may include quizzes, tests, as well as supervised performance of clinic tasks.
                 </p>
             </>
@@ -136,9 +136,9 @@ const helpTopics = [
         icon: Megaphone,
         href: "/announcements",
         clickable: true,
-        color: "text-sky-600",
-        bg: "bg-sky-50",
-        hoverBg: "group-hover:bg-sky-100",
+        color: "text-sky-600 dark:text-sky-400",
+        bg: "bg-sky-50 dark:bg-sky-900/20",
+        hoverBg: "group-hover:bg-sky-100 dark:group-hover:bg-sky-900/30",
     },
     {
         id: "single-day-off",
@@ -147,9 +147,9 @@ const helpTopics = [
         icon: CalendarOff,
         href: "/dashboard",
         clickable: true,
-        color: "text-amber-600",
-        bg: "bg-amber-50",
-        hoverBg: "group-hover:bg-amber-100",
+        color: "text-amber-600 dark:text-amber-400",
+        bg: "bg-amber-50 dark:bg-amber-900/20",
+        hoverBg: "group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30",
     },
     {
         id: "time-clock",
@@ -158,9 +158,9 @@ const helpTopics = [
         icon: Clock,
         href: "/dashboard",
         clickable: true,
-        color: "text-indigo-600",
-        bg: "bg-indigo-50",
-        hoverBg: "group-hover:bg-indigo-100",
+        color: "text-indigo-600 dark:text-indigo-400",
+        bg: "bg-indigo-50 dark:bg-indigo-900/20",
+        hoverBg: "group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30",
     },
     {
         id: "overtime",
@@ -169,9 +169,9 @@ const helpTopics = [
         icon: Briefcase,
         href: "/dashboard",
         clickable: true,
-        color: "text-orange-600",
-        bg: "bg-orange-50",
-        hoverBg: "group-hover:bg-orange-100",
+        color: "text-orange-600 dark:text-orange-400",
+        bg: "bg-orange-50 dark:bg-orange-900/20",
+        hoverBg: "group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30",
     },
     {
         id: "vacation",
@@ -180,9 +180,9 @@ const helpTopics = [
         icon: Calendar,
         href: "#",
         clickable: false,
-        color: "text-blue-600",
-        bg: "bg-blue-50",
-        hoverBg: "group-hover:bg-blue-100",
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/20",
+        hoverBg: "group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30",
     },
     {
         id: "sick-day",
@@ -191,23 +191,23 @@ const helpTopics = [
         icon: ThermometerSun,
         href: "#",
         clickable: false,
-        color: "text-emerald-600",
-        bg: "bg-emerald-50",
-        hoverBg: "group-hover:bg-emerald-100",
+        color: "text-emerald-600 dark:text-emerald-400",
+        bg: "bg-emerald-50 dark:bg-emerald-900/20",
+        hoverBg: "group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30",
     },
 ];
 
 function HelpTopicCard({ topic }: { topic: typeof helpTopics[0] }) {
     const Icon = topic.icon;
-    const className = `group flex flex-col items-start p-6 rounded-2xl border border-border/50 bg-white shadow-sm transition-all duration-300 ${topic.clickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : 'opacity-60 cursor-not-allowed'}`;
+    const className = `group flex flex-col items-start p-6 rounded-2xl border border-border/50 bg-card text-card-foreground shadow-sm transition-all duration-300 ${topic.clickable ? 'hover:shadow-md hover:-translate-y-1 cursor-pointer' : 'opacity-60 cursor-not-allowed'}`;
 
     const content = (
         <>
             <div className={`p-3 rounded-xl ${topic.bg} ${topic.hoverBg} transition-colors mb-4`}>
                 <Icon className={`w-8 h-8 ${topic.color}`} />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{topic.title}</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">{topic.description}</p>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{topic.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{topic.description}</p>
         </>
     );
 
@@ -228,17 +228,17 @@ function HelpTopicCard({ topic }: { topic: typeof helpTopics[0] }) {
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-slate-50/50">
+        <div className="min-h-screen bg-background">
             {/* Hero Section */}
-            <div className="bg-white border-b border-slate-200">
+            <div className="bg-background border-b border-border">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
                         How can we help you?
                     </h1>
-                    <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10">
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
                         Welcome to the Clinic of Dr. Steven Ma Employee Portal. Access resources, submit requests, and manage your schedule all in one place.
                     </p>
-                    <div className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors">
+                    <div className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors">
                         Employee Handbook and Forms
                     </div>
                 </div>
@@ -254,25 +254,25 @@ export default function HomePage() {
                 <div className="flex flex-col lg:flex-row gap-12 mb-20">
                     <div className="lg:w-1/3">
                         <div className="sticky top-8">
-                            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                            <h2 className="text-3xl font-bold text-foreground mb-4">
                                 Important Information
                             </h2>
-                            <p className="text-slate-600 mb-8 leading-relaxed">
+                            <p className="text-muted-foreground mb-8 leading-relaxed">
                                 Please review the following sections carefully. They contain essential information regarding clinic protocols, expectations, and your rights as an employee.
                             </p>
-                            <div className="p-6 bg-white rounded-2xl border border-border/50 shadow-sm">
+                            <div className="p-6 bg-card rounded-2xl border border-border/50 shadow-sm">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                                        <Mail className="w-6 h-6 text-blue-600" />
+                                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                                        <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-slate-900">Need Guidance?</h3>
-                                        <p className="text-sm text-slate-500">Contact Dr. Ma confidentially</p>
+                                        <h3 className="font-semibold text-foreground">Need Guidance?</h3>
+                                        <p className="text-sm text-muted-foreground">Contact Dr. Ma confidentially</p>
                                     </div>
                                 </div>
                                 <a
                                     href="mailto:sma.eyemd@gmail.com"
-                                    className="block w-full py-3 px-4 bg-slate-900 text-white text-center rounded-xl font-medium hover:bg-slate-800 transition-colors"
+                                    className="block w-full py-3 px-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-center rounded-xl font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
                                 >
                                     Email Dr. Ma
                                 </a>
@@ -284,14 +284,14 @@ export default function HomePage() {
                         {sections.map((section) => {
                             const Icon = section.icon;
                             return (
-                                <div key={section.id} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 scroll-mt-24" id={section.id}>
+                                <div key={section.id} className="bg-card rounded-2xl p-8 shadow-sm border border-border/50 scroll-mt-24" id={section.id}>
                                     <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 bg-slate-50 rounded-xl">
-                                            <Icon className="w-6 h-6 text-slate-700" />
+                                        <div className="p-3 bg-slate-50 dark:bg-muted/50 rounded-xl">
+                                            <Icon className="w-6 h-6 text-slate-700 dark:text-slate-300" />
                                         </div>
-                                        <h3 className="text-xl font-bold text-slate-900">{section.title}</h3>
+                                        <h3 className="text-xl font-bold text-foreground">{section.title}</h3>
                                     </div>
-                                    <div className="text-slate-600">
+                                    <div className="text-muted-foreground">
                                         {section.content}
                                     </div>
                                 </div>
