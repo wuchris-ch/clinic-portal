@@ -29,6 +29,7 @@ import {
   Home,
   Megaphone,
   FileText,
+  BookOpen,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,11 @@ const helpCenterItems = [
     title: "Documentation",
     url: "/documentation",
     icon: FileText,
+  },
+  {
+    title: "App Walkthrough",
+    url: "/walkthrough",
+    icon: BookOpen,
   },
 ];
 

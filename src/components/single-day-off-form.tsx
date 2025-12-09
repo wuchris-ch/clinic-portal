@@ -195,17 +195,19 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
                         <SelectValue placeholder="Select leave type" />
                     </SelectTrigger>
                     <SelectContent>
-                        {leaveTypes.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
-                                <div className="flex items-center gap-2">
-                                    <div
-                                        className="w-3 h-3 rounded-full"
-                                        style={{ backgroundColor: type.color }}
-                                    />
-                                    {type.name}
-                                </div>
-                            </SelectItem>
-                        ))}
+                        {leaveTypes
+                            .filter((type) => type.name !== "Vacation")
+                            .map((type) => (
+                                <SelectItem key={type.id} value={type.id}>
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className="w-3 h-3 rounded-full"
+                                            style={{ backgroundColor: type.color }}
+                                        />
+                                        {type.name}
+                                    </div>
+                                </SelectItem>
+                            ))}
                     </SelectContent>
                 </Select>
             </div>
