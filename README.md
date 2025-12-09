@@ -239,8 +239,9 @@ Vercel is configured to **automatically build and deploy** every branch you push
 ### 3. Pull Requests (PR) & Merging
 
 1.  **Open a Pull Request**: On GitHub, open a PR from your feature branch to `main`.
-2.  **Review**: Check the "Files changed" tab to self-review your code.
-3.  **Merge**: Once satisfied (and tests pass), merge the PR.
+2.  **Vercel Checks**: Vercel automatically runs a build check on your PR. You'll see a ✅ or ❌ status indicating if the build succeeds. This catches errors before merging.
+3.  **Review**: Check the "Files changed" tab to self-review your code.
+4.  **Merge**: Once satisfied (and Vercel build passes), merge the PR.
 
 ### 4. Automatic Production Deployment
 
