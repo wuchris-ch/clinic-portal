@@ -23,14 +23,14 @@ function getMailTransporter() {
   });
 }
 
-// Get current date/time in Pacific Time
-function getPSTTimestamp(includeTime: boolean = false): string {
+// Get current date and time in Pacific Time (returns object with both)
+function getPSTDateTime(): { date: string; time: string } {
   const now = new Date();
   const pstDate = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-  if (includeTime) {
-    return format(pstDate, "yyyy-MM-dd HH:mm:ss");
-  }
-  return format(pstDate, "yyyy-MM-dd");
+  return {
+    date: format(pstDate, "yyyy-MM-dd"),
+    time: format(pstDate, "hh:mm:ss a") // 12-hour format with AM/PM
+  };
 }
 
 // Get notification recipients from database, falling back to env var
@@ -95,19 +95,21 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
+        const pst = getPSTDateTime();
         await appendRowToSheet([
-          submissionDate || getPSTTimestamp(), // A: Submission Date (PST)
-          "Leave Request",                                    // B: Type
-          employeeName,                                       // C: Name
-          employeeEmail,                                      // D: Email
-          leaveType,                                          // E: Leave Type
-          startDate,                                          // F: Start Date
-          endDate,                                            // G: End Date
-          totalDays?.toString() || "0",                       // H: Total Days
-          reason,                                             // I: Reason
-          payPeriodLabel || "N/A",                            // J: Pay Period
-          coverageName || "N/A",                              // K: Coverage Name
-          coverageEmail || "N/A"                                // L: Coverage Email
+          submissionDate || pst.date,                           // A: Submission Date (PST)
+          pst.time,                                             // B: Time of Day (PST)
+          "Leave Request",                                      // C: Type
+          employeeName,                                         // D: Name
+          employeeEmail,                                        // E: Email
+          leaveType,                                            // F: Leave Type
+          startDate,                                            // G: Start Date
+          endDate,                                              // H: End Date
+          totalDays?.toString() || "0",                         // I: Total Days
+          reason,                                               // J: Reason
+          payPeriodLabel || "N/A",                              // K: Pay Period
+          coverageName || "N/A",                                // L: Coverage Name
+          coverageEmail || "N/A"                                // M: Coverage Email
         ], "Leave Requests");
         console.log("Leave request logged to Google Sheets");
       } catch (sheetError) {
@@ -170,20 +172,21 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = getPSTTimestamp(true); // PST timestamp
+        const pst = getPSTDateTime();
         const clockInStr = clockInDate ? `${clockInDate} ${clockInTime}` : "N/A";
         const clockOutStr = clockOutDate ? `${clockOutDate} ${clockOutTime}` : "N/A";
 
         await appendRowToSheet([
-          timestamp,                  // A: Submission Date
-          "Time Clock Request",       // B: Type
-          employeeName,               // C: Name
-          employeeEmail,              // D: Email
-          clockInStr,                 // E: Clock In
-          clockOutStr,                // F: Clock Out
-          clockInReason || "",        // G: Reason In
-          clockOutReason || "",       // H: Reason Out
-          payPeriodLabel || "N/A"     // I: Pay Period
+          pst.date,                     // A: Submission Date
+          pst.time,                     // B: Time of Day
+          "Time Clock Request",         // C: Type
+          employeeName,                 // D: Name
+          employeeEmail,                // E: Email
+          clockInStr,                   // F: Clock In
+          clockOutStr,                  // G: Clock Out
+          clockInReason || "",          // H: Reason In
+          clockOutReason || "",         // I: Reason Out
+          payPeriodLabel || "N/A"       // J: Pay Period
         ], "Time Clock");
         console.log("Time clock request logged to Google Sheets");
       } catch (sheetError) {
@@ -236,16 +239,17 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = getPSTTimestamp(true); // PST timestamp
+        const pst = getPSTDateTime();
         await appendRowToSheet([
-          timestamp,                  // A: Submission Date
-          "Overtime Request",         // B: Type
-          employeeName,               // C: Name
-          employeeEmail,              // D: Email
-          overtimeDate,               // E: Overtime Date
-          askedDoctor ? "Yes" : "No", // F: Asked Doctor
-          seniorStaffName || "N/A",   // G: Senior Staff
-          payPeriodLabel || "N/A"     // H: Pay Period
+          pst.date,                     // A: Submission Date
+          pst.time,                     // B: Time of Day
+          "Overtime Request",           // C: Type
+          employeeName,                 // D: Name
+          employeeEmail,                // E: Email
+          overtimeDate,                 // F: Overtime Date
+          askedDoctor ? "Yes" : "No",   // G: Asked Doctor
+          seniorStaffName || "N/A",     // H: Senior Staff
+          payPeriodLabel || "N/A"       // I: Pay Period
         ], "Overtime");
         console.log("Overtime request logged to Google Sheets");
       } catch (sheetError) {
