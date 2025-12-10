@@ -23,6 +23,16 @@ function getMailTransporter() {
   });
 }
 
+// Get current date/time in Pacific Time
+function getPSTTimestamp(includeTime: boolean = false): string {
+  const now = new Date();
+  const pstDate = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  if (includeTime) {
+    return format(pstDate, "yyyy-MM-dd HH:mm:ss");
+  }
+  return format(pstDate, "yyyy-MM-dd");
+}
+
 // Get notification recipients from database, falling back to env var
 async function getNotificationRecipients(): Promise<string[]> {
   try {
@@ -86,7 +96,7 @@ export async function POST(request: Request) {
       // Log to Google Sheets FIRST (before email check)
       try {
         await appendRowToSheet([
-          submissionDate || format(new Date(), "yyyy-MM-dd"), // A: Submission Date
+          submissionDate || getPSTTimestamp(), // A: Submission Date (PST)
           "Leave Request",                                    // B: Type
           employeeName,                                       // C: Name
           employeeEmail,                                      // D: Email
@@ -160,7 +170,7 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        const timestamp = getPSTTimestamp(true); // PST timestamp
         const clockInStr = clockInDate ? `${clockInDate} ${clockInTime}` : "N/A";
         const clockOutStr = clockOutDate ? `${clockOutDate} ${clockOutTime}` : "N/A";
 
@@ -226,7 +236,7 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        const timestamp = getPSTTimestamp(true); // PST timestamp
         await appendRowToSheet([
           timestamp,                  // A: Submission Date
           "Overtime Request",         // B: Type
