@@ -44,10 +44,13 @@ vi.mock('@/components/emails/overtime-request-email', () => ({ OvertimeRequestEm
 
 describe('Notifications API - Gmail Independence', () => {
     const originalEnv = process.env;
+    const originalConsoleLog = console.log;
 
     beforeEach(() => {
         vi.clearAllMocks();
         process.env = { ...originalEnv };
+        // Suppress console.log during tests (keeps test output clean)
+        console.log = vi.fn();
         // Ensure Google Sheets IS configured
         process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL = 'test@test.iam.gserviceaccount.com';
         process.env.GOOGLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----';
@@ -56,6 +59,7 @@ describe('Notifications API - Gmail Independence', () => {
 
     afterEach(() => {
         process.env = originalEnv;
+        console.log = originalConsoleLog;
     });
 
     describe('Google Sheets logs even when Gmail is NOT configured', () => {
