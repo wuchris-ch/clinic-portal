@@ -62,13 +62,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type } = body;
 
-    // Skip email sending if no Gmail credentials configured
+    // Get mail transporter (may be null if credentials not configured)
     const transporter = getMailTransporter();
-    if (!transporter) {
-      console.log("Gmail credentials not configured, skipping email");
-      return NextResponse.json({ success: true, emailSent: false });
-    }
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     // Handle new request notifications (sent to admins)
@@ -111,8 +106,10 @@ export async function POST(request: Request) {
 
       // Get notification recipients from database (with env var fallback)
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -184,8 +181,10 @@ export async function POST(request: Request) {
       }
 
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -244,8 +243,10 @@ export async function POST(request: Request) {
       }
 
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -326,7 +327,12 @@ export async function POST(request: Request) {
       subject = `Time-Off Request Denied - ${leaveType}`;
     }
 
-    // Send email via Gmail
+    // Send email via Gmail (skip if not configured)
+    if (!transporter) {
+      console.log("Gmail not configured, skipping approval/denial email");
+      return NextResponse.json({ success: true, emailSent: false });
+    }
+
     const emailResult = await transporter.sendMail({
       from: `StaffHub <${process.env.GMAIL_USER}>`,
       to: userEmail,
