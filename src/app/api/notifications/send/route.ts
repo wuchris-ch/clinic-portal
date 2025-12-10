@@ -23,13 +23,14 @@ function getMailTransporter() {
   });
 }
 
-// Get current date and time in Pacific Time (returns object with both)
-function getPSTDateTime(): { date: string; time: string } {
+// Get current date, time, and day of week in Pacific Time
+function getPSTDateTime(): { date: string; time: string; dayOfWeek: string } {
   const now = new Date();
   const pstDate = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
   return {
     date: format(pstDate, "yyyy-MM-dd"),
-    time: format(pstDate, "hh:mm:ss a") // 12-hour format with AM/PM
+    time: format(pstDate, "hh:mm:ss a"), // 12-hour format with AM/PM
+    dayOfWeek: format(pstDate, "EEEE")   // Full day name (e.g., "Monday")
   };
 }
 
@@ -99,17 +100,18 @@ export async function POST(request: Request) {
         await appendRowToSheet([
           submissionDate || pst.date,                           // A: Submission Date (PST)
           pst.time,                                             // B: Time of Day (PST)
-          "Leave Request",                                      // C: Type
-          employeeName,                                         // D: Name
-          employeeEmail,                                        // E: Email
-          leaveType,                                            // F: Leave Type
-          startDate,                                            // G: Start Date
-          endDate,                                              // H: End Date
-          totalDays?.toString() || "0",                         // I: Total Days
-          reason,                                               // J: Reason
-          payPeriodLabel || "N/A",                              // K: Pay Period
-          coverageName || "N/A",                                // L: Coverage Name
-          coverageEmail || "N/A"                                // M: Coverage Email
+          pst.dayOfWeek,                                        // C: Day of Week
+          "Leave Request",                                      // D: Type
+          employeeName,                                         // E: Name
+          employeeEmail,                                        // F: Email
+          leaveType,                                            // G: Leave Type
+          startDate,                                            // H: Start Date
+          endDate,                                              // I: End Date
+          totalDays?.toString() || "0",                         // J: Total Days
+          reason,                                               // K: Reason
+          payPeriodLabel || "N/A",                              // L: Pay Period
+          coverageName || "N/A",                                // M: Coverage Name
+          coverageEmail || "N/A"                                // N: Coverage Email
         ], "Leave Requests");
         console.log("Leave request logged to Google Sheets");
       } catch (sheetError) {
@@ -179,14 +181,15 @@ export async function POST(request: Request) {
         await appendRowToSheet([
           pst.date,                     // A: Submission Date
           pst.time,                     // B: Time of Day
-          "Time Clock Request",         // C: Type
-          employeeName,                 // D: Name
-          employeeEmail,                // E: Email
-          clockInStr,                   // F: Clock In
-          clockOutStr,                  // G: Clock Out
-          clockInReason || "",          // H: Reason In
-          clockOutReason || "",         // I: Reason Out
-          payPeriodLabel || "N/A"       // J: Pay Period
+          pst.dayOfWeek,                // C: Day of Week
+          "Time Clock Request",         // D: Type
+          employeeName,                 // E: Name
+          employeeEmail,                // F: Email
+          clockInStr,                   // G: Clock In
+          clockOutStr,                  // H: Clock Out
+          clockInReason || "",          // I: Reason In
+          clockOutReason || "",         // J: Reason Out
+          payPeriodLabel || "N/A"       // K: Pay Period
         ], "Time Clock");
         console.log("Time clock request logged to Google Sheets");
       } catch (sheetError) {
@@ -243,13 +246,14 @@ export async function POST(request: Request) {
         await appendRowToSheet([
           pst.date,                     // A: Submission Date
           pst.time,                     // B: Time of Day
-          "Overtime Request",           // C: Type
-          employeeName,                 // D: Name
-          employeeEmail,                // E: Email
-          overtimeDate,                 // F: Overtime Date
-          askedDoctor ? "Yes" : "No",   // G: Asked Doctor
-          seniorStaffName || "N/A",     // H: Senior Staff
-          payPeriodLabel || "N/A"       // I: Pay Period
+          pst.dayOfWeek,                // C: Day of Week
+          "Overtime Request",           // D: Type
+          employeeName,                 // E: Name
+          employeeEmail,                // F: Email
+          overtimeDate,                 // G: Overtime Date
+          askedDoctor ? "Yes" : "No",   // H: Asked Doctor
+          seniorStaffName || "N/A",     // I: Senior Staff
+          payPeriodLabel || "N/A"       // J: Pay Period
         ], "Overtime");
         console.log("Overtime request logged to Google Sheets");
       } catch (sheetError) {
