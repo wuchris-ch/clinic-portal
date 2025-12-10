@@ -107,7 +107,7 @@ export async function POST(request: Request) {
           reason,                                             // I: Reason
           payPeriodLabel || "N/A",                            // J: Pay Period
           coverageName || "N/A",                              // K: Coverage Name
-          requestId                                           // L: Request ID
+          coverageEmail || "N/A"                                // L: Coverage Email
         ], "Leave Requests");
         console.log("Leave request logged to Google Sheets");
       } catch (sheetError) {
