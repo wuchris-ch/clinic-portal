@@ -113,54 +113,60 @@ describe('Google Sheets Integration', () => {
     });
 
     describe('Data transformation', () => {
-        it('Leave Request row has correct number of columns', () => {
+        it('Leave Request row has correct number of columns (14)', () => {
             const leaveRequestRow = [
                 '2025-12-08',           // A: Submission Date
-                'Leave Request',        // B: Type
-                'John Doe',             // C: Name
-                'john@example.com',     // D: Email
-                'Single Day Off',       // E: Leave Type
-                '2025-12-10',           // F: Start Date
-                '2025-12-10',           // G: End Date
-                '1',                    // H: Total Days
-                'Personal appointment', // I: Reason
-                'Period 1',             // J: Pay Period
-                'N/A',                  // K: Coverage Name
-                'request-id-123'        // L: Request ID
+                '10:30:00 AM',          // B: Time of Day
+                'Tuesday',              // C: Day of Week
+                'Leave Request',        // D: Type
+                'John Doe',             // E: Name
+                'john@example.com',     // F: Email
+                'Single Day Off',       // G: Leave Type
+                '2025-12-10',           // H: Start Date
+                '2025-12-10',           // I: End Date
+                '1',                    // J: Total Days
+                'Personal appointment', // K: Reason
+                'Period 1',             // L: Pay Period
+                'Jane Smith',           // M: Coverage Name
+                'jane@example.com'      // N: Coverage Email
             ];
 
-            expect(leaveRequestRow.length).toBe(12);
+            expect(leaveRequestRow.length).toBe(14);
         });
 
-        it('Time Clock row has correct number of columns', () => {
+        it('Time Clock row has correct number of columns (11)', () => {
             const timeClockRow = [
-                '2025-12-08 10:30:00',  // A: Submission Date
-                'Time Clock Request',   // B: Type
-                'John Doe',             // C: Name
-                'john@example.com',     // D: Email
-                '2025-12-07 09:00 AM',  // E: Clock In
-                '2025-12-07 05:00 PM',  // F: Clock Out
-                'Forgot to clock in',   // G: Reason In
-                '',                     // H: Reason Out
-                'Period 1'              // I: Pay Period
+                '2025-12-08',           // A: Submission Date
+                '10:30:00 AM',          // B: Time of Day
+                'Tuesday',              // C: Day of Week
+                'Time Clock Request',   // D: Type
+                'John Doe',             // E: Name
+                'john@example.com',     // F: Email
+                '2025-12-07 09:00 AM',  // G: Clock In
+                '2025-12-07 05:00 PM',  // H: Clock Out
+                'Forgot to clock in',   // I: Reason In
+                '',                     // J: Reason Out
+                'Period 1'              // K: Pay Period
             ];
 
-            expect(timeClockRow.length).toBe(9);
+            expect(timeClockRow.length).toBe(11);
         });
 
-        it('Overtime row has correct number of columns', () => {
+        it('Overtime row has correct number of columns (10)', () => {
             const overtimeRow = [
-                '2025-12-08 10:30:00',  // A: Submission Date
-                'Overtime Request',     // B: Type
-                'John Doe',             // C: Name
-                'john@example.com',     // D: Email
-                '2025-12-07',           // E: Overtime Date
-                'Yes',                  // F: Asked Doctor
-                'Jane Smith',           // G: Senior Staff
-                'Period 1'              // H: Pay Period
+                '2025-12-08',           // A: Submission Date
+                '10:30:00 AM',          // B: Time of Day
+                'Tuesday',              // C: Day of Week
+                'Overtime Request',     // D: Type
+                'John Doe',             // E: Name
+                'john@example.com',     // F: Email
+                '2025-12-07',           // G: Overtime Date
+                'Yes',                  // H: Asked Doctor
+                'Jane Smith',           // I: Senior Staff
+                'Period 1'              // J: Pay Period
             ];
 
-            expect(overtimeRow.length).toBe(8);
+            expect(overtimeRow.length).toBe(10);
         });
     });
 });
