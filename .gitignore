@@ -16,6 +16,7 @@
 /playwright-report/
 /playwright/.cache/
 tests/node_modules/
+tests/.auth/*.json
 
 # next.js
 /.next/
