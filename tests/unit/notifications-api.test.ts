@@ -264,7 +264,7 @@ describe('Notifications API - Gmail Independence', () => {
 
             // We need to override this.
             const nodemailer = await import('nodemailer');
-            // @ts-ignore
+            // @ts-expect-error - mocking nodemailer in test
             nodemailer.default.createTransport.mockReturnValue({
                 sendMail: mockSendMail
             });
@@ -300,7 +300,7 @@ describe('Notifications API - Gmail Independence', () => {
             // Mock SendMail
             const nodemailer = await import('nodemailer');
             const mockSendMail = vi.fn().mockResolvedValue({ messageId: '123' });
-            // @ts-ignore
+            // @ts-expect-error - mocking nodemailer in test
             nodemailer.default.createTransport.mockReturnValue({
                 sendMail: mockSendMail
             });

@@ -20,9 +20,27 @@ export default defineConfig({
         // Coverage configuration
         coverage: {
             provider: 'v8',
-            reporter: ['text', 'html'],
+            reporter: ['text', 'html', 'lcov'],
             reportsDirectory: '../test-results/coverage',
+            // Enforce minimum coverage thresholds
+            thresholds: {
+                lines: 50,
+                functions: 50,
+                branches: 40,
+                statements: 50,
+            },
+            // Exclude test files and configs from coverage
+            exclude: [
+                'node_modules/**',
+                '**/*.test.ts',
+                '**/*.test.tsx',
+                '**/*.spec.ts',
+                '**/setup.ts',
+            ],
         },
+
+        // Test timeout
+        testTimeout: 10000,
     },
     resolve: {
         alias: {
