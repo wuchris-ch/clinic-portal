@@ -9,8 +9,8 @@ import { join } from 'path';
  * navigation elements (clickable logo and "Go to Home" button).
  */
 
-// When vitest runs from tests/, process.cwd() is tests/, so we go up one level
-const projectRoot = join(process.cwd(), '..');
+// Use __dirname to get the directory of this test file, then navigate to project root
+const projectRoot = join(__dirname, '../..');
 const loginPagePath = join(projectRoot, 'src/app/(auth)/login/page.tsx');
 const registerPagePath = join(projectRoot, 'src/app/(auth)/register/page.tsx');
 
