@@ -9,11 +9,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  */
 
 // Mock dependencies
+vi.mock('@/components/emails/overtime-request-email', () => ({ OvertimeRequestEmail: vi.fn() }));
+
+// Mock dependencies
 const mockAppendRowToSheet = vi.fn().mockResolvedValue(true);
 const mockCreateClient = vi.fn().mockResolvedValue({
     from: () => ({
         select: () => ({
-            eq: () => ({ data: [], error: null })
+            eq: () => ({ data: [{ email: 'test@db.com' }], error: null })
         })
     })
 });
@@ -273,6 +276,59 @@ describe('Notifications API - Gmail Independence', () => {
 
             // Verify Email was SENT (failure in sheets shouldn't block email)
             expect(mockSendMail).toHaveBeenCalled();
+        });
+    });
+
+    describe('Recipient Logic', () => {
+        it('should RESPECT empty DB list (Admin disabled) and NOT fall back to Env Var', async () => {
+            // Mock CreateClient to return empty list (Simulate Admin disabled all)
+            mockCreateClient.mockResolvedValueOnce({
+                from: () => ({
+                    select: () => ({
+                        eq: () => ({ data: [], error: null })
+                    })
+                })
+            });
+
+            // Ensure Env Var IS set (to prove we ignore it when DB is healthy but empty)
+            process.env.NOTIFY_EMAILS = 'fallback@example.com';
+
+            // Ensure Gmail IS set (so transporter exists)
+            process.env.GMAIL_USER = 'test@gmail.com';
+            process.env.GMAIL_APP_PASSWORD = 'password';
+
+            // Mock SendMail
+            const nodemailer = await import('nodemailer');
+            const mockSendMail = vi.fn().mockResolvedValue({ messageId: '123' });
+            // @ts-ignore
+            nodemailer.default.createTransport.mockReturnValue({
+                sendMail: mockSendMail
+            });
+
+            const { POST } = await import('@/app/api/notifications/send/route');
+            const request = new Request('http://localhost/api/notifications/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'new_request',
+                    employeeName: 'Logic Test',
+                    leaveType: 'Test',
+                    startDate: '2025-01-01',
+                    endDate: '2025-01-01',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            // Should be success: true (Sheets logged)
+            expect(data.success).toBe(true);
+
+            // But emailSent: false (because recipient list was empty)
+            expect(data.emailSent).toBe(false);
+
+            // And sendMail NOT called (proving we ignored NOTIFY_EMAILS fallback)
+            expect(mockSendMail).not.toHaveBeenCalled();
         });
     });
 });

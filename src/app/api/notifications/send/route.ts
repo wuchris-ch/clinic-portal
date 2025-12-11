@@ -49,9 +49,13 @@ async function getNotificationRecipients(): Promise<string[]> {
       return data.map((r: { email: string }) => r.email);
     }
 
-    // Fall back to env var if no recipients in DB
-    const envEmails = process.env.NOTIFY_EMAILS;
-    return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
+    // If we have recipients in DB, use those
+    if (data && data.length > 0) {
+      return data.map((r: { email: string }) => r.email);
+    }
+
+    // If DB returned successful but empty list, it means "Send to No One" (Admin disabled all)
+    return [];
   } catch (err) {
     console.error("Error in getNotificationRecipients:", err);
     // Fall back to env var on any error
