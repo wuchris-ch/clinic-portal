@@ -2,6 +2,8 @@
  * Shared test utilities and setup for HR Employee Portal tests.
  */
 
+import type { Page } from '@playwright/test';
+
 // Common test constants
 export const TEST_URLS = {
     // Public routes
@@ -58,7 +60,7 @@ export const SAMPLE_OVERTIME_DATA = {
 };
 
 // Helper to check if element is visible
-export async function isElementVisible(page: any, selector: string): Promise<boolean> {
+export async function isElementVisible(page: Page, selector: string): Promise<boolean> {
     try {
         await page.waitForSelector(selector, { timeout: 5000 });
         return true;

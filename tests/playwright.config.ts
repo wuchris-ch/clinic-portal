@@ -57,13 +57,21 @@ export default defineConfig({
         // },
     ],
 
-    // Run local dev server before starting the tests (optional - can use existing server)
-    // webServer: {
-    //   command: 'npm run dev',
-    //   url: 'http://localhost:3000',
-    //   reuseExistingServer: !process.env.CI,
-    //   timeout: 120 * 1000,
-    // },
+    // Run local dev server before starting the tests
+    webServer: {
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120 * 1000,
+    },
+
+    // Global timeout for each test
+    timeout: 30 * 1000,
+
+    // Expect timeout
+    expect: {
+        timeout: 10 * 1000,
+    },
 
     // Output folder for test artifacts
     outputDir: '../test-results/artifacts',
