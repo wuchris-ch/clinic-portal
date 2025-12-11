@@ -242,7 +242,7 @@ export default function HomePage() {
                         <div className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors">
                             Employee Handbook and Forms
                         </div>
-                        <div className="flex flex-col items-center gap-2">
+                        <div className="relative flex flex-col items-center">
                             <Link
                                 href="https://docs.google.com/spreadsheets/d/1LO2QpKORnLL6XgRK__kiUREAe2t09NgnQW1MyRhgRwE/edit?gid=0#gid=0"
                                 target="_blank"
@@ -259,7 +259,7 @@ export default function HomePage() {
                                 href="https://docs.google.com/spreadsheets/d/1LO2QpKORnLL6XgRK__kiUREAe2t09NgnQW1MyRhgRwE/edit?gid=0#gid=0"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="!text-[10px] md:!text-[11px] font-normal text-muted-foreground/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors leading-none pb-0.5 border-b border-transparent hover:border-emerald-600/50"
+                                className="absolute top-full mt-2 !text-[10px] md:!text-[11px] font-normal text-muted-foreground/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors leading-none pb-0.5 border-b border-transparent hover:border-emerald-600/50 whitespace-nowrap"
                             >
                                 View Live Sheet →
                             </Link>

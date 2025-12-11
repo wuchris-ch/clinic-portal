@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Terminal } from "lucide-react";
 
 export default async function WalkthroughPage() {
     const walkthroughPath = path.join(process.cwd(), "WALKTHROUGH.md");
@@ -39,6 +40,17 @@ export default async function WalkthroughPage() {
                         </article>
                     </CardContent>
                 </Card>
+
+                {/* Secret nerdy link - only visible to those who scroll all the way down */}
+                <div className="mt-16 text-center">
+                    <Link
+                        href="/tech"
+                        className="group inline-flex items-center gap-2 text-xs text-slate-400 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors"
+                    >
+                        <Terminal className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                        <span className="opacity-50 group-hover:opacity-100 transition-opacity">view source</span>
+                    </Link>
+                </div>
             </div>
         </div>
     );
