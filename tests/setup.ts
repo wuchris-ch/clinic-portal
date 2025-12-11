@@ -11,6 +11,7 @@ export const TEST_URLS = {
     announcements: '/announcements',
     documentation: '/documentation',
     walkthrough: '/walkthrough',
+    tech: '/tech',
 
     // Public forms
     publicDayOff: '/forms/day-off',
