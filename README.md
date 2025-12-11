@@ -13,8 +13,11 @@ A modern, mobile-first employee time-off request and management portal built wit
   - **Database Tracking**: Requests are saved and trackable.
   - **Team Calendar**: View approved time-off across the organization to coordinate schedules.
 - **Admin Dashboard**: Review, approve, or deny pending requests with one-click actions.
-- **Email Notifications**:
-  - Admins notified immediately upon any request submission (public or private).
+- **Email Notifications & Logging**:
+  - **Resilient Logging**: All requests logged to Google Sheets independently of email status.
+  - **Timezone Intelligence**: Timestamps automatically converted to Pacific Time (PST/PDT) handling DST correctly.
+  - **Admin Control**: Disabling emails in dashboard stops all notifications (no unexpected fallbacks).
+  - Admins notified immediately upon any request submission.
   - Employees notified when requests are approved/denied.
 - **Role-based Access**: Staff and Admin roles with appropriate permissions.
 - **Mobile-First Design**: Responsive design that works beautifully on phones, tablets, and desktops.
@@ -88,8 +91,14 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 GMAIL_USER=yourcompany.hr@gmail.com
 GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
 
+
 # App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Fallback Notification Email
+# Only used if database connection fails. 
+# If Admin disables all recipients in DB, this is IGNORED (no email sent).
+NOTIFY_EMAILS=fallback@company.com
 ```
 
 ### 6. Create Demo Users (Optional)
@@ -112,7 +121,21 @@ To seed demo data:
 npm run dev
 ```
 
+
 Open [http://localhost:3000](http://localhost:3000)
+
+## Testing
+
+The project includes a comprehensive test suite using **Vitest** (Unit) and **Playwright** (E2E).
+
+- **Unit Tests**: Cover timezone logic (PST/DST), API resilience, and data validation.
+- **E2E Tests**: Verify critical user flows like form submission and navigation.
+
+Run tests:
+```bash
+npm run test:unit
+npx playwright test
+```
 
 ## Deployment to Vercel
 

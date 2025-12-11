@@ -9,6 +9,7 @@ import { TimeClockRequestEmail } from "@/components/emails/time-clock-request-em
 import { OvertimeRequestEmail } from "@/components/emails/overtime-request-email";
 import { appendRowToSheet } from "@/lib/google-sheets";
 import { format } from "date-fns";
+import { getPSTDateTime } from "@/lib/utils";
 
 function getMailTransporter() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -23,16 +24,7 @@ function getMailTransporter() {
   });
 }
 
-// Get current date, time, and day of week in Pacific Time
-function getPSTDateTime(): { date: string; time: string; dayOfWeek: string } {
-  const now = new Date();
-  const pstDate = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-  return {
-    date: format(pstDate, "yyyy-MM-dd"),
-    time: format(pstDate, "hh:mm:ss a"), // 12-hour format with AM/PM
-    dayOfWeek: format(pstDate, "EEEE")   // Full day name (e.g., "Monday")
-  };
-}
+
 
 // Get notification recipients from database, falling back to env var
 async function getNotificationRecipients(): Promise<string[]> {
@@ -57,9 +49,13 @@ async function getNotificationRecipients(): Promise<string[]> {
       return data.map((r: { email: string }) => r.email);
     }
 
-    // Fall back to env var if no recipients in DB
-    const envEmails = process.env.NOTIFY_EMAILS;
-    return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
+    // If we have recipients in DB, use those
+    if (data && data.length > 0) {
+      return data.map((r: { email: string }) => r.email);
+    }
+
+    // If DB returned successful but empty list, it means "Send to No One" (Admin disabled all)
+    return [];
   } catch (err) {
     console.error("Error in getNotificationRecipients:", err);
     // Fall back to env var on any error
