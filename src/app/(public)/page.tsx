@@ -238,15 +238,32 @@ export default function HomePage() {
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
                         Welcome to the Clinic of Dr. Steven Ma Employee Portal. Access resources, submit requests, and manage your schedule all in one place.
                     </p>
-                    <div className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors">
-                        Employee Handbook and Forms
-                    </div>
-                    <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium rounded-full">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        Syncs with Google Sheets
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors">
+                            Employee Handbook and Forms
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <Link
+                                href="https://docs.google.com/spreadsheets/d/1LO2QpKORnLL6XgRK__kiUREAe2t09NgnQW1MyRhgRwE/edit?gid=0#gid=0"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-medium rounded-full hover:bg-emerald-200 dark:hover:bg-emerald-900/50 hover:shadow-sm transition-all duration-200 active:scale-95"
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                Syncs with Google Sheets
+                            </Link>
+                            <Link
+                                href="https://docs.google.com/spreadsheets/d/1LO2QpKORnLL6XgRK__kiUREAe2t09NgnQW1MyRhgRwE/edit?gid=0#gid=0"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="!text-[10px] md:!text-[11px] font-normal text-muted-foreground/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors leading-none pb-0.5 border-b border-transparent hover:border-emerald-600/50"
+                            >
+                                View Live Sheet →
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
