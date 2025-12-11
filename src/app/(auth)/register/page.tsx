@@ -65,7 +65,7 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Account created! Please check your email to verify.");
+      toast.success("Account created successfully!");
       router.push("/login");
     } catch {
       toast.error("An unexpected error occurred");
