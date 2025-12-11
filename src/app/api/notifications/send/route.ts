@@ -23,6 +23,17 @@ function getMailTransporter() {
   });
 }
 
+// Get current date, time, and day of week in Pacific Time
+function getPSTDateTime(): { date: string; time: string; dayOfWeek: string } {
+  const now = new Date();
+  const pstDate = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  return {
+    date: format(pstDate, "yyyy-MM-dd"),
+    time: format(pstDate, "hh:mm:ss a"), // 12-hour format with AM/PM
+    dayOfWeek: format(pstDate, "EEEE")   // Full day name (e.g., "Monday")
+  };
+}
+
 // Get notification recipients from database, falling back to env var
 async function getNotificationRecipients(): Promise<string[]> {
   try {
@@ -62,13 +73,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type } = body;
 
-    // Skip email sending if no Gmail credentials configured
+    // Get mail transporter (may be null if credentials not configured)
     const transporter = getMailTransporter();
-    if (!transporter) {
-      console.log("Gmail credentials not configured, skipping email");
-      return NextResponse.json({ success: true, emailSent: false });
-    }
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     // Handle new request notifications (sent to admins)
@@ -90,19 +96,22 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
+        const pst = getPSTDateTime();
         await appendRowToSheet([
-          submissionDate || format(new Date(), "yyyy-MM-dd"), // A: Submission Date
-          "Leave Request",                                    // B: Type
-          employeeName,                                       // C: Name
-          employeeEmail,                                      // D: Email
-          leaveType,                                          // E: Leave Type
-          startDate,                                          // F: Start Date
-          endDate,                                            // G: End Date
-          totalDays?.toString() || "0",                       // H: Total Days
-          reason,                                             // I: Reason
-          payPeriodLabel || "N/A",                            // J: Pay Period
-          coverageName || "N/A",                              // K: Coverage Name
-          requestId                                           // L: Request ID
+          submissionDate || pst.date,                           // A: Submission Date (PST)
+          pst.time,                                             // B: Time of Day (PST)
+          pst.dayOfWeek,                                        // C: Day of Week
+          "Leave Request",                                      // D: Type
+          employeeName,                                         // E: Name
+          employeeEmail,                                        // F: Email
+          leaveType,                                            // G: Leave Type
+          startDate,                                            // H: Start Date
+          endDate,                                              // I: End Date
+          totalDays?.toString() || "0",                         // J: Total Days
+          reason,                                               // K: Reason
+          payPeriodLabel || "N/A",                              // L: Pay Period
+          coverageName || "N/A",                                // M: Coverage Name
+          coverageEmail || "N/A"                                // N: Coverage Email
         ], "Leave Requests");
         console.log("Leave request logged to Google Sheets");
       } catch (sheetError) {
@@ -111,8 +120,10 @@ export async function POST(request: Request) {
 
       // Get notification recipients from database (with env var fallback)
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -163,20 +174,22 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        const pst = getPSTDateTime();
         const clockInStr = clockInDate ? `${clockInDate} ${clockInTime}` : "N/A";
         const clockOutStr = clockOutDate ? `${clockOutDate} ${clockOutTime}` : "N/A";
 
         await appendRowToSheet([
-          timestamp,                  // A: Submission Date
-          "Time Clock Request",       // B: Type
-          employeeName,               // C: Name
-          employeeEmail,              // D: Email
-          clockInStr,                 // E: Clock In
-          clockOutStr,                // F: Clock Out
-          clockInReason || "",        // G: Reason In
-          clockOutReason || "",       // H: Reason Out
-          payPeriodLabel || "N/A"     // I: Pay Period
+          pst.date,                     // A: Submission Date
+          pst.time,                     // B: Time of Day
+          pst.dayOfWeek,                // C: Day of Week
+          "Time Clock Request",         // D: Type
+          employeeName,                 // E: Name
+          employeeEmail,                // F: Email
+          clockInStr,                   // G: Clock In
+          clockOutStr,                  // H: Clock Out
+          clockInReason || "",          // I: Reason In
+          clockOutReason || "",         // J: Reason Out
+          payPeriodLabel || "N/A"       // K: Pay Period
         ], "Time Clock");
         console.log("Time clock request logged to Google Sheets");
       } catch (sheetError) {
@@ -184,8 +197,10 @@ export async function POST(request: Request) {
       }
 
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -227,16 +242,18 @@ export async function POST(request: Request) {
 
       // Log to Google Sheets FIRST (before email check)
       try {
-        const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        const pst = getPSTDateTime();
         await appendRowToSheet([
-          timestamp,                  // A: Submission Date
-          "Overtime Request",         // B: Type
-          employeeName,               // C: Name
-          employeeEmail,              // D: Email
-          overtimeDate,               // E: Overtime Date
-          askedDoctor ? "Yes" : "No", // F: Asked Doctor
-          seniorStaffName || "N/A",   // G: Senior Staff
-          payPeriodLabel || "N/A"     // H: Pay Period
+          pst.date,                     // A: Submission Date
+          pst.time,                     // B: Time of Day
+          pst.dayOfWeek,                // C: Day of Week
+          "Overtime Request",           // D: Type
+          employeeName,                 // E: Name
+          employeeEmail,                // F: Email
+          overtimeDate,                 // G: Overtime Date
+          askedDoctor ? "Yes" : "No",   // H: Asked Doctor
+          seniorStaffName || "N/A",     // I: Senior Staff
+          payPeriodLabel || "N/A"       // J: Pay Period
         ], "Overtime");
         console.log("Overtime request logged to Google Sheets");
       } catch (sheetError) {
@@ -244,8 +261,10 @@ export async function POST(request: Request) {
       }
 
       const notifyEmailsList = await getNotificationRecipients();
-      if (notifyEmailsList.length === 0) {
-        console.log("No notification recipients configured, skipping admin notification");
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(!transporter
+          ? "Gmail not configured, skipping email (Sheets logged)"
+          : "No notification recipients configured");
         return NextResponse.json({ success: true, emailSent: false });
       }
 
@@ -326,7 +345,12 @@ export async function POST(request: Request) {
       subject = `Time-Off Request Denied - ${leaveType}`;
     }
 
-    // Send email via Gmail
+    // Send email via Gmail (skip if not configured)
+    if (!transporter) {
+      console.log("Gmail not configured, skipping approval/denial email");
+      return NextResponse.json({ success: true, emailSent: false });
+    }
+
     const emailResult = await transporter.sendMail({
       from: `StaffHub <${process.env.GMAIL_USER}>`,
       to: userEmail,
