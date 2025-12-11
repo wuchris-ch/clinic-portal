@@ -19,7 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { CalendarDays, Loader2 } from "lucide-react";
+import { CalendarDays, Home, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -97,11 +97,13 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4 shadow-sm">
-            <CalendarDays className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">StaffHub</h1>
-          <p className="text-muted-foreground mt-2">Time Off Portal</p>
+          <Link href="/" className="inline-block cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4 shadow-sm">
+              <CalendarDays className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">StaffHub</h1>
+            <p className="text-muted-foreground mt-2">Time Off Portal</p>
+          </Link>
         </div>
 
         <Card className="border-border/40 shadow-xl shadow-primary/5">
@@ -231,6 +233,13 @@ export default function RegisterPage() {
             </div>
           </CardFooter>
         </Card>
+
+        <Link href="/">
+          <Button variant="outline" className="mt-6 w-full h-11">
+            <Home className="mr-2 h-4 w-4" />
+            Go to Home
+          </Button>
+        </Link>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
           By signing up, you agree to our Terms of Service and Privacy Policy.
