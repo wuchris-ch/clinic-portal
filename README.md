@@ -25,13 +25,36 @@ A modern, mobile-first employee time-off request and management portal built wit
 
 ## Tech Stack
 
+### Core
 - **Framework**: Next.js 16 (App Router) with React 19
-- **Language**: TypeScript
-- **Database & Auth**: Supabase (PostgreSQL + Auth with Google OAuth)
+- **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS v4 + shadcn/ui components
-- **Date Handling**: date-fns
-- **Calendar**: react-big-calendar
-- **Email**: Gmail SMTP via Nodemailer + React Email templates
+
+### Database & Authentication
+- **Supabase**: PostgreSQL database with Row Level Security (RLS)
+- **Auth**: Supabase Auth with Google OAuth integration
+- **Session Management**: Server-side session validation via middleware
+
+### Data Pipeline & Integrations
+- **Google Sheets API**: Real-time form submission logging via Service Account authentication
+- **Gmail SMTP**: Transactional emails via Nodemailer with React Email templates
+- **Timezone Handling**: Pacific Time (PST/PDT) with automatic DST conversion using date-fns-tz
+
+### Deployment & Infrastructure
+- **Hosting**: Vercel with automatic preview deployments per branch
+- **Environment Management**: Separate env configs for development, preview, and production
+- **Edge Middleware**: Auth protection and route handling at the edge
+
+### CI/CD Pipeline (GitHub Actions)
+- **Unit Tests**: Vitest with coverage reporting
+- **E2E Tests**: Playwright running against Chromium
+- **Lint & Type Check**: ESLint + TypeScript strict mode verification
+- **Build Verification**: Production build validation before merge
+- **Artifact Storage**: Test reports and coverage data retained for 7 days
+
+### Libraries
+- **Calendar**: react-big-calendar for team scheduling views
+- **Date Handling**: date-fns + date-fns-tz
 
 ## Getting Started
 

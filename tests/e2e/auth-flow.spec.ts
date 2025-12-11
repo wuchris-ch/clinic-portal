@@ -175,6 +175,79 @@ test.describe('Authentication Flow Smoke Tests', () => {
         });
     });
 
+    test.describe('Password Visibility Toggle', () => {
+        test('login page has password visibility toggle button', async ({ page }) => {
+            await page.goto(TEST_URLS.login);
+
+            // Should have the toggle button with aria-label
+            const toggleButton = page.getByRole('button', { name: /show password|hide password/i });
+            await expect(toggleButton).toBeVisible();
+        });
+
+        test('login password toggle reveals and hides password', async ({ page }) => {
+            await page.goto(TEST_URLS.login);
+
+            const passwordField = page.locator('#password');
+            const toggleButton = page.getByRole('button', { name: /show password/i });
+
+            // Fill in a password
+            await passwordField.fill('testpassword123');
+
+            // Initially should be hidden (type="password")
+            await expect(passwordField).toHaveAttribute('type', 'password');
+
+            // Click to reveal password
+            await toggleButton.click();
+
+            // Should now be visible (type="text")
+            await expect(passwordField).toHaveAttribute('type', 'text');
+
+            // Click again to hide
+            const hideButton = page.getByRole('button', { name: /hide password/i });
+            await hideButton.click();
+
+            // Should be hidden again
+            await expect(passwordField).toHaveAttribute('type', 'password');
+        });
+
+        test('register page has password visibility toggle buttons', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            // Should have toggle buttons for both password fields
+            const toggleButtons = page.getByRole('button', { name: /show password|hide password/i });
+            await expect(toggleButtons).toHaveCount(2);
+        });
+
+        test('register password toggle reveals and hides password', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            const passwordField = page.locator('#password');
+            const confirmPasswordField = page.locator('#confirmPassword');
+
+            // Fill passwords
+            await passwordField.fill('testpassword123');
+            await confirmPasswordField.fill('testpassword123');
+
+            // Both should be hidden initially
+            await expect(passwordField).toHaveAttribute('type', 'password');
+            await expect(confirmPasswordField).toHaveAttribute('type', 'password');
+
+            // Click first toggle (password field)
+            const toggleButtons = page.getByRole('button', { name: /show password/i });
+            await toggleButtons.first().click();
+
+            // First field should be visible, second still hidden
+            await expect(passwordField).toHaveAttribute('type', 'text');
+            await expect(confirmPasswordField).toHaveAttribute('type', 'password');
+
+            // Click second toggle (confirm password field)
+            await toggleButtons.first().click(); // This is now the confirm password toggle
+
+            // Both should be visible now
+            await expect(confirmPasswordField).toHaveAttribute('type', 'text');
+        });
+    });
+
     test.describe('Public Routes Accessibility', () => {
         test('public forms are accessible without authentication', async ({ page }) => {
             // Public day off form
