@@ -123,6 +123,15 @@ test.describe('Authentication Flow Smoke Tests', () => {
             const submitButton = page.getByRole('button', { name: /sign up|register|create|submit/i });
             await expect(submitButton.first()).toBeVisible();
         });
+
+        test('register page has home navigation', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            // Should have a link/button to go back home
+            const homeLink = page.getByRole('link', { name: /home/i })
+                .or(page.getByRole('button', { name: /home/i }));
+            await expect(homeLink.first()).toBeVisible();
+        });
     });
 
     test.describe('Login Form Interaction', () => {

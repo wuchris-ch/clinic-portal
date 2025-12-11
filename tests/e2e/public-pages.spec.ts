@@ -77,6 +77,41 @@ test.describe('Public Pages Smoke Tests', () => {
         await expect(page.locator('body')).toContainText(/walkthrough|guide|how to/i);
     });
 
+    test('walkthrough page has correct header text', async ({ page }) => {
+        await page.goto(TEST_URLS.walkthrough);
+
+        // Header should say "App Walkthrough" not "Dashboard"
+        const heading = page.getByRole('heading', { level: 1, name: /App Walkthrough/i });
+        await expect(heading).toBeVisible();
+    });
+
+    test('tech page loads', async ({ page }) => {
+        await page.goto(TEST_URLS.tech);
+
+        // Page should load without error
+        await expect(page).not.toHaveURL(/error|404/);
+
+        // Should have the main heading
+        const heading = page.getByRole('heading', { level: 1, name: /Under the Hood/i });
+        await expect(heading).toBeVisible();
+    });
+
+    test('tech page has key sections', async ({ page }) => {
+        await page.goto(TEST_URLS.tech);
+
+        // Check for major tech sections
+        await expect(page.getByText(/Core Stack/i)).toBeVisible();
+        await expect(page.getByText(/Database.*Authentication/i)).toBeVisible();
+        await expect(page.getByText(/CI\/CD Pipeline/i)).toBeVisible();
+    });
+
+    test('tech page has back link to walkthrough', async ({ page }) => {
+        await page.goto(TEST_URLS.tech);
+
+        const backLink = page.getByRole('link', { name: /Back to App Walkthrough/i });
+        await expect(backLink).toBeVisible();
+    });
+
     test('public day-off form page loads', async ({ page }) => {
         await page.goto(TEST_URLS.publicDayOff);
 
