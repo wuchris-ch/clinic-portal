@@ -21,11 +21,13 @@ test.describe('Sidebar Navigation Sanity Tests', () => {
 
             // May not have "Quick Forms" label, but should have form links
             const dayOffLink = page.getByRole('link', { name: /day off/i });
+            const vacationLink = page.getByRole('link', { name: /vacation/i });
             const timeClockLink = page.getByRole('link', { name: /time clock/i });
             const overtimeLink = page.getByRole('link', { name: /overtime/i });
 
             // At least some form links should be visible
             const hasFormLinks = await dayOffLink.first().isVisible() ||
+                await vacationLink.first().isVisible() ||
                 await timeClockLink.first().isVisible() ||
                 await overtimeLink.first().isVisible();
 
@@ -51,6 +53,18 @@ test.describe('Sidebar Navigation Sanity Tests', () => {
             if (await overtimeLink.isVisible()) {
                 const href = await overtimeLink.getAttribute('href');
                 expect(href).toMatch(/overtime/);
+            }
+
+            const vacationLink = page.getByRole('link', { name: /vacation/i }).first();
+            if (await vacationLink.isVisible()) {
+                const href = await vacationLink.getAttribute('href');
+                expect(href).toMatch(/vacation/);
+            }
+
+            const sickDayLink = page.getByRole('link', { name: /sick day/i }).first();
+            if (await sickDayLink.isVisible()) {
+                const href = await sickDayLink.getAttribute('href');
+                expect(href).toMatch(/sick-day/);
             }
         });
     });

@@ -17,6 +17,8 @@ export const TEST_URLS = {
     publicDayOff: '/forms/day-off',
     publicTimeClock: '/forms/time-clock',
     publicOvertime: '/forms/overtime',
+    publicVacation: '/forms/vacation',
+    publicSickDay: '/forms/sick-day',
 
     // Auth routes  
     login: '/login',
@@ -27,6 +29,8 @@ export const TEST_URLS = {
     dashboardDayOff: '/dashboard/day-off',
     dashboardTimeClock: '/dashboard/time-clock',
     dashboardOvertime: '/dashboard/overtime',
+    dashboardVacation: '/dashboard/vacation',
+    dashboardSickDay: '/dashboard/sick-day',
     admin: '/admin',
     calendar: '/calendar',
 } as const;
@@ -58,6 +62,13 @@ export const SAMPLE_OVERTIME_DATA = {
     email: 'test@example.com',
     overtimeHours: 2,
     reason: 'Project deadline',
+};
+
+export const SAMPLE_SICK_DAY_DATA = {
+    name: 'Test Employee',
+    email: 'test@example.com',
+    sickDate: new Date().toISOString().split('T')[0],
+    hasDoctorNote: false,
 };
 
 // Helper to check if element is visible

@@ -121,6 +121,40 @@ test.describe('Form Smoke Tests', () => {
         });
     });
 
+    test.describe('Public Vacation Form', () => {
+        test('form has all required fields', async ({ page }) => {
+            await page.goto(TEST_URLS.publicVacation);
+
+            // Name field
+            await expect(page.getByLabel(/full name|your name|name/i).first()).toBeVisible();
+
+            // Email field
+            await expect(page.getByLabel(/email/i).first()).toBeVisible();
+
+            // Submission date (button)
+            // (button text is a formatted date, so assert the label exists instead)
+            await expect(page.getByText(/today's date/i).first()).toBeVisible();
+
+            // Vacation date buttons
+            const startDateButton = page.getByRole('button', { name: /start date/i }).first();
+            const endDateButton = page.getByRole('button', { name: /end date/i }).first();
+            await expect(startDateButton).toBeVisible();
+            await expect(endDateButton).toBeVisible();
+
+            // Pay periods checklist (radix checkbox role)
+            const payPeriodsSection = page.getByText(/pay periods affected/i).first();
+            await expect(payPeriodsSection).toBeVisible();
+            const checkboxes = page.getByRole('checkbox');
+            expect(await checkboxes.count()).toBeGreaterThan(0);
+
+            // New helper text
+            await expect(page.getByText(/reply by email,\s*within 72 hours/i).first()).toBeVisible();
+
+            // Submit button text
+            await expect(page.getByRole('button', { name: /^submit request$/i }).first()).toBeVisible();
+        });
+    });
+
     test.describe('Form Loading States', () => {
         test('forms do not show loading state initially', async ({ page }) => {
             await page.goto(TEST_URLS.publicDayOff);
@@ -134,6 +168,79 @@ test.describe('Form Smoke Tests', () => {
             // Check that there's no spinner visible (loading complete)
             const spinner = page.locator('.animate-spin');
             await expect(spinner).toHaveCount(0);
+        });
+    });
+
+    test.describe('Public Sick Day Form', () => {
+        test('form has all required fields', async ({ page }) => {
+            await page.goto(TEST_URLS.publicSickDay);
+
+            // Name field
+            await expect(page.getByLabel(/full name|your name|name/i).first()).toBeVisible();
+
+            // Email field
+            await expect(page.getByLabel(/email/i).first()).toBeVisible();
+
+            // Sick day date picker
+            await expect(page.getByText(/sick day date/i).first()).toBeVisible();
+
+            // Doctor note question
+            await expect(page.getByText(/do you have a doctor note to submit/i).first()).toBeVisible();
+
+            // Yes/No options
+            await expect(page.getByLabel(/yes/i).first()).toBeVisible();
+            await expect(page.getByLabel(/no/i).first()).toBeVisible();
+
+            // Submit button
+            await expect(page.getByRole('button', { name: /submit/i }).first()).toBeVisible();
+        });
+
+        test('form fields are interactive', async ({ page }) => {
+            await page.goto(TEST_URLS.publicSickDay);
+
+            // Find and fill name field
+            const nameInput = page.getByLabel(/full name|your name|name/i).first()
+                .or(page.locator('input[placeholder*="name" i]').first());
+            await nameInput.fill('Sick Employee');
+            await expect(nameInput).toHaveValue('Sick Employee');
+
+            // Find and fill email field
+            const emailInput = page.getByLabel(/email/i).first()
+                .or(page.locator('input[type="email"]').first());
+            await emailInput.fill('sick@example.com');
+            await expect(emailInput).toHaveValue('sick@example.com');
+        });
+
+        test('shows file upload when Yes is selected for doctor note', async ({ page }) => {
+            await page.goto(TEST_URLS.publicSickDay);
+
+            // Click Yes checkbox
+            await page.getByLabel(/yes/i).first().click();
+
+            // File upload zone should appear
+            await expect(page.getByText(/click to upload or drag and drop/i).first()).toBeVisible();
+            await expect(page.getByText(/pdf, jpeg, or png/i).first()).toBeVisible();
+        });
+
+        test('hides file upload when No is selected for doctor note', async ({ page }) => {
+            await page.goto(TEST_URLS.publicSickDay);
+
+            // Click Yes first
+            await page.getByLabel(/yes/i).first().click();
+            await expect(page.getByText(/click to upload or drag and drop/i).first()).toBeVisible();
+
+            // Click No
+            await page.getByLabel(/no/i).first().click();
+
+            // File upload zone should disappear
+            await expect(page.getByText(/click to upload or drag and drop/i)).toHaveCount(0);
+        });
+
+        test('has instructions about BC Employment Standards', async ({ page }) => {
+            await page.goto(TEST_URLS.publicSickDay);
+
+            // Check for the BC Employment Standards note
+            await expect(page.getByText(/bc employment standards act/i).first()).toBeVisible();
         });
     });
 });
