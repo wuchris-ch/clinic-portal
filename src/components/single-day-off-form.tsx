@@ -227,9 +227,14 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
                                         <span>
                                             PP{period.period_number} — {format(parseISO(period.start_date), "MMM d")} to {format(parseISO(period.end_date), "MMM d, yyyy")}
                                         </span>
-                                        {period.period_number === 1 && period.t4_year === 2026 && (
+                                        {period.period_number === 1 && period.t4_year && (
                                             <span className="text-xs text-muted-foreground sm:text-sm">
-                                                start of 2026 T4
+                                                start of {period.t4_year} T4
+                                            </span>
+                                        )}
+                                        {period.period_number === 24 && period.t4_year && (
+                                            <span className="text-xs text-muted-foreground sm:text-sm">
+                                                end of {period.t4_year} T4
                                             </span>
                                         )}
                                     </div>
@@ -353,6 +358,10 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
             </div>
 
             {/* Submit */}
+            <p className="text-xs text-muted-foreground text-center">
+                We will reply by email, within 48 hours of your submission. You will receive a reply at
+                the email you entered above.
+            </p>
             <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                     <>

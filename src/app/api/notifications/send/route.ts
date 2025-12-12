@@ -73,6 +73,94 @@ export async function POST(request: Request) {
     const transporter = getMailTransporter();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+    // Handle vacation request notifications (sent to admins) - logs to a separate Sheet tab
+    if (type === "vacation_request") {
+      const {
+        requestId,
+        employeeName,
+        employeeEmail,
+        startDate,
+        endDate,
+        totalDays,
+        submissionDate,
+        payPeriodLabel,
+        coverageName,
+        coverageEmail,
+        notes,
+      } = body;
+
+      // Log to Google Sheets FIRST (before email check)
+      try {
+        const pst = getPSTDateTime();
+        await appendRowToSheet(
+          [
+            submissionDate || pst.date,            // A: Submission Date (PST)
+            pst.time,                              // B: Time of Day (PST)
+            pst.dayOfWeek,                         // C: Day of Week
+            "Vacation Request",                    // D: Type
+            employeeName,                          // E: Name
+            employeeEmail,                         // F: Email
+            startDate,                             // G: Vacation Start Date
+            endDate,                               // H: Vacation End Date
+            totalDays?.toString() || "0",          // I: Weekdays Count (Mon-Fri)
+            payPeriodLabel || "N/A",               // J: Pay Periods (selected)
+            coverageName || "N/A",                 // K: Coverage Name
+            coverageEmail || "N/A",                // L: Coverage Email
+            notes || "N/A",                        // M: Notes
+          ],
+          "Vacation Request"
+        );
+        console.log("Vacation request logged to Google Sheets");
+      } catch (sheetError) {
+        console.error("Failed to log vacation request to Sheets:", sheetError);
+      }
+
+      // Get notification recipients from database (with env var fallback)
+      const notifyEmailsList = await getNotificationRecipients();
+      if (notifyEmailsList.length === 0 || !transporter) {
+        console.log(
+          !transporter
+            ? "Gmail not configured, skipping email (Sheets logged)"
+            : "No notification recipients configured"
+        );
+        return NextResponse.json({ success: true, emailSent: false });
+      }
+
+      const isSameDay = startDate === endDate;
+
+      const emailHtml = await render(
+        NewRequestEmail({
+          employeeName,
+          employeeEmail,
+          leaveType: "Vacation",
+          startDate,
+          endDate,
+          isSameDay,
+          reason: notes || "Vacation request",
+          totalDays,
+          submissionDate,
+          payPeriodLabel,
+          coverageName,
+          coverageEmail,
+          adminUrl: `${appUrl}/admin`,
+        })
+      );
+
+      const emailResult = await transporter.sendMail({
+        from: `StaffHub <${process.env.GMAIL_USER}>`,
+        to: notifyEmailsList,
+        subject: `New Vacation Request from ${employeeName}`,
+        html: emailHtml,
+      });
+
+      console.log(`Admin notification sent for vacation request ${requestId}`);
+      return NextResponse.json({
+        success: true,
+        emailSent: true,
+        id: emailResult?.messageId,
+      });
+    }
+
     // Handle new request notifications (sent to admins)
     if (type === "new_request") {
       const {
