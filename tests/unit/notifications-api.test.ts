@@ -175,6 +175,40 @@ describe('Notifications API - Gmail Independence', () => {
             expect(data.success).toBe(true);
             expect(data.emailSent).toBe(false);
         });
+
+        it('should call appendRowToSheet for vacation_request into Vacation Request sheet even without Gmail', async () => {
+            const { POST } = await import('@/app/api/notifications/send/route');
+
+            const request = new Request('http://localhost/api/notifications/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'vacation_request',
+                    requestId: 'vac-123',
+                    employeeName: 'John Doe',
+                    employeeEmail: 'john@example.com',
+                    startDate: '2026-01-02',
+                    endDate: '2026-01-10',
+                    totalDays: 6,
+                    submissionDate: '2025-12-11',
+                    payPeriodLabel: 'PP1 (ending 2025-12-31); PP2 (ending 2026-01-15)',
+                    coverageName: 'Jane Smith',
+                    coverageEmail: 'jane@example.com',
+                    notes: 'Booked flights',
+                }),
+            });
+
+            const response = await POST(request);
+            const data = await response.json();
+
+            expect(mockAppendRowToSheet).toHaveBeenCalled();
+            expect(mockAppendRowToSheet).toHaveBeenCalledWith(
+                expect.arrayContaining(['Vacation Request']),
+                'Vacation Request'
+            );
+            expect(data.success).toBe(true);
+            expect(data.emailSent).toBe(false);
+        });
     });
 
     describe('Regression guard: API should NOT have early return blocking Sheets', () => {

@@ -143,9 +143,21 @@ export function TimeClockRequestForm({ payPeriods = [], userEmail, userName }: T
                         <SelectContent>
                             {payPeriods.map((period) => (
                                 <SelectItem key={period.id} value={period.id}>
-                                    <span>
-                                        PP{period.period_number} — {format(parseISO(period.start_date), "MMM d")} to {format(parseISO(period.end_date), "MMM d, yyyy")}
-                                    </span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                        <span>
+                                            PP{period.period_number} — {format(parseISO(period.start_date), "MMM d")} to {format(parseISO(period.end_date), "MMM d, yyyy")}
+                                        </span>
+                                        {period.period_number === 1 && period.t4_year && (
+                                            <span className="text-xs text-muted-foreground sm:text-sm">
+                                                start of {period.t4_year} T4
+                                            </span>
+                                        )}
+                                        {period.period_number === 24 && period.t4_year && (
+                                            <span className="text-xs text-muted-foreground sm:text-sm">
+                                                end of {period.t4_year} T4
+                                            </span>
+                                        )}
+                                    </div>
                                 </SelectItem>
                             ))}
                         </SelectContent>

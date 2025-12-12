@@ -15,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,6 +24,7 @@ import {
   CalendarOff,
   Clock,
   Timer,
+  Thermometer,
   Shield,
   Users,
   LogOut,
@@ -30,6 +32,7 @@ import {
   Megaphone,
   FileText,
   BookOpen,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -69,6 +72,11 @@ const quickFormItems = [
     icon: CalendarOff,
   },
   {
+    title: "Vacation Request",
+    url: "/forms/vacation",
+    icon: Calendar,
+  },
+  {
     title: "Time Clock Request",
     url: "/forms/time-clock",
     icon: Clock,
@@ -78,6 +86,11 @@ const quickFormItems = [
     url: "/forms/overtime",
     icon: Timer,
   },
+  {
+    title: "Sick Day Submission",
+    url: "/forms/sick-day",
+    icon: Thermometer,
+  },
 ];
 
 const staffNavItems = [
@@ -85,6 +98,11 @@ const staffNavItems = [
     title: "Request 1 Day Off",
     url: "/dashboard/day-off",
     icon: CalendarOff,
+  },
+  {
+    title: "Vacation Request",
+    url: "/dashboard/vacation",
+    icon: Calendar,
   },
   {
     title: "Time Clock Request",
@@ -97,9 +115,14 @@ const staffNavItems = [
     icon: Timer,
   },
   {
+    title: "Sick Day Submission",
+    url: "/dashboard/sick-day",
+    icon: Thermometer,
+  },
+  {
     title: "Team Calendar",
     url: "/calendar",
-    icon: Calendar,
+    icon: CalendarDays,
   },
 ];
 
@@ -121,6 +144,14 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === "admin";
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  // Close sidebar on mobile after navigation
+  const closeSidebarOnMobile = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -138,13 +169,21 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border relative">
+        {/* Mobile close button */}
+        <button
+          onClick={closeSidebarOnMobile}
+          className="absolute top-3 right-3 p-1.5 rounded-md hover:bg-sidebar-accent transition-colors md:hidden"
+          aria-label="Close sidebar"
+        >
+          <X className="w-5 h-5 text-muted-foreground" />
+        </button>
         <a
           href="https://clinic-portal-three.vercel.app/"
           className="flex items-center gap-3 px-2 py-3 hover:bg-sidebar-accent rounded-lg transition-colors"
         >
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <CalendarDays className="w-5 h-5 text-primary" />
+            <CalendarDays className="w-5 h-5 text-primary" suppressHydrationWarning />
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-lg">StaffHub</span>
@@ -163,8 +202,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                     asChild
                     isActive={pathname === item.url}
                   >
-                    <Link href={item.url}>
-                      <item.icon className="w-4 h-4" />
+                    <Link href={item.url} onClick={closeSidebarOnMobile}>
+                      <item.icon className="w-4 h-4" suppressHydrationWarning />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -186,8 +225,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                       asChild
                       isActive={pathname === item.url}
                     >
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                      <Link href={item.url} onClick={closeSidebarOnMobile}>
+                        <item.icon className="w-4 h-4" suppressHydrationWarning />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -209,8 +248,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                       asChild
                       isActive={pathname === item.url}
                     >
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                      <Link href={item.url} onClick={closeSidebarOnMobile}>
+                        <item.icon className="w-4 h-4" suppressHydrationWarning />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -232,8 +271,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
                       asChild
                       isActive={pathname === item.url}
                     >
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4" />
+                      <Link href={item.url} onClick={closeSidebarOnMobile}>
+                        <item.icon className="w-4 h-4" suppressHydrationWarning />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -276,7 +315,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           ) : (
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href="/login">
+                <Link href="/login" onClick={closeSidebarOnMobile}>
                   <LogOut className="w-4 h-4" />
                   <span>Sign In</span>
                 </Link>

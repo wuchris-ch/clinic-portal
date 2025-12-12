@@ -28,10 +28,21 @@ const pageTitles: Record<string, string> = {
   "/announcements": "Announcements",
   "/documentation": "Documentation",
   "/walkthrough": "App Walkthrough",
-  "/dashboard": "Dashboard",
   "/calendar": "Team Calendar",
   "/admin": "Admin Dashboard",
   "/admin/employees": "Manage Staff",
+  // Public forms
+  "/forms/day-off": "Request 1 Day Off",
+  "/forms/vacation": "Vacation Request",
+  "/forms/time-clock": "Time Clock Request",
+  "/forms/overtime": "Overtime Submission",
+  "/forms/sick-day": "Sick Day Submission",
+  // Authenticated forms (dashboard)
+  "/dashboard/day-off": "Request 1 Day Off",
+  "/dashboard/vacation": "Vacation Request",
+  "/dashboard/time-clock": "Time Clock Request",
+  "/dashboard/overtime": "Overtime Submission",
+  "/dashboard/sick-day": "Sick Day Submission",
 };
 
 export function AppHeader({ user, profile }: AppHeaderProps) {
