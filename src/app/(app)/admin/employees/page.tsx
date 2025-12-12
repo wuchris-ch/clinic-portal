@@ -26,7 +26,7 @@ export default async function EmployeesPage() {
   const profile = profileData as Profile | null;
 
   if (!profile || profile.role !== "admin") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Fetch all employees with their request counts

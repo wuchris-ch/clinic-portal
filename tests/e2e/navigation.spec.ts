@@ -53,6 +53,28 @@ test.describe('Navigation Smoke Tests', () => {
             // Should navigate to overtime form
             await expect(page).toHaveURL(/forms\/overtime|overtime/);
         });
+
+        test('vacation card links to public form', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
+
+            // Find and click vacation link
+            const vacationLink = page.getByRole('link', { name: /vacation/i }).first();
+            await vacationLink.click();
+
+            // Should navigate to vacation form
+            await expect(page).toHaveURL(/forms\/vacation|vacation/);
+        });
+
+        test('sick day card links to public form', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
+
+            // Find and click sick day link
+            const sickDayLink = page.getByRole('link', { name: /sick day/i }).first();
+            await sickDayLink.click();
+
+            // Should navigate to sick day form
+            await expect(page).toHaveURL(/forms\/sick-day|sick-day/);
+        });
     });
 
     test.describe('Login Page Navigation', () => {

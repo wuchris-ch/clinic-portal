@@ -34,7 +34,7 @@ export default async function AdminPage() {
   const profile = profileData as Profile | null;
 
   if (!profile || profile.role !== "admin") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   // Fetch all leave requests with user profiles
@@ -153,9 +153,9 @@ export default async function AdminPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <NotificationRecipients 
-            recipients={notificationRecipients} 
-            adminId={user.id} 
+          <NotificationRecipients
+            recipients={notificationRecipients}
+            adminId={user.id}
           />
         </CardContent>
       </Card>
