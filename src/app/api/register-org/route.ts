@@ -19,15 +19,6 @@ function generateSlug(name: string): string {
 }
 
 export async function POST(request: NextRequest) {
-    // Debug: Log env var status (not values)
-    console.log('ENV CHECK:', {
-        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        urlStart: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30),
-        hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-        keyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length,
-        keyEnd: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(-10),
-    });
-
     try {
         const body = await request.json();
         const { organizationName, adminName, adminEmail, password } = body;

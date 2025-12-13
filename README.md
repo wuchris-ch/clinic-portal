@@ -286,6 +286,7 @@ src/
 - `leave_requests` - Time-off requests
 - `leave_request_dates` - Individual dates per request
 - `leave_types` - Request types (Vacation, Sick, etc.)
+- `pay_periods` - T4 year pay periods (reference data, easy to delete/augment via SQL)
 - `announcements` - Org announcements
 - `notification_recipients` - Email settings
 
