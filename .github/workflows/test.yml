@@ -8,10 +8,9 @@ on:
 
 env:
   CI: true
-  # Dummy env vars for tests (Google Sheets tests mock these)
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: 'test@test.iam.gserviceaccount.com'
-  GOOGLE_PRIVATE_KEY: 'test-key'
-  GOOGLE_SHEET_ID: 'test-sheet-id'
+  # Google credentials from GitHub Secrets (for Google Sheets integration tests)
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+  GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
   # Supabase will be set up locally per job (see setup-supabase step)
 
 jobs:
@@ -79,6 +78,8 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" > .env.local
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> .env.local
           echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_KEY" >> .env.local
+          echo "GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL" >> .env.local
+          echo "GOOGLE_PRIVATE_KEY=$GOOGLE_PRIVATE_KEY" >> .env.local
 
           # Also set for this workflow (for auth.setup.ts)
           echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
