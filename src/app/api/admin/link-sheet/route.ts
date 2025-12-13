@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
-// Service role client for admin operations
-const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-);
+function getSupabaseAdmin() {
+    return createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Update the organization with the new sheet ID
+        const supabaseAdmin = getSupabaseAdmin();
         const { error: updateError } = await supabaseAdmin
             .from("organizations")
             .update({ google_sheet_id: sheetId })
