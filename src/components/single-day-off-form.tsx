@@ -60,7 +60,9 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!leaveTypeId || !selectedPayPeriodId || !submissionDate || !dayOffDate || !reason || !name || !email) {
+        // Pay period is only required if pay periods are available
+        const payPeriodRequired = payPeriods.length > 0;
+        if (!leaveTypeId || (payPeriodRequired && !selectedPayPeriodId) || !submissionDate || !dayOffDate || !reason || !name || !email) {
             toast.error("Please fill in all required fields");
             return;
         }
@@ -79,7 +81,7 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
                     .insert({
                         user_id: userId,
                         leave_type_id: leaveTypeId,
-                        pay_period_id: selectedPayPeriodId,
+                        pay_period_id: selectedPayPeriodId || null,
                         organization_id: organizationId,
                         submission_date: format(submissionDate, "yyyy-MM-dd"),
                         start_date: format(dayOffDate, "yyyy-MM-dd"),

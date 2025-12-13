@@ -105,7 +105,8 @@ export function VacationRequestForm({
       return;
     }
 
-    if (selectedPayPeriodIds.length === 0) {
+    // Pay periods are only required if pay periods are available
+    if (payPeriods.length > 0 && selectedPayPeriodIds.length === 0) {
       toast.error("Please select the pay periods affected by your vacation");
       return;
     }
