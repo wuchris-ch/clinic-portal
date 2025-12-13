@@ -76,8 +76,30 @@ test.describe('Admin Settings - Authenticated', () => {
 
 test.describe('Admin Settings - Google Sheets Integration', () => {
 
+    // Helper to scroll to and expand the link sheet section
+    async function scrollToLinkSheetSection(page: import('@playwright/test').Page) {
+        // Scroll to Organization Settings first
+        const orgSettings = page.getByText('Organization Settings').first();
+        await orgSettings.scrollIntoViewIfNeeded();
+
+        // Find and expand the link sheet section
+        const linkSection = page.getByText(/link your google sheet/i);
+        await linkSection.scrollIntoViewIfNeeded();
+
+        // Click to expand if it's a summary element (details might be collapsed)
+        const details = page.locator('details:has-text("Link your Google Sheet")');
+        const isOpen = await details.getAttribute('open');
+        if (isOpen === null) {
+            await linkSection.click();
+        }
+    }
+
     test('admin can see Google Sheets Integration section', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
+
+        // Scroll to Organization Settings
+        const orgSettings = page.getByText('Organization Settings').first();
+        await orgSettings.scrollIntoViewIfNeeded();
 
         // Should see Google Sheets Integration label
         await expect(page.getByText(/google sheets integration/i)).toBeVisible();
@@ -85,13 +107,7 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
     test('admin can expand link sheet section', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        // Click to expand link sheet section (it might already be open)
-        const linkSection = page.getByText(/link your google sheet/i);
-
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         // Should see step-by-step instructions
         await expect(page.getByText(/create a google sheet/i)).toBeVisible();
@@ -100,12 +116,7 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
     test('Test Connection button is disabled when input is empty', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        // Expand the link sheet section if needed
-        const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         const testButton = page.getByRole('button', { name: /test connection/i });
         await expect(testButton).toBeDisabled();
@@ -113,12 +124,7 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
     test('Test Connection button enables when sheet ID is entered', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        // Expand the link sheet section if needed
-        const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         // Enter a sheet URL
         const sheetInput = page.locator('#sheetIdInput');
@@ -131,12 +137,7 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
     test('Link Sheet button remains disabled until connection test succeeds', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        // Expand the link sheet section if needed
-        const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         // Enter a sheet URL
         const sheetInput = page.locator('#sheetIdInput');
@@ -149,12 +150,7 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
     test('shows error for invalid sheet connection', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        // Expand the link sheet section if needed
-        const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         // Enter an invalid sheet ID
         const sheetInput = page.locator('#sheetIdInput');
@@ -179,13 +175,24 @@ test.describe('Admin Settings - Google Sheets Integration', () => {
 
 test.describe('Admin Settings - Sheet Input Parsing', () => {
 
-    test('accepts full Google Sheets URL', async ({ page }) => {
-        await page.goto(TEST_ORG_URLS.admin);
+    // Helper to scroll to and expand the link sheet section
+    async function scrollToLinkSheetSection(page: import('@playwright/test').Page) {
+        const orgSettings = page.getByText('Organization Settings').first();
+        await orgSettings.scrollIntoViewIfNeeded();
 
         const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
+        await linkSection.scrollIntoViewIfNeeded();
+
+        const details = page.locator('details:has-text("Link your Google Sheet")');
+        const isOpen = await details.getAttribute('open');
+        if (isOpen === null) {
             await linkSection.click();
         }
+    }
+
+    test('accepts full Google Sheets URL', async ({ page }) => {
+        await page.goto(TEST_ORG_URLS.admin);
+        await scrollToLinkSheetSection(page);
 
         const sheetInput = page.locator('#sheetIdInput');
         const fullUrl = 'https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit#gid=0';
@@ -200,11 +207,7 @@ test.describe('Admin Settings - Sheet Input Parsing', () => {
 
     test('accepts raw sheet ID', async ({ page }) => {
         await page.goto(TEST_ORG_URLS.admin);
-
-        const linkSection = page.getByText(/link your google sheet/i);
-        if (await linkSection.isVisible()) {
-            await linkSection.click();
-        }
+        await scrollToLinkSheetSection(page);
 
         const sheetInput = page.locator('#sheetIdInput');
         const rawId = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms';
