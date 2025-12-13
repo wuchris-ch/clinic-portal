@@ -17,6 +17,7 @@
 /playwright/.cache/
 tests/node_modules/
 tests/.auth/*.json
+scripts/test-login-info.md
 
 # next.js
 /.next/
@@ -47,3 +48,6 @@ next-env.d.ts
 
 # IDE
 .cursor
+.claude
+.agent/rules/
+CLAUDE.md

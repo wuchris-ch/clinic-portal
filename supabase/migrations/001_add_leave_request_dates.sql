@@ -28,7 +28,8 @@ CREATE INDEX IF NOT EXISTS idx_leave_request_dates_date ON leave_request_dates(d
 -- Enable RLS
 ALTER TABLE leave_request_dates ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+-- RLS Policies (drop first to make migration idempotent)
+DROP POLICY IF EXISTS "Users can view own request dates" ON leave_request_dates;
 CREATE POLICY "Users can view own request dates" ON leave_request_dates
   FOR SELECT USING (
     EXISTS (
@@ -36,6 +37,7 @@ CREATE POLICY "Users can view own request dates" ON leave_request_dates
     )
   );
 
+DROP POLICY IF EXISTS "Users can view approved request dates for calendar" ON leave_request_dates;
 CREATE POLICY "Users can view approved request dates for calendar" ON leave_request_dates
   FOR SELECT USING (
     EXISTS (
@@ -43,6 +45,7 @@ CREATE POLICY "Users can view approved request dates for calendar" ON leave_requ
     )
   );
 
+DROP POLICY IF EXISTS "Admins can view all request dates" ON leave_request_dates;
 CREATE POLICY "Admins can view all request dates" ON leave_request_dates
   FOR SELECT USING (
     EXISTS (
@@ -50,6 +53,7 @@ CREATE POLICY "Admins can view all request dates" ON leave_request_dates
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert dates for own requests" ON leave_request_dates;
 CREATE POLICY "Users can insert dates for own requests" ON leave_request_dates
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -57,6 +61,7 @@ CREATE POLICY "Users can insert dates for own requests" ON leave_request_dates
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete dates from own pending requests" ON leave_request_dates;
 CREATE POLICY "Users can delete dates from own pending requests" ON leave_request_dates
   FOR DELETE USING (
     EXISTS (

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { render } from "@react-email/components";
 import { ApprovalEmail } from "@/components/emails/approval-email";
 import { DenialEmail } from "@/components/emails/denial-email";
@@ -8,7 +8,6 @@ import { NewRequestEmail } from "@/components/emails/new-request-email";
 import { TimeClockRequestEmail } from "@/components/emails/time-clock-request-email";
 import { OvertimeRequestEmail } from "@/components/emails/overtime-request-email";
 import { appendRowToSheet } from "@/lib/google-sheets";
-import { format } from "date-fns";
 import { getPSTDateTime } from "@/lib/utils";
 
 function getMailTransporter() {
@@ -26,27 +25,30 @@ function getMailTransporter() {
 
 
 
-// Get notification recipients from database, falling back to env var
-async function getNotificationRecipients(): Promise<string[]> {
+// Get notification recipients from database for a specific organization
+// Uses service client to bypass RLS (API route may not have user session)
+async function getNotificationRecipients(organizationId?: string): Promise<string[]> {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    let query = (supabase as any)
       .from("notification_recipients")
       .select("email")
       .eq("is_active", true);
+
+    // Filter by organization if provided
+    if (organizationId) {
+      query = query.eq("organization_id", organizationId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching notification recipients:", error);
       // Fall back to env var if database query fails
       const envEmails = process.env.NOTIFY_EMAILS;
       return envEmails ? envEmails.split(",").map((e) => e.trim()) : [];
-    }
-
-    // If we have recipients in DB, use those
-    if (data && data.length > 0) {
-      return data.map((r: { email: string }) => r.email);
     }
 
     // If we have recipients in DB, use those
@@ -87,6 +89,8 @@ export async function POST(request: Request) {
         coverageName,
         coverageEmail,
         notes,
+        googleSheetId, // Optional org-specific sheet ID
+        organizationId, // For filtering notification recipients
       } = body;
 
       // Log to Google Sheets FIRST (before email check)
@@ -108,15 +112,16 @@ export async function POST(request: Request) {
             coverageEmail || "N/A",                // L: Coverage Email
             notes || "N/A",                        // M: Notes
           ],
-          "Vacation Request"
+          "Vacation Requests",
+          googleSheetId // Pass org-specific sheet ID (undefined falls back to global)
         );
         console.log("Vacation request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log vacation request to Sheets:", sheetError);
       }
 
-      // Get notification recipients from database (with env var fallback)
-      const notifyEmailsList = await getNotificationRecipients();
+      // Get notification recipients from database for this org
+      const notifyEmailsList = await getNotificationRecipients(organizationId);
       if (notifyEmailsList.length === 0 || !transporter) {
         console.log(
           !transporter
@@ -176,6 +181,8 @@ export async function POST(request: Request) {
         coverageEmail,
         submissionDate,
         payPeriodLabel,
+        googleSheetId, // Optional org-specific sheet ID
+        organizationId, // For filtering notification recipients
       } = body;
 
       // Log to Google Sheets FIRST (before email check)
@@ -196,14 +203,14 @@ export async function POST(request: Request) {
           payPeriodLabel || "N/A",                              // L: Pay Period
           coverageName || "N/A",                                // M: Coverage Name
           coverageEmail || "N/A"                                // N: Coverage Email
-        ], "Leave Requests");
-        console.log("Leave request logged to Google Sheets");
+        ], "Day Off Requests", googleSheetId);
+        console.log("Day off request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log leave request to Sheets:", sheetError);
       }
 
-      // Get notification recipients from database (with env var fallback)
-      const notifyEmailsList = await getNotificationRecipients();
+      // Get notification recipients from database for this org
+      const notifyEmailsList = await getNotificationRecipients(organizationId);
       if (notifyEmailsList.length === 0 || !transporter) {
         console.log(!transporter
           ? "Gmail not configured, skipping email (Sheets logged)"
@@ -254,6 +261,8 @@ export async function POST(request: Request) {
         clockOutDate,
         clockOutTime,
         clockOutReason,
+        googleSheetId,
+        organizationId,
       } = body;
 
       // Log to Google Sheets FIRST (before email check)
@@ -274,13 +283,13 @@ export async function POST(request: Request) {
           clockInReason || "",          // I: Reason In
           clockOutReason || "",         // J: Reason Out
           payPeriodLabel || "N/A"       // K: Pay Period
-        ], "Time Clock");
+        ], "Time Clock Adjustments", googleSheetId);
         console.log("Time clock request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log time clock to Sheets:", sheetError);
       }
 
-      const notifyEmailsList = await getNotificationRecipients();
+      const notifyEmailsList = await getNotificationRecipients(organizationId);
       if (notifyEmailsList.length === 0 || !transporter) {
         console.log(!transporter
           ? "Gmail not configured, skipping email (Sheets logged)"
@@ -322,6 +331,8 @@ export async function POST(request: Request) {
         overtimeDate,
         askedDoctor,
         seniorStaffName,
+        googleSheetId,
+        organizationId,
       } = body;
 
       // Log to Google Sheets FIRST (before email check)
@@ -338,13 +349,13 @@ export async function POST(request: Request) {
           askedDoctor ? "Yes" : "No",   // H: Asked Doctor
           seniorStaffName || "N/A",     // I: Senior Staff
           payPeriodLabel || "N/A"       // J: Pay Period
-        ], "Overtime");
+        ], "Overtime Requests", googleSheetId);
         console.log("Overtime request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log overtime to Sheets:", sheetError);
       }
 
-      const notifyEmailsList = await getNotificationRecipients();
+      const notifyEmailsList = await getNotificationRecipients(organizationId);
       if (notifyEmailsList.length === 0 || !transporter) {
         console.log(!transporter
           ? "Gmail not configured, skipping email (Sheets logged)"
@@ -386,8 +397,8 @@ export async function POST(request: Request) {
       adminNotes,
     } = body;
 
-    // Log notification to database
-    const supabase = await createClient();
+    // Log notification to database (use service client - RLS requires service_role for insert)
+    const supabase = await createServiceClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).from("notifications").insert({
       user_id: userId,

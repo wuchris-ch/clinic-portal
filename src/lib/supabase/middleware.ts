@@ -41,19 +41,26 @@ export async function updateSession(request: NextRequest) {
 
   const url = request.nextUrl.clone();
   const isAuthRoute =
-    url.pathname.startsWith("/login") || url.pathname.startsWith("/register");
-  const isProtectedRoute =
+    url.pathname.startsWith("/login") ||
+    url.pathname.startsWith("/register") ||
+    url.pathname.startsWith("/register-org");
+
+  // Protected routes: /org/[slug]/* paths for org-scoped authenticated pages
+  const isOrgRoute = url.pathname.startsWith("/org/");
+
+  // Legacy protected routes (keep for backwards compatibility during transition)
+  const isLegacyProtectedRoute =
     url.pathname.startsWith("/dashboard") ||
     url.pathname.startsWith("/admin") ||
     url.pathname.startsWith("/calendar");
 
-  // Redirect unauthenticated users to login
-  if (!user && isProtectedRoute) {
+  // Redirect unauthenticated users away from protected routes
+  if (!user && (isOrgRoute || isLegacyProtectedRoute)) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages (to home, they'll navigate to their org)
   if (user && isAuthRoute) {
     url.pathname = "/";
     return NextResponse.redirect(url);
@@ -61,4 +68,5 @@ export async function updateSession(request: NextRequest) {
 
   return supabaseResponse;
 }
+
 

@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { TEST_URLS } from '../setup';
+import { TEST_URLS, TEST_ORG_URLS } from '../setup';
 
 /**
  * Smoke Tests: Authentication Flow
- * 
+ *
  * These tests verify authentication-related functionality:
  * - Protected routes redirect to login
  * - Login page renders correctly
@@ -12,43 +12,65 @@ import { TEST_URLS } from '../setup';
 
 test.describe('Authentication Flow Smoke Tests', () => {
 
-    test.describe('Protected Route Redirects', () => {
-        test('dashboard redirects unauthenticated users to login', async ({ page }) => {
-            // Try to access dashboard without auth
-            await page.goto(TEST_URLS.dashboard);
+    test.describe('Org-Scoped Protected Route Redirects', () => {
+        test('org dashboard redirects unauthenticated users to login', async ({ page }) => {
+            // Try to access org dashboard without auth
+            await page.goto(TEST_ORG_URLS.dashboard);
 
             // Should redirect to login
             await expect(page).toHaveURL(/login/);
         });
 
-        test('admin page redirects unauthenticated users to login', async ({ page }) => {
-            // Try to access admin without auth
-            await page.goto(TEST_URLS.admin);
+        test('org admin page redirects unauthenticated users to login', async ({ page }) => {
+            // Try to access org admin without auth
+            await page.goto(TEST_ORG_URLS.admin);
 
             // Should redirect to login
             await expect(page).toHaveURL(/login/);
         });
 
-        test('calendar page redirects unauthenticated users to login', async ({ page }) => {
-            // Try to access calendar without auth
-            await page.goto(TEST_URLS.calendar);
+        test('org calendar page redirects unauthenticated users to login', async ({ page }) => {
+            // Try to access org calendar without auth
+            await page.goto(TEST_ORG_URLS.calendar);
 
             // Should redirect to login
             await expect(page).toHaveURL(/login/);
         });
 
-        test('dashboard day-off form redirects unauthenticated users', async ({ page }) => {
-            await page.goto(TEST_URLS.dashboardDayOff);
+        test('org dashboard day-off form redirects unauthenticated users', async ({ page }) => {
+            await page.goto(TEST_ORG_URLS.dashboardDayOff);
             await expect(page).toHaveURL(/login/);
         });
 
-        test('dashboard time-clock form redirects unauthenticated users', async ({ page }) => {
-            await page.goto(TEST_URLS.dashboardTimeClock);
+        test('org dashboard time-clock form redirects unauthenticated users', async ({ page }) => {
+            await page.goto(TEST_ORG_URLS.dashboardTimeClock);
             await expect(page).toHaveURL(/login/);
         });
 
-        test('dashboard overtime form redirects unauthenticated users', async ({ page }) => {
-            await page.goto(TEST_URLS.dashboardOvertime);
+        test('org dashboard overtime form redirects unauthenticated users', async ({ page }) => {
+            await page.goto(TEST_ORG_URLS.dashboardOvertime);
+            await expect(page).toHaveURL(/login/);
+        });
+
+        test('org dashboard vacation form redirects unauthenticated users', async ({ page }) => {
+            await page.goto(TEST_ORG_URLS.dashboardVacation);
+            await expect(page).toHaveURL(/login/);
+        });
+    });
+
+    test.describe('Legacy Protected Route Redirects', () => {
+        test('legacy dashboard redirects unauthenticated users to login', async ({ page }) => {
+            await page.goto(TEST_URLS.legacyDashboard);
+            await expect(page).toHaveURL(/login/);
+        });
+
+        test('legacy admin page redirects unauthenticated users to login', async ({ page }) => {
+            await page.goto(TEST_URLS.legacyAdmin);
+            await expect(page).toHaveURL(/login/);
+        });
+
+        test('legacy calendar page redirects unauthenticated users to login', async ({ page }) => {
+            await page.goto(TEST_URLS.legacyCalendar);
             await expect(page).toHaveURL(/login/);
         });
     });
@@ -99,12 +121,16 @@ test.describe('Authentication Flow Smoke Tests', () => {
             await page.goto(TEST_URLS.register);
 
             // Should have form content
-            const pageContent = page.getByText(/create|sign up|register|join|staffhub/i);
+            const pageContent = page.getByText(/create|sign up|register|join|staffhub|organization/i);
             await expect(pageContent.first()).toBeVisible();
         });
 
         test('register form has all required fields', async ({ page }) => {
             await page.goto(TEST_URLS.register);
+
+            // Organization name field (multi-tenancy)
+            const orgField = page.getByLabel(/organization/i).first();
+            await expect(orgField).toBeVisible();
 
             // Email field
             const emailField = page.getByLabel(/email/i)
@@ -120,7 +146,7 @@ test.describe('Authentication Flow Smoke Tests', () => {
         test('register form has submit button', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
-            const submitButton = page.getByRole('button', { name: /sign up|register|create|submit/i });
+            const submitButton = page.getByRole('button', { name: /join organization|sign up|register|create|submit/i });
             await expect(submitButton.first()).toBeVisible();
         });
 
@@ -131,6 +157,69 @@ test.describe('Authentication Flow Smoke Tests', () => {
             const homeLink = page.getByRole('link', { name: /home/i })
                 .or(page.getByRole('button', { name: /home/i }));
             await expect(homeLink.first()).toBeVisible();
+        });
+
+        test('register page has link to org registration', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            // Should have link to register an organization
+            const orgRegLink = page.getByRole('link', { name: /register your organization|clinic administrator/i });
+            await expect(orgRegLink.first()).toBeVisible();
+        });
+
+        test('org registration link navigates to register-org page', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            const orgRegLink = page.getByRole('link', { name: /register your organization|clinic administrator/i }).first();
+            await orgRegLink.click();
+
+            await expect(page).toHaveURL(/register-org/);
+        });
+    });
+
+    test.describe('Organization Registration Page Structure', () => {
+        test('register-org page renders correctly', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            // Should have form content
+            const pageContent = page.getByText(/register|organization|clinic|staffhub/i);
+            await expect(pageContent.first()).toBeVisible();
+        });
+
+        test('register-org form has all required fields', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            // Organization name
+            const orgNameField = page.getByLabel(/organization.*name|clinic.*name/i);
+            await expect(orgNameField.first()).toBeVisible();
+
+            // Admin name
+            const adminNameField = page.getByLabel(/your name|admin/i);
+            await expect(adminNameField.first()).toBeVisible();
+
+            // Email field
+            const emailField = page.getByLabel(/email/i)
+                .or(page.locator('input[type="email"]'));
+            await expect(emailField.first()).toBeVisible();
+
+            // Password fields
+            const passwordFields = page.locator('input[type="password"]');
+            await expect(passwordFields).toHaveCount(2); // Password and confirm password
+        });
+
+        test('register-org form has submit button', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            const submitButton = page.getByRole('button', { name: /create organization|register/i });
+            await expect(submitButton.first()).toBeVisible();
+        });
+
+        test('register-org page has link to staff registration', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            // Should have link to join existing org as staff
+            const staffRegLink = page.getByRole('link', { name: /join.*existing|register as staff/i });
+            await expect(staffRegLink.first()).toBeVisible();
         });
     });
 
@@ -258,29 +347,30 @@ test.describe('Authentication Flow Smoke Tests', () => {
     });
 
     test.describe('Public Routes Accessibility', () => {
-        test('public forms are accessible without authentication', async ({ page }) => {
-            // Public day off form
-            await page.goto(TEST_URLS.publicDayOff);
-            await expect(page).not.toHaveURL(/login/);
-
-            // Public time clock form
-            await page.goto(TEST_URLS.publicTimeClock);
-            await expect(page).not.toHaveURL(/login/);
-
-            // Public overtime form
-            await page.goto(TEST_URLS.publicOvertime);
-            await expect(page).not.toHaveURL(/login/);
-        });
-
         test('homepage is accessible without authentication', async ({ page }) => {
             await page.goto(TEST_URLS.home);
             await expect(page).not.toHaveURL(/login/);
             await expect(page).toHaveURL('/');
         });
 
-        test('announcements page is accessible without authentication', async ({ page }) => {
-            await page.goto(TEST_URLS.announcements);
+        test('documentation page is accessible without authentication', async ({ page }) => {
+            await page.goto(TEST_URLS.documentation);
             await expect(page).not.toHaveURL(/login/);
+        });
+
+        test('login page is accessible without authentication', async ({ page }) => {
+            await page.goto(TEST_URLS.login);
+            await expect(page).toHaveURL(/login/);
+        });
+
+        test('register page is accessible without authentication', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+            await expect(page).toHaveURL(/register/);
+        });
+
+        test('register-org page is accessible without authentication', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+            await expect(page).toHaveURL(/register-org/);
         });
     });
 });

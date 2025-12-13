@@ -116,7 +116,8 @@ describe('Sick Day API - FormData Handling', () => {
         expect(mockAppendRowToSheet).toHaveBeenCalled();
         expect(mockAppendRowToSheet).toHaveBeenCalledWith(
             expect.arrayContaining(['John Doe', 'john@example.com']),
-            'Sick Days'
+            'Sick Days',
+            undefined // googleSheetId
         );
         expect(data.success).toBe(true);
         expect(data.emailSent).toBe(false);
@@ -203,7 +204,8 @@ describe('Sick Day API - FormData Handling', () => {
             expect.arrayContaining([
                 expect.stringContaining('supabase.co') // The mock URL
             ]),
-            'Sick Days'
+            'Sick Days',
+            undefined // googleSheetId
         );
     });
 
@@ -237,7 +239,8 @@ describe('Sick Day API - FormData Handling', () => {
         // Should still log to sheets with N/A for the link
         expect(mockAppendRowToSheet).toHaveBeenCalledWith(
             expect.arrayContaining(['N/A']),
-            'Sick Days'
+            'Sick Days',
+            undefined // googleSheetId
         );
     });
 });

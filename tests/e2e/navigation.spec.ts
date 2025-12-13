@@ -3,77 +3,52 @@ import { TEST_URLS } from '../setup';
 
 /**
  * Smoke Tests: Navigation
- * 
+ *
  * These tests verify that navigation links work correctly across the application.
+ * Note: Public forms have been removed in favor of org-scoped authenticated forms.
  */
 
 test.describe('Navigation Smoke Tests', () => {
 
     test.describe('Homepage Navigation', () => {
-        test('announcements card links to announcements page', async ({ page }) => {
+        test('homepage loads correctly', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Find and click announcements link
-            const announcementsLink = page.getByRole('link', { name: /announcements/i }).first();
-            await announcementsLink.click();
-
-            // Should navigate to announcements page
-            await expect(page).toHaveURL(/announcements/);
+            // Should display StaffHub branding
+            await expect(page.getByRole('heading', { name: /staffhub/i })).toBeVisible();
         });
 
-        test('day off card links to public form', async ({ page }) => {
+        test('register org button links to registration page', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Find and click day off link
-            const dayOffLink = page.getByRole('link', { name: /day off|request day/i }).first();
-            await dayOffLink.click();
+            // Find and click register organization link
+            const registerOrgLink = page.getByRole('link', { name: /register organization/i }).first();
+            await registerOrgLink.click();
 
-            // Should navigate to day off form
-            await expect(page).toHaveURL(/forms\/day-off|day-off/);
+            // Should navigate to register-org page
+            await expect(page).toHaveURL(/register-org/);
         });
 
-        test('time clock card links to public form', async ({ page }) => {
+        test('sign in link navigates to login', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Find and click time clock link
-            const timeClockLink = page.getByRole('link', { name: /time clock/i }).first();
-            await timeClockLink.click();
+            // Find and click sign in link
+            const signInLink = page.getByRole('link', { name: /sign in/i }).first();
+            await signInLink.click();
 
-            // Should navigate to time clock form
-            await expect(page).toHaveURL(/forms\/time-clock|time-clock/);
+            // Should navigate to login page
+            await expect(page).toHaveURL(/login/);
         });
 
-        test('overtime card links to public form', async ({ page }) => {
+        test('staff registration link navigates to register', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Find and click overtime link
-            const overtimeLink = page.getByRole('link', { name: /overtime/i }).first();
-            await overtimeLink.click();
+            // Find and click staff registration link
+            const staffLink = page.getByRole('link', { name: /register as staff/i }).first();
+            await staffLink.click();
 
-            // Should navigate to overtime form
-            await expect(page).toHaveURL(/forms\/overtime|overtime/);
-        });
-
-        test('vacation card links to public form', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
-
-            // Find and click vacation link
-            const vacationLink = page.getByRole('link', { name: /vacation/i }).first();
-            await vacationLink.click();
-
-            // Should navigate to vacation form
-            await expect(page).toHaveURL(/forms\/vacation|vacation/);
-        });
-
-        test('sick day card links to public form', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
-
-            // Find and click sick day link
-            const sickDayLink = page.getByRole('link', { name: /sick day/i }).first();
-            await sickDayLink.click();
-
-            // Should navigate to sick day form
-            await expect(page).toHaveURL(/forms\/sick-day|sick-day/);
+            // Should navigate to register page
+            await expect(page).toHaveURL(/register/);
         });
     });
 
@@ -137,6 +112,55 @@ test.describe('Navigation Smoke Tests', () => {
 
             await expect(page).toHaveURL(/login/);
         });
+
+        test('register page has org registration link', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            const orgLink = page.getByRole('link', { name: /register your organization|clinic administrator/i });
+            await expect(orgLink.first()).toBeVisible();
+        });
+
+        test('org registration link navigates to register-org', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            const orgLink = page.getByRole('link', { name: /register your organization|clinic administrator/i }).first();
+            await orgLink.click();
+
+            await expect(page).toHaveURL(/register-org/);
+        });
+    });
+
+    test.describe('Organization Registration Page Navigation', () => {
+        test('register-org page has login link', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            const loginLink = page.getByRole('link', { name: /sign in|log in|login/i });
+            await expect(loginLink.first()).toBeVisible();
+        });
+
+        test('register-org page has staff registration link', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            const staffLink = page.getByRole('link', { name: /join.*existing|register as staff/i });
+            await expect(staffLink.first()).toBeVisible();
+        });
+
+        test('staff registration link navigates to register page', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            const staffLink = page.getByRole('link', { name: /join.*existing|register as staff/i }).first();
+            await staffLink.click();
+
+            await expect(page).toHaveURL(/\/register$/);
+        });
+
+        test('register-org page has home button', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+
+            const homeLink = page.getByRole('link', { name: /home/i })
+                .or(page.getByRole('button', { name: /home/i }));
+            await expect(homeLink.first()).toBeVisible();
+        });
     });
 
     test.describe('Header/Brand Navigation', () => {
@@ -160,8 +184,8 @@ test.describe('Navigation Smoke Tests', () => {
             // Start at home
             await page.goto(TEST_URLS.home);
 
-            // Navigate to announcements
-            await page.goto(TEST_URLS.announcements);
+            // Navigate to documentation
+            await page.goto(TEST_URLS.documentation);
 
             // Go back
             await page.goBack();

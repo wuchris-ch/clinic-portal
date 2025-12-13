@@ -17,18 +17,25 @@ test.describe('Registration Form Validation', () => {
         test('shows error toast when passwords do not match', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
+            // First validate org (required for submit to work)
+            await page.locator('#organization').fill('testorg');
+            await page.locator('#organization').blur();
+
+            // Wait for org validation to complete
+            await expect(page.getByText(/organization found/i)).toBeVisible({ timeout: 10000 });
+
             // Fill in all required fields
             await page.locator('#fullName').fill('Test User');
             await page.locator('#email').fill('test@example.com');
             await page.locator('#password').fill('password123');
             await page.locator('#confirmPassword').fill('differentpassword');
 
-            // Click submit
-            const submitButton = page.getByRole('button', { name: /create account/i });
+            // Click submit (should be enabled now)
+            const submitButton = page.getByRole('button', { name: /join organization/i });
+            await expect(submitButton).toBeEnabled();
             await submitButton.click();
 
             // Should show error toast for password mismatch
-            // The app uses sonner for toasts which creates elements with role="status" or similar
             const errorToast = page.locator('[data-sonner-toast]').filter({ hasText: /passwords do not match/i })
                 .or(page.getByText(/passwords do not match/i));
             await expect(errorToast.first()).toBeVisible({ timeout: 5000 });
@@ -37,45 +44,22 @@ test.describe('Registration Form Validation', () => {
             await expect(page).toHaveURL(/register/);
         });
 
-        test('submit button is not disabled with mismatched passwords (client validation handles it)', async ({ page }) => {
+        test('submit button is disabled without valid org', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
-            // Fill with mismatched passwords
+            // Fill other fields but NOT organization
             await page.locator('#fullName').fill('Test User');
             await page.locator('#email').fill('test@example.com');
             await page.locator('#password').fill('password123');
-            await page.locator('#confirmPassword').fill('differentpassword');
+            await page.locator('#confirmPassword').fill('password123');
 
-            // Submit button should still be clickable (validation happens on submit)
-            const submitButton = page.getByRole('button', { name: /create account/i });
-            await expect(submitButton).toBeEnabled();
+            // Submit button should be disabled (org not validated)
+            const submitButton = page.getByRole('button', { name: /join organization/i });
+            await expect(submitButton).toBeDisabled();
         });
     });
 
     test.describe('Password Minimum Length Validation', () => {
-        test('form does not submit when password is too short (HTML5 validation)', async ({ page }) => {
-            await page.goto(TEST_URLS.register);
-
-            // Fill in all required fields with short password
-            await page.locator('#fullName').fill('Test User');
-            await page.locator('#email').fill('test@example.com');
-            await page.locator('#password').fill('12345'); // Only 5 characters
-            await page.locator('#confirmPassword').fill('12345');
-
-            // Click submit
-            const submitButton = page.getByRole('button', { name: /create account/i });
-            await submitButton.click();
-
-            // HTML5 minLength validation should prevent form submission
-            // Form should remain on register page
-            await expect(page).toHaveURL(/register/);
-
-            // Password field should be in invalid state due to minLength constraint
-            const passwordField = page.locator('#password');
-            const isInvalid = await passwordField.evaluate((el: HTMLInputElement) => !el.validity.valid);
-            expect(isInvalid).toBe(true);
-        });
-
         test('password field has minLength attribute set to 6', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
@@ -85,24 +69,30 @@ test.describe('Registration Form Validation', () => {
             expect(minLength).toBe('6');
         });
 
-        test('accepts password with exactly 6 characters (boundary)', async ({ page }) => {
+        test('password field validates minimum length', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
-            // Fill with exactly 6 character password
-            await page.locator('#fullName').fill('Test User');
-            await page.locator('#email').fill('test@example.com');
-            await page.locator('#password').fill('123456');
-            await page.locator('#confirmPassword').fill('123456');
+            // Fill with short password
+            const passwordField = page.locator('#password');
+            await passwordField.fill('12345'); // Only 5 characters
+            await passwordField.blur();
 
-            // Submit
-            const submitButton = page.getByRole('button', { name: /create account/i });
-            await submitButton.click();
+            // Password field should be in invalid state due to minLength constraint
+            const isInvalid = await passwordField.evaluate((el: HTMLInputElement) => !el.validity.valid);
+            expect(isInvalid).toBe(true);
+        });
 
-            // Should NOT show the "too short" error
-            // (may show other errors like already registered, invalid email domain, etc. but not length)
-            await page.waitForTimeout(500);
-            const shortPasswordError = page.getByText(/at least 6 characters/i);
-            await expect(shortPasswordError).toHaveCount(0);
+        test('password field accepts 6+ characters', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+
+            // Fill with exactly 6 characters
+            const passwordField = page.locator('#password');
+            await passwordField.fill('123456');
+            await passwordField.blur();
+
+            // Password field should be valid
+            const isValid = await passwordField.evaluate((el: HTMLInputElement) => el.validity.valid);
+            expect(isValid).toBe(true);
         });
     });
 
@@ -116,25 +106,13 @@ test.describe('Registration Form Validation', () => {
             expect(isRequired).toBe(true);
         });
 
-        test('form does not submit without full name', async ({ page }) => {
+        test('organization field is required', async ({ page }) => {
             await page.goto(TEST_URLS.register);
 
-            // Fill email and password but NOT name
-            await page.locator('#email').fill('test@example.com');
-            await page.locator('#password').fill('password123');
-            await page.locator('#confirmPassword').fill('password123');
+            const orgField = page.locator('#organization');
+            const isRequired = await orgField.evaluate((el: HTMLInputElement) => el.required);
 
-            // Click submit
-            const submitButton = page.getByRole('button', { name: /create account/i });
-            await submitButton.click();
-
-            // Should stay on register page due to HTML5 required validation
-            await expect(page).toHaveURL(/register/);
-
-            // Name field should show validation state
-            const fullNameField = page.locator('#fullName');
-            const isInvalid = await fullNameField.evaluate((el: HTMLInputElement) => !el.validity.valid);
-            expect(isInvalid).toBe(true);
+            expect(isRequired).toBe(true);
         });
     });
 

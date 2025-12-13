@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Search, ArrowLeft, FileText, BookOpen, ClipboardList } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, FileText, BookOpen, ClipboardList } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 // Documentation sections - empty for now, can be populated later
@@ -30,7 +29,7 @@ const documentationSections = [
 
 export default async function DocumentationPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  await supabase.auth.getUser();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

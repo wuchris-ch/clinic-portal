@@ -19,7 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { CalendarDays, Eye, EyeOff, Home, Loader2 } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, Home, Loader2, Building2, CheckCircle2, XCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -29,12 +29,59 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [orgName, setOrgName] = useState("");
+  const [orgValidated, setOrgValidated] = useState<boolean | null>(null);
+  const [validatedOrgId, setValidatedOrgId] = useState<string | null>(null);
+  const [, setValidatedOrgSlug] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
+  // Validate org name when user finishes typing
+  const validateOrg = async (name: string) => {
+    if (!name.trim()) {
+      setOrgValidated(null);
+      setValidatedOrgId(null);
+      setValidatedOrgSlug(null);
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      // Search by name (case-insensitive) or slug
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .from("organizations")
+        .select("id, name, slug")
+        .or(`name.ilike.${name.trim()},slug.eq.${name.trim().toLowerCase().replace(/\s+/g, '-')}`)
+        .limit(1)
+        .single();
+
+      if (error || !data) {
+        setOrgValidated(false);
+        setValidatedOrgId(null);
+        setValidatedOrgSlug(null);
+      } else {
+        setOrgValidated(true);
+        setValidatedOrgId(data.id);
+        setValidatedOrgSlug(data.slug);
+      }
+    } catch {
+      setOrgValidated(false);
+      setValidatedOrgId(null);
+      setValidatedOrgSlug(null);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!orgValidated || !validatedOrgId) {
+      toast.error("Please enter a valid organization name");
+      return;
+    }
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
@@ -56,6 +103,7 @@ export default function RegisterPage() {
           data: {
             full_name: fullName,
             role: "staff",
+            organization_id: validatedOrgId,
           },
         },
       });
@@ -65,33 +113,12 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Account created successfully!");
+      toast.success("Account created! Please check your email to verify, then sign in.");
       router.push("/login");
     } catch {
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setIsGoogleLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
-        setIsGoogleLoading(false);
-      }
-    } catch {
-      toast.error("An unexpected error occurred");
-      setIsGoogleLoading(false);
     }
   };
 
@@ -111,58 +138,68 @@ export default function RegisterPage() {
         <Card className="border-border/40 shadow-xl shadow-primary/5">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">
-              Create an account
+              Join Your Organization
             </CardTitle>
             <CardDescription className="text-center">
-              Get started with your time off management
+              Register as a staff member to manage your time-off requests
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button
-              variant="outline"
-              className="w-full h-11"
-              onClick={handleGoogleSignUp}
-              disabled={isGoogleLoading || isLoading}
-            >
-              {isGoogleLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                </svg>
-              )}
-              Continue with Google
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
-
             <form onSubmit={handleEmailRegister} className="space-y-4">
+              {/* Organization Name Input */}
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="organization">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    Organization Name *
+                  </div>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="organization"
+                    type="text"
+                    placeholder="Enter your clinic/organization name"
+                    value={orgName}
+                    onChange={(e) => {
+                      setOrgName(e.target.value);
+                      setOrgValidated(null); // Reset validation on change
+                    }}
+                    onBlur={() => validateOrg(orgName)}
+                    required
+                    disabled={isLoading}
+                    className="pr-10"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isValidating && (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                    {!isValidating && orgValidated === true && (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    )}
+                    {!isValidating && orgValidated === false && (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                </div>
+                {orgValidated === false && (
+                  <p className="text-xs text-red-500">
+                    Organization not found. Check the name or ask your admin.
+                  </p>
+                )}
+                {orgValidated === true && (
+                  <p className="text-xs text-green-600 dark:text-green-400">
+                    ✓ Organization found
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Ask your clinic administrator for the exact organization name.
+                </p>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name *</Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -170,11 +207,11 @@ export default function RegisterPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  disabled={isLoading || isGoogleLoading}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -182,11 +219,11 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={isLoading || isGoogleLoading}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Password *</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -195,14 +232,14 @@ export default function RegisterPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    disabled={isLoading || isGoogleLoading}
+                    disabled={isLoading}
                     className="pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    disabled={isLoading || isGoogleLoading}
+                    disabled={isLoading}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
@@ -214,7 +251,7 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">Confirm Password *</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -223,14 +260,14 @@ export default function RegisterPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     minLength={6}
-                    disabled={isLoading || isGoogleLoading}
+                    disabled={isLoading}
                     className="pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    disabled={isLoading || isGoogleLoading}
+                    disabled={isLoading}
                     aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                   >
                     {showConfirmPassword ? (
@@ -244,12 +281,12 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 className="w-full h-11"
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading || !orgValidated}
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Create Account
+                Join Organization
               </Button>
             </form>
           </CardContent>
@@ -263,6 +300,16 @@ export default function RegisterPage() {
                 Sign in
               </Link>
             </div>
+            <Separator />
+            <div className="text-center text-sm text-muted-foreground">
+              Are you a clinic administrator?{" "}
+              <Link
+                href="/register-org"
+                className="text-primary hover:underline font-medium"
+              >
+                Register your organization
+              </Link>
+            </div>
           </CardFooter>
         </Card>
 
@@ -272,10 +319,7 @@ export default function RegisterPage() {
             Go to Home
           </Button>
         </Link>
-
-
       </div>
     </div>
   );
 }
-

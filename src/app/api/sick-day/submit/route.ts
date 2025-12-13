@@ -5,7 +5,7 @@ import { SickDayEmail } from "@/components/emails/sick-day-email";
 import { appendRowToSheet } from "@/lib/google-sheets";
 import { uploadDoctorNote } from "@/lib/google-drive";
 import { getPSTDateTime } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 function getMailTransporter() {
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -20,16 +20,24 @@ function getMailTransporter() {
     });
 }
 
-// Get notification recipients from database, falling back to env var
-async function getNotificationRecipients(): Promise<string[]> {
+// Get notification recipients from database for a specific organization
+// Uses service client to bypass RLS (API route may not have user session)
+async function getNotificationRecipients(organizationId?: string): Promise<string[]> {
     try {
-        const supabase = await createClient();
+        const supabase = await createServiceClient();
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any)
+        let query = (supabase as any)
             .from("notification_recipients")
             .select("email")
             .eq("is_active", true);
+
+        // Filter by organization if provided
+        if (organizationId) {
+            query = query.eq("organization_id", organizationId);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             console.error("Error fetching notification recipients:", error);
@@ -69,6 +77,8 @@ export async function POST(request: Request) {
         const sickDate = formData.get("sickDate") as string;
         const hasDoctorNote = formData.get("hasDoctorNote") === "true";
         const doctorNoteFile = formData.get("doctorNote") as File | null;
+        const googleSheetId = formData.get("googleSheetId") as string || undefined;
+        const organizationId = formData.get("organizationId") as string || undefined;
 
         let doctorNoteLink: string | null = null;
 
@@ -104,15 +114,15 @@ export async function POST(request: Request) {
                 sickDate,                             // G: Sick Date
                 hasDoctorNote ? "Yes" : "No",         // H: Has Doctor Note
                 doctorNoteLink || "N/A",              // I: Doctor Note Link
-            ], "Sick Days");
+            ], "Sick Days", googleSheetId);
             console.log("Sick day logged to Google Sheets");
         } catch (sheetError) {
             console.error("Failed to log sick day to Sheets:", sheetError);
         }
 
-        // Get mail transporter and recipients
+        // Get mail transporter and recipients for this org
         const transporter = getMailTransporter();
-        const notifyEmailsList = await getNotificationRecipients();
+        const notifyEmailsList = await getNotificationRecipients(organizationId);
 
         if (notifyEmailsList.length === 0 || !transporter) {
             console.log(!transporter

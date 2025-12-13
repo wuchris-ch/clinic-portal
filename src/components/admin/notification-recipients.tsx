@@ -43,9 +43,10 @@ import {
 interface NotificationRecipientsProps {
   recipients: NotificationRecipient[];
   adminId: string;
+  organizationId: string;
 }
 
-export function NotificationRecipients({ recipients, adminId }: NotificationRecipientsProps) {
+export function NotificationRecipients({ recipients, adminId, organizationId }: NotificationRecipientsProps) {
   const router = useRouter();
   const supabase = createClient();
   const [isPending, startTransition] = useTransition();
@@ -86,6 +87,7 @@ export function NotificationRecipients({ recipients, adminId }: NotificationReci
           name: newName.trim() || null,
           added_by: adminId,
           is_active: true,
+          organization_id: organizationId,
         });
 
       if (error) {

@@ -13,10 +13,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { Home, Megaphone, FileText, LogOut, LogIn } from "lucide-react";
+import { Home, FileText, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 interface AppHeaderProps {
   user: User | null;
@@ -25,18 +24,12 @@ interface AppHeaderProps {
 
 const pageTitles: Record<string, string> = {
   "/": "Home",
-  "/announcements": "Announcements",
   "/documentation": "Documentation",
-  "/walkthrough": "App Walkthrough",
+  // Org-scoped pages (slug is dynamic, matched by suffix below)
+  "/announcements": "Announcements",
   "/calendar": "Team Calendar",
   "/admin": "Admin Dashboard",
   "/admin/employees": "Manage Staff",
-  // Public forms
-  "/forms/day-off": "Request 1 Day Off",
-  "/forms/vacation": "Vacation Request",
-  "/forms/time-clock": "Time Clock Request",
-  "/forms/overtime": "Overtime Submission",
-  "/forms/sick-day": "Sick Day Submission",
   // Authenticated forms (dashboard)
   "/dashboard/day-off": "Request 1 Day Off",
   "/dashboard/vacation": "Vacation Request",
@@ -47,7 +40,23 @@ const pageTitles: Record<string, string> = {
 
 export function AppHeader({ user, profile }: AppHeaderProps) {
   const pathname = usePathname();
-  const pageTitle = pageTitles[pathname] || "Dashboard";
+
+  // Get page title, checking for org-scoped routes (e.g., /org/acme-clinic/announcements)
+  const getPageTitle = () => {
+    // Direct match first
+    if (pageTitles[pathname]) return pageTitles[pathname];
+
+    // Check for org-scoped routes by matching path suffix
+    for (const [path, title] of Object.entries(pageTitles)) {
+      if (path !== "/" && pathname.endsWith(path)) {
+        return title;
+      }
+    }
+
+    return "Dashboard";
+  };
+
+  const pageTitle = getPageTitle();
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/50 px-4">
@@ -69,13 +78,6 @@ export function AppHeader({ user, profile }: AppHeaderProps) {
           >
             <Home className="w-3.5 h-3.5" />
             <span>Home</span>
-          </Link>
-          <Link
-            href="/announcements"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-          >
-            <Megaphone className="w-3.5 h-3.5" />
-            <span>Announcements</span>
           </Link>
           <Link
             href="/documentation"
