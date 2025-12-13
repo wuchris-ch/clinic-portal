@@ -114,7 +114,8 @@ export function SickDayForm({ payPeriods = [], userEmail, userName, googleSheetI
             return;
         }
 
-        if (!selectedPayPeriodId) {
+        // Pay period is only required if pay periods are available
+        if (payPeriods.length > 0 && !selectedPayPeriodId) {
             toast.error("Please select a pay period");
             return;
         }
