@@ -2,12 +2,14 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -21,21 +23,38 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { CalendarDays, Eye, EyeOff, Home, Loader2 } from "lucide-react";
 
+const ERROR_MESSAGES: Record<string, string> = {
+  auth: "Authentication failed. Please try again.",
+  no_profile: "Your account profile could not be found. Please contact support.",
+  no_org: "Your account is not associated with an organization. Please register with an organization first.",
+  org_not_found: "Your organization could not be found. Please contact support.",
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error && ERROR_MESSAGES[error]) {
+      setAuthError(ERROR_MESSAGES[error]);
+    }
+  }, [searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -46,6 +65,34 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome back!");
+
+      // Fetch user's profile to get their organization
+      if (authData.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: profile } = await (supabase as any)
+          .from("profiles")
+          .select("organization_id")
+          .eq("id", authData.user.id)
+          .single();
+
+        if (profile?.organization_id) {
+          // Get org slug for redirect
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: org } = await (supabase as any)
+            .from("organizations")
+            .select("slug")
+            .eq("id", profile.organization_id)
+            .single();
+
+          if (org?.slug) {
+            router.push(`/org/${org.slug}/dashboard`);
+            router.refresh();
+            return;
+          }
+        }
+      }
+
+      // Fallback: no org, go to home
       router.push("/");
       router.refresh();
     } catch {
@@ -57,6 +104,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
+    setAuthError(null);
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -97,6 +145,12 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {authError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
             <Button
               variant="outline"
               className="w-full h-11"

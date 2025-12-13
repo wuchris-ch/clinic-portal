@@ -4,6 +4,9 @@ import { defineConfig, devices } from '@playwright/test';
  * Playwright configuration for HR Employee Portal E2E and Sanity tests.
  */
 export default defineConfig({
+    // Global setup - checks we're not running against production
+    globalSetup: require.resolve('./global-setup.ts'),
+
     // Test directory
     testDir: './',
 
@@ -40,20 +43,38 @@ export default defineConfig({
         screenshot: 'only-on-failure',
     },
 
-    // Configure projects for major browsers
+    // Configure projects
     projects: [
+        // Setup project - runs first to authenticate
         {
-            name: 'chromium',
+            name: 'setup',
+            testMatch: /auth\.setup\.ts/,
             use: { ...devices['Desktop Chrome'] },
         },
+
+        // Authenticated tests - use saved auth state
+        {
+            name: 'authenticated',
+            testMatch: /.*\.auth\.spec\.ts/,
+            dependencies: ['setup'],
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: 'tests/.auth/admin.json',
+            },
+        },
+
+        // Default project - unauthenticated tests
+        {
+            name: 'chromium',
+            testMatch: /(?<!\.auth)\.spec\.ts$/,
+            testIgnore: /auth\.setup\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+        },
+
         // Add more browsers as needed:
         // {
         //   name: 'firefox',
         //   use: { ...devices['Desktop Firefox'] },
-        // },
-        // {
-        //   name: 'webkit',
-        //   use: { ...devices['Desktop Safari'] },
         // },
     ],
 
