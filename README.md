@@ -546,6 +546,27 @@ For production schema changes:
    - `GOOGLE_PRIVATE_KEY`
 5. Share your Google Sheet with the service account email
 
+## TODO (Multi-tenancy PR cleanup)
+
+- [ ] Create migration file for GRANT statements (currently manually applied to prod Supabase):
+  ```sql
+  GRANT ALL ON organizations TO service_role, authenticated;
+  GRANT SELECT ON organizations TO anon;
+  GRANT ALL ON profiles TO service_role, authenticated;
+  GRANT SELECT ON profiles TO anon;
+  GRANT ALL ON leave_requests TO service_role, authenticated;
+  GRANT ALL ON leave_types TO service_role, authenticated;
+  GRANT SELECT ON leave_types TO anon;
+  GRANT ALL ON notification_recipients TO service_role, authenticated;
+  GRANT ALL ON announcements TO service_role, authenticated;
+  GRANT SELECT ON announcements TO anon;
+  GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO service_role, authenticated, anon;
+  ```
+- [ ] Clean up test data from prod Supabase:
+  - Delete `test-debug` organization
+  - Delete `playwright-test-clinic` organization
+  - Delete associated test users
+
 ## License
 
 MIT
