@@ -108,8 +108,15 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error("Error in test-sheet API:", error);
+        console.error("Error details:", {
+            name: (error as Error)?.name,
+            message: (error as Error)?.message,
+            hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
+            keyLength: process.env.GOOGLE_PRIVATE_KEY?.length,
+        });
         return NextResponse.json(
-            { error: "Failed to test sheet connection" },
+            { error: "Failed to test sheet connection", details: (error as Error)?.message },
             { status: 500 }
         );
     }
