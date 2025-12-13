@@ -3,12 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createOrganizationSheet } from "@/lib/google-sheets-create";
 
-// Service role client for admin operations
-const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-);
+function getSupabaseAdmin() {
+    return createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -51,6 +52,8 @@ export async function POST(request: NextRequest) {
                 { status: 403 }
             );
         }
+
+        const supabaseAdmin = getSupabaseAdmin();
 
         // Fetch the organization
         const { data: organization, error: orgError } = await supabaseAdmin
