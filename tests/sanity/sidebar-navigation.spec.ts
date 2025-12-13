@@ -3,69 +3,40 @@ import { TEST_URLS } from '../setup';
 
 /**
  * Sanity Tests: Sidebar Navigation
- * 
+ *
  * These tests verify that the sidebar/navigation components work correctly:
  * - All expected links are present
  * - Active state is shown on current route
  * - Mobile menu toggle works
+ *
+ * Note: Public forms have been removed. Forms are now org-scoped and require auth.
  */
 
 test.describe('Sidebar Navigation Sanity Tests', () => {
 
-    test.describe('Homepage Quick Forms Section', () => {
-        test('quick forms section is visible', async ({ page }) => {
+    test.describe('Homepage CTA Section', () => {
+        test('homepage has organization registration CTA', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Look for Quick Forms section or similar
-            const quickForms = page.getByText(/quick forms|submit forms|no login/i);
-
-            // May not have "Quick Forms" label, but should have form links
-            const dayOffLink = page.getByRole('link', { name: /day off/i });
-            const vacationLink = page.getByRole('link', { name: /vacation/i });
-            const timeClockLink = page.getByRole('link', { name: /time clock/i });
-            const overtimeLink = page.getByRole('link', { name: /overtime/i });
-
-            // At least some form links should be visible
-            const hasFormLinks = await dayOffLink.first().isVisible() ||
-                await vacationLink.first().isVisible() ||
-                await timeClockLink.first().isVisible() ||
-                await overtimeLink.first().isVisible();
-
-            expect(hasFormLinks).toBe(true);
+            // Should have register organization button
+            const registerOrgLink = page.getByRole('link', { name: /register organization/i });
+            await expect(registerOrgLink.first()).toBeVisible();
         });
 
-        test('form links have correct hrefs', async ({ page }) => {
+        test('homepage has sign in link', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            const dayOffLink = page.getByRole('link', { name: /day off|request day/i }).first();
-            if (await dayOffLink.isVisible()) {
-                const href = await dayOffLink.getAttribute('href');
-                expect(href).toMatch(/day-off/);
-            }
+            // Should have sign in link
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await expect(signInLink.first()).toBeVisible();
+        });
 
-            const timeClockLink = page.getByRole('link', { name: /time clock/i }).first();
-            if (await timeClockLink.isVisible()) {
-                const href = await timeClockLink.getAttribute('href');
-                expect(href).toMatch(/time-clock/);
-            }
+        test('homepage has staff registration link', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
 
-            const overtimeLink = page.getByRole('link', { name: /overtime/i }).first();
-            if (await overtimeLink.isVisible()) {
-                const href = await overtimeLink.getAttribute('href');
-                expect(href).toMatch(/overtime/);
-            }
-
-            const vacationLink = page.getByRole('link', { name: /vacation/i }).first();
-            if (await vacationLink.isVisible()) {
-                const href = await vacationLink.getAttribute('href');
-                expect(href).toMatch(/vacation/);
-            }
-
-            const sickDayLink = page.getByRole('link', { name: /sick day/i }).first();
-            if (await sickDayLink.isVisible()) {
-                const href = await sickDayLink.getAttribute('href');
-                expect(href).toMatch(/sick-day/);
-            }
+            // Should have register as staff link
+            const staffLink = page.getByRole('link', { name: /register as staff/i });
+            await expect(staffLink.first()).toBeVisible();
         });
     });
 
@@ -89,43 +60,27 @@ test.describe('Sidebar Navigation Sanity Tests', () => {
             await page.setViewportSize({ width: 375, height: 667 });
         });
 
-        test('mobile menu button exists on small screens', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
-
-            // Look for hamburger menu button
-            const menuButton = page.getByRole('button', { name: /menu|navigation|open/i })
-                .or(page.locator('button[data-testid="mobile-menu"]'))
-                .or(page.locator('button:has(.lucide-menu)'))
-                .or(page.locator('[aria-label*="menu"]'));
-
-            // Mobile menu might exist
-            const hasMobileMenu = await menuButton.first().isVisible().catch(() => false);
-
-            // Either has mobile menu or is responsive layout
-            expect(true).toBe(true);
-        });
-
-        test('content is still accessible on mobile', async ({ page }) => {
+        test('content is accessible on mobile', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
             // Content should still be visible
             await expect(page.locator('body').first()).toBeVisible();
 
             // Key text should be readable
-            const clinicText = page.getByText(/clinic|staffhub|portal/i);
-            await expect(clinicText.first()).toBeVisible();
+            const staffHubText = page.getByText(/staffhub/i);
+            await expect(staffHubText.first()).toBeVisible();
         });
 
-        test('forms work on mobile viewport', async ({ page }) => {
-            await page.goto(TEST_URLS.publicDayOff);
+        test('login page works on mobile viewport', async ({ page }) => {
+            await page.goto(TEST_URLS.login);
 
             // Form should be visible
             await expect(page.locator('form')).toBeVisible();
 
-            // Fields should be accessible
-            const nameField = page.getByLabel(/name/i).first()
-                .or(page.locator('input[placeholder*="name" i]').first());
-            await expect(nameField).toBeVisible();
+            // Email field should be accessible
+            const emailField = page.getByLabel(/email/i).first()
+                .or(page.locator('input[type="email"]').first());
+            await expect(emailField).toBeVisible();
         });
     });
 
@@ -145,14 +100,15 @@ test.describe('Sidebar Navigation Sanity Tests', () => {
     });
 
     test.describe('Section Navigation', () => {
-        test('homepage has navigable sections', async ({ page }) => {
+        test('homepage has feature sections', async ({ page }) => {
             await page.goto(TEST_URLS.home);
 
-            // Check for section headings
+            // Check for section headings on the new landing page
             const sections = [
-                /clinic protocols/i,
-                /employee handbook/i,
-                /employee.*evaluation/i,
+                /time-off requests/i,
+                /google sheets integration/i,
+                /email notifications/i,
+                /team calendar/i,
             ];
 
             let foundSections = 0;
@@ -164,7 +120,7 @@ test.describe('Sidebar Navigation Sanity Tests', () => {
                 }
             }
 
-            // Should have at least some sections
+            // Should have at least some feature sections
             expect(foundSections).toBeGreaterThan(0);
         });
     });

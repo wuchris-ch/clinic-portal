@@ -27,9 +27,11 @@ interface TimeClockRequestFormProps {
     payPeriods?: PayPeriod[];
     userEmail: string;
     userName: string;
+    googleSheetId?: string;
+    organizationId?: string;
 }
 
-export function TimeClockRequestForm({ payPeriods = [], userEmail, userName }: TimeClockRequestFormProps) {
+export function TimeClockRequestForm({ payPeriods = [], userEmail, userName, googleSheetId, organizationId }: TimeClockRequestFormProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     // User details state (editable)
@@ -106,6 +108,8 @@ export function TimeClockRequestForm({ payPeriods = [], userEmail, userName }: T
                     clockOutDate: clockOutDate ? format(clockOutDate, "yyyy-MM-dd") : null,
                     clockOutTime: formatTime(clockOutHour, clockOutMinute, clockOutAmPm),
                     clockOutReason: clockOutReason || null,
+                    googleSheetId,
+                    organizationId,
                 }),
             });
 

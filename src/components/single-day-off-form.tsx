@@ -32,9 +32,11 @@ interface SingleDayOffFormProps {
     userId?: string; // Optional - anonymous users can submit without login
     userEmail: string;
     userName: string;
+    googleSheetId?: string; // Optional - org-specific sheet ID for multi-tenancy
+    organizationId?: string; // Required for multi-tenancy DB inserts
 }
 
-export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmail, userName }: SingleDayOffFormProps) {
+export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmail, userName, googleSheetId, organizationId }: SingleDayOffFormProps) {
     const router = useRouter();
     const supabase = createClient();
 
@@ -78,6 +80,7 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
                         user_id: userId,
                         leave_type_id: leaveTypeId,
                         pay_period_id: selectedPayPeriodId,
+                        organization_id: organizationId,
                         submission_date: format(submissionDate, "yyyy-MM-dd"),
                         start_date: format(dayOffDate, "yyyy-MM-dd"),
                         end_date: format(dayOffDate, "yyyy-MM-dd"),
@@ -134,6 +137,7 @@ export function SingleDayOffForm({ leaveTypes, payPeriods = [], userId, userEmai
                         coverageName: hasCoverage ? coverageName : null,
                         coverageEmail: hasCoverage ? coverageEmail : null,
                         payPeriodLabel,
+                        googleSheetId, // Pass org-specific sheet ID for multi-tenancy
                     }),
                 });
             } catch (notifyError) {

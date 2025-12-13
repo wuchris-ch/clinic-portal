@@ -26,7 +26,7 @@ vi.mock('@/lib/google-sheets', () => ({
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
-    createClient: () => mockCreateClient(),
+    createServiceClient: () => mockCreateClient(),
 }));
 
 vi.mock('nodemailer', () => ({
@@ -107,7 +107,8 @@ describe('Notifications API - Gmail Independence', () => {
             expect(mockAppendRowToSheet).toHaveBeenCalled();
             expect(mockAppendRowToSheet).toHaveBeenCalledWith(
                 expect.arrayContaining(['Leave Request']),
-                'Leave Requests'
+                'Day Off Requests',
+                undefined // googleSheetId
             );
 
             // Response should indicate success (sheets logged) but no email sent
@@ -141,7 +142,8 @@ describe('Notifications API - Gmail Independence', () => {
             expect(mockAppendRowToSheet).toHaveBeenCalled();
             expect(mockAppendRowToSheet).toHaveBeenCalledWith(
                 expect.arrayContaining(['Time Clock Request']),
-                'Time Clock'
+                'Time Clock Adjustments',
+                undefined // googleSheetId
             );
             expect(data.success).toBe(true);
             expect(data.emailSent).toBe(false);
@@ -170,7 +172,8 @@ describe('Notifications API - Gmail Independence', () => {
             expect(mockAppendRowToSheet).toHaveBeenCalled();
             expect(mockAppendRowToSheet).toHaveBeenCalledWith(
                 expect.arrayContaining(['Overtime Request']),
-                'Overtime'
+                'Overtime Requests',
+                undefined // googleSheetId
             );
             expect(data.success).toBe(true);
             expect(data.emailSent).toBe(false);
@@ -204,7 +207,8 @@ describe('Notifications API - Gmail Independence', () => {
             expect(mockAppendRowToSheet).toHaveBeenCalled();
             expect(mockAppendRowToSheet).toHaveBeenCalledWith(
                 expect.arrayContaining(['Vacation Request']),
-                'Vacation Request'
+                'Vacation Requests',
+                undefined // googleSheetId
             );
             expect(data.success).toBe(true);
             expect(data.emailSent).toBe(false);

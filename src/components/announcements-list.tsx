@@ -28,7 +28,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pin, Edit, Trash2, Megaphone } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -38,7 +37,8 @@ interface Announcement {
   title: string;
   content: string;
   pinned: boolean;
-  image_url?: string;
+  image_url: string | null;
+  organization_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -46,9 +46,10 @@ interface Announcement {
 interface AnnouncementsListProps {
   announcements: Announcement[];
   isAdmin: boolean;
+  organizationId: string;
 }
 
-export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListProps) {
+export function AnnouncementsList({ announcements, isAdmin, organizationId }: AnnouncementsListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ title: "", content: "", pinned: false });
@@ -61,12 +62,12 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
       return;
     }
 
-    // @ts-ignore
-    const { error } = await (supabase as any).from("announcements").insert({
+    const { error } = await supabase.from("announcements").insert({
       title: formData.title,
       content: formData.content,
       pinned: formData.pinned,
-    } as any);
+      organization_id: organizationId,
+    });
 
     if (error) {
       toast.error("Failed to create announcement");
@@ -85,14 +86,13 @@ export function AnnouncementsList({ announcements, isAdmin }: AnnouncementsListP
       return;
     }
 
-    // @ts-ignore
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("announcements")
       .update({
         title: formData.title,
         content: formData.content,
         pinned: formData.pinned,
-      } as any)
+      })
       .eq("id", id);
 
     if (error) {
