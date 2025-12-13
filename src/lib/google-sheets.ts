@@ -2,14 +2,32 @@ import { google } from 'googleapis';
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
-export async function appendRowToSheet(values: string[], sheetName: string = 'Sheet1') {
+/**
+ * Appends a row to a Google Sheet.
+ * 
+ * @param values - Array of values to append as a row
+ * @param sheetName - Tab name within the spreadsheet (default: 'Sheet1')
+ * @param spreadsheetId - Optional org-specific sheet ID. Falls back to GOOGLE_SHEET_ID env var for public forms.
+ */
+export async function appendRowToSheet(
+    values: string[],
+    sheetName: string = 'Sheet1',
+    spreadsheetId?: string
+) {
     try {
         if (
             !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-            !process.env.GOOGLE_PRIVATE_KEY ||
-            !process.env.GOOGLE_SHEET_ID
+            !process.env.GOOGLE_PRIVATE_KEY
         ) {
             console.warn("Google Sheets credentials not configured. Skipping sheet update.");
+            return false;
+        }
+
+        // Use provided spreadsheetId or fall back to global env var
+        const targetSheetId = spreadsheetId || process.env.GOOGLE_SHEET_ID;
+
+        if (!targetSheetId) {
+            console.warn("No spreadsheet ID provided and GOOGLE_SHEET_ID not configured. Skipping sheet update.");
             return false;
         }
 
@@ -22,10 +40,9 @@ export async function appendRowToSheet(values: string[], sheetName: string = 'Sh
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
         await sheets.spreadsheets.values.append({
-            spreadsheetId,
+            spreadsheetId: targetSheetId,
             range: `${sheetName}!A:A`, // Appends to the specified sheet
             valueInputOption: 'USER_ENTERED',
             requestBody: {
@@ -39,3 +56,4 @@ export async function appendRowToSheet(values: string[], sheetName: string = 'Sh
         return false;
     }
 }
+
