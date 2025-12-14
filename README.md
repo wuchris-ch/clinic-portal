@@ -546,6 +546,38 @@ For production schema changes:
    - `GOOGLE_PRIVATE_KEY`
 5. Share your Google Sheet with the service account email
 
+## Troubleshooting
+
+### Tables Not Loading / Empty Dropdowns (RLS vs GRANT issue)
+
+**Symptom:** Data exists in Supabase SQL Editor but the app shows empty dropdowns (pay periods, leave types, etc.). No errors in browser console.
+
+**Cause:** Missing table-level GRANT permissions. Supabase has two layers of security:
+1. **GRANT** - Table-level: Can this role access this table at all?
+2. **RLS** - Row-level: Which specific rows can this role see?
+
+Even with correct RLS policies, if GRANT permissions are missing, the role cannot access the table.
+
+**Fix:** Run these GRANT statements in Supabase SQL Editor:
+
+```sql
+-- Core reference tables (read-only for app users)
+GRANT SELECT ON leave_types TO authenticated, anon;
+GRANT SELECT ON pay_periods TO authenticated, anon;
+
+-- Request tables (full access for authenticated users)
+GRANT SELECT, INSERT, UPDATE, DELETE ON leave_requests TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON leave_request_dates TO authenticated, anon;
+
+-- If other tables are affected, grant as needed:
+GRANT SELECT ON organizations TO authenticated, anon;
+GRANT SELECT, INSERT, UPDATE ON profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON announcements TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON notification_recipients TO authenticated;
+```
+
+**When this happens:** After running migrations that create new tables, or if table permissions get reset.
+
 ## TODO (Multi-tenancy PR cleanup)
 
 - [ ] Create migration file for GRANT statements (currently manually applied to prod Supabase):
@@ -555,8 +587,13 @@ For production schema changes:
   GRANT ALL ON profiles TO service_role, authenticated;
   GRANT SELECT ON profiles TO anon;
   GRANT ALL ON leave_requests TO service_role, authenticated;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON leave_requests TO anon;
+  GRANT ALL ON leave_request_dates TO service_role, authenticated;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON leave_request_dates TO anon;
   GRANT ALL ON leave_types TO service_role, authenticated;
   GRANT SELECT ON leave_types TO anon;
+  GRANT ALL ON pay_periods TO service_role, authenticated;
+  GRANT SELECT ON pay_periods TO anon;
   GRANT ALL ON notification_recipients TO service_role, authenticated;
   GRANT ALL ON announcements TO service_role, authenticated;
   GRANT SELECT ON announcements TO anon;

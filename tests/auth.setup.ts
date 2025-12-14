@@ -53,38 +53,8 @@ async function ensureTestUser(
     role: 'admin' | 'staff',
     organizationId: string
 ): Promise<void> {
-    // Check if user already exists
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find((u) => u.email === email);
-
-    if (existingUser) {
-        console.log(`✓ User ${email} already exists`);
-
-        // Ensure profile exists and is linked to org
-        const { data: profile } = await adminClient
-            .from('profiles')
-            .select('id, organization_id')
-            .eq('id', existingUser.id)
-            .single();
-
-        if (profile && !(profile as { organization_id: string | null }).organization_id) {
-            // Update profile with organization
-            await adminClient
-                .from('profiles')
-                .update({
-                    organization_id: organizationId,
-                    role: role,
-                    full_name: fullName,
-                } as Record<string, unknown>)
-                .eq('id', existingUser.id);
-            console.log(`  → Updated profile with organization`);
-        }
-
-        return;
-    }
-
-    // Create new user
-    console.log(`Creating user ${email}...`);
+    // Try to create the user first - if they exist, we'll get an error we can handle
+    console.log(`Ensuring user ${email} exists...`);
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
@@ -94,20 +64,46 @@ async function ensureTestUser(
         },
     });
 
+    let userId: string;
+
     if (createError) {
-        throw new Error(`Failed to create user ${email}: ${createError.message}`);
-    }
+        // User already exists - this is expected and OK
+        if (createError.message.includes('already been registered')) {
+            console.log(`✓ User ${email} already exists`);
+            // Find the user by querying profiles table (more reliable than listUsers pagination)
+            const { data: profile } = await adminClient
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .single();
 
-    if (!newUser?.user) {
+            if (!profile) {
+                // Fallback: try to get from auth users list with filter
+                const { data: users } = await adminClient.auth.admin.listUsers({
+                    filter: { email: email },
+                });
+                if (users?.users?.[0]) {
+                    userId = users.users[0].id;
+                } else {
+                    console.warn(`  → Could not find user ID for ${email}, skipping profile update`);
+                    return;
+                }
+            } else {
+                userId = profile.id;
+            }
+        } else {
+            throw new Error(`Failed to create user ${email}: ${createError.message}`);
+        }
+    } else if (!newUser?.user) {
         throw new Error(`Failed to create user ${email}: No user returned`);
+    } else {
+        console.log(`✓ Created user ${email}`);
+        userId = newUser.user.id;
+        // Brief wait for profile trigger
+        await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
-    console.log(`✓ Created user ${email}`);
-
-    // Update profile with organization and role
-    // (profile is auto-created by trigger, we just need to update it)
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Brief wait for trigger
-
+    // Ensure profile is linked to org
     const { error: profileError } = await adminClient
         .from('profiles')
         .update({
@@ -115,10 +111,10 @@ async function ensureTestUser(
             role: role,
             full_name: fullName,
         } as Record<string, unknown>)
-        .eq('id', newUser.user.id);
+        .eq('id', userId);
 
     if (profileError) {
-        console.warn(`Warning: Could not update profile for ${email}: ${profileError.message}`);
+        console.warn(`  → Warning: Could not update profile for ${email}: ${profileError.message}`);
     } else {
         console.log(`  → Profile linked to organization`);
     }

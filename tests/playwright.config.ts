@@ -1,4 +1,20 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load .env.local for local development (CI sets these via GITHUB_ENV)
+const envPath = path.resolve(__dirname, '../.env.local');
+if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, 'utf-8');
+    for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const [key, ...valueParts] = trimmed.split('=');
+        if (key && valueParts.length > 0 && !process.env[key.trim()]) {
+            process.env[key.trim()] = valueParts.join('=').trim();
+        }
+    }
+}
 
 /**
  * Playwright configuration for HR Employee Portal E2E and Sanity tests.
