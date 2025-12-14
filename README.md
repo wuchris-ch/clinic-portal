@@ -582,6 +582,7 @@ Tests verify code logic but **cannot catch** infrastructure issues. Before mergi
 | **Form Submit** | Success toast appears | Real API integration |
 | **Google Sheet** | Row appears (if sheet linked) | Tests mock googleapis |
 | **Cross-org Access** | User from Org A can't access `/org/org-b/dashboard` | RLS tested but GRANT drift possible |
+| **Sick Day PDF** | Upload doctor note → PDF generates & attaches to email | Tests mock file upload and PDF generation |
 
 **Quick checklist:**
 
@@ -592,6 +593,7 @@ Tests verify code logic but **cannot catch** infrastructure issues. Before mergi
 □ Submit a request → success toast
 □ Check Google Sheet → new row appears
 □ Try accessing another org's URL → redirected or denied
+□ Submit sick day with doctor note → verify PDF attachment in email
 ```
 
 If all pass, you're safe to merge. If any fail, the issue is likely:
