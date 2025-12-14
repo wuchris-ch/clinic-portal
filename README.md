@@ -252,6 +252,93 @@ npm run test:e2e
 
 See `scripts/test-login-info.md` for setup details.
 
+### Bug-Driven Testing (How to Fix Bugs Properly)
+
+When a bug is reported, **always write a failing test first** before fixing it. This ensures the bug is reproducible, the fix actually works, and the bug never comes back.
+
+**The Workflow:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BUG REPORTED                                                               │
+│  "Users can access other organizations' dashboards"                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STEP 1: Write a Failing Test                                               │
+│                                                                             │
+│  // tests/unit/org-access-bug.test.ts                                      │
+│  it('denies access when user org does not match requested org', () => {    │
+│      const result = canAccessOrg('org-123', 'org-456');                    │
+│      expect(result).toBe(false);  // Should deny cross-org access          │
+│  });                                                                        │
+│                                                                             │
+│  npm run test:unit → ❌ FAILS (good! we reproduced the bug)                │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STEP 2: Fix the Bug in Source Code                                        │
+│                                                                             │
+│  // src/app/org/[slug]/layout.tsx                                          │
+│  if (profile.organization_id !== organization.id) {                        │
+│      redirect(`/org/${userOrg.slug}/dashboard`);  // ← Add this check      │
+│  }                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STEP 3: Run Test Again                                                     │
+│                                                                             │
+│  npm run test:unit → ✅ PASSES (bug is fixed!)                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  STEP 4: Commit Both Together                                               │
+│                                                                             │
+│  git add .                                                                  │
+│  git commit -m "fix: prevent cross-org dashboard access                    │
+│                                                                             │
+│  - Added org ID validation in layout                                       │
+│  - Added regression test for org access"                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Example Commands:**
+
+```bash
+# 1. Create test file for the bug
+touch tests/unit/bug-fix-ISSUE-123.test.ts
+
+# 2. Write your failing test, then run it
+npm run test:unit -- tests/unit/bug-fix-ISSUE-123.test.ts
+# → Should FAIL (proves bug exists)
+
+# 3. Fix the bug in source code
+
+# 4. Run test again
+npm run test:unit -- tests/unit/bug-fix-ISSUE-123.test.ts
+# → Should PASS (proves fix works)
+
+# 5. Run full test suite to check for regressions
+npm run test
+
+# 6. Commit test + fix together
+git add .
+git commit -m "fix: description of bug fix"
+```
+
+**Why This Matters:**
+
+| Without Test-First | With Test-First |
+|-------------------|-----------------|
+| "I think I fixed it" | "The test proves it's fixed" |
+| Bug might come back later | Test prevents regression forever |
+| No documentation of bug | Test documents the exact issue |
+| Can't verify fix in CI | CI will catch if bug returns |
+
 ## Project Structure
 
 ```
