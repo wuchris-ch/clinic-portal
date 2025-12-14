@@ -32,6 +32,7 @@ const mockRequests = [
         reviewed_by: 'admin1',
         reviewed_at: '2025-01-12T10:00:00Z',
         created_at: '2025-01-10T10:00:00Z',
+        updated_at: '2025-01-12T10:00:00Z',
         profiles: {
             id: 'user1',
             full_name: 'John Doe',
@@ -42,6 +43,7 @@ const mockRequests = [
             id: 'lt1',
             name: 'Personal Day',
             color: '#3b82f6',
+            is_single_day: true,
             created_at: '2025-01-01',
         },
     },
@@ -62,6 +64,7 @@ const mockRequests = [
         reviewed_by: 'admin1',
         reviewed_at: '2025-01-09T10:00:00Z',
         created_at: '2025-01-08T10:00:00Z',
+        updated_at: '2025-01-09T10:00:00Z',
         profiles: {
             id: 'user2',
             full_name: 'Alice Johnson',
@@ -72,6 +75,7 @@ const mockRequests = [
             id: 'lt2',
             name: 'Vacation',
             color: '#22c55e',
+            is_single_day: false,
             created_at: '2025-01-01',
         },
     },
@@ -92,6 +96,7 @@ const mockRequests = [
         reviewed_by: 'admin1',
         reviewed_at: '2025-01-06T10:00:00Z',
         created_at: '2025-01-05T10:00:00Z',
+        updated_at: '2025-01-06T10:00:00Z',
         profiles: {
             id: 'user3',
             full_name: 'Bob Wilson',
@@ -102,6 +107,7 @@ const mockRequests = [
             id: 'lt1',
             name: 'Personal Day',
             color: '#3b82f6',
+            is_single_day: true,
             created_at: '2025-01-01',
         },
     },
