@@ -1,97 +1,63 @@
 # StaffHub - Time Off Portal
 
-A modern, multi-tenant employee time-off request and management portal built with **Next.js 16**, Supabase, and shadcn/ui.
+A multi-tenant employee time-off request and management portal built with **Next.js 16**, Supabase, and shadcn/ui.
+
+## What This App Does
+
+StaffHub lets organizations manage employee time-off requests:
+
+1. **Admin registers an organization** → gets a unique URL like `/org/acme/dashboard`
+2. **Staff register and join** → submit vacation, sick day, overtime requests
+3. **Admins review and approve** → staff get notified, everything logs to Google Sheets
+
+All forms require login. Each organization's data is isolated via Row Level Security.
 
 ## Features
 
 ### Multi-Tenancy
-- **Organization Isolation**: Each clinic/business has its own isolated data space
-- **URL-based Routing**: `/org/{slug}/dashboard` pattern for org-scoped access
-- **Self-Service Registration**: Organizations can sign up and invite staff
+- **Organization isolation**: Each organization has its own data space
+- **URL-based routing**: `/org/{slug}/dashboard` pattern
+- **Self-service registration**: Organizations sign up and invite staff
 - **Row Level Security**: Database-enforced data isolation
 
-### Public Features (No Login)
-- **Quick Forms**: Submit single day off, time clock adjustment, and overtime requests without an account
-- **Anonymous Submissions**: Requests are emailed directly to admin
-- **Information Access**: View clinic protocols, handbook chapters, and announcements
-
-### Staff Dashboard (Logged In)
-- **Pre-filled Forms**: Name and email auto-populated from profile
-- **Database Tracking**: Requests are saved and trackable
-- **Team Calendar**: View approved time-off across the organization
+### Staff Dashboard
+- **Time-off forms**: Vacation, sick day, single day off, overtime, time clock adjustments
+- **Pre-filled forms**: Name and email auto-populated from profile
+- **Request tracking**: View submitted requests and their status
+- **Team calendar**: See approved time-off across the organization
 
 ### Admin Dashboard
-- **Request Management**: Review, approve, or deny pending requests
-- **Employee Management**: View and manage staff
-- **Organization Settings**: Configure email notifications and preferences
+- **Request queue**: Review, approve, or deny pending requests
+- **Employee management**: View staff and manage roles
+- **Organization settings**: Configure Google Sheet integration and notification recipients
 
-### Notifications & Logging
-- **Google Sheets Integration**: All requests logged automatically
-- **Email Notifications**: Admins notified on submissions, staff notified on approvals
-- **Timezone Intelligence**: Pacific Time (PST/PDT) with automatic DST handling
+### Integrations
+- **Google Sheets**: All requests automatically logged to your spreadsheet
+- **Email notifications**: Admins notified on submissions, staff notified on decisions
+- **Pacific timezone**: All timestamps in PST/PDT with automatic DST handling
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router) with React 19
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS v4 + shadcn/ui components
-- **Database**: Supabase PostgreSQL with Row Level Security
-- **Auth**: Supabase Auth with Google OAuth
-- **Email**: Gmail SMTP via Nodemailer + React Email templates
-- **Logging**: Google Sheets API via Service Account
-- **Testing**: Vitest (unit) + Playwright (E2E)
-- **CI/CD**: GitHub Actions + Vercel
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) with React 19 |
+| Language | TypeScript (strict mode) |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Database | Supabase PostgreSQL with Row Level Security |
+| Auth | Supabase Auth with Google OAuth |
+| Email | Gmail SMTP via Nodemailer + React Email |
+| Logging | Google Sheets API via Service Account |
+| Testing | Vitest (unit) + Playwright (E2E) |
+| CI/CD | GitHub Actions + Vercel |
 
-## Environments & Authentication
-
-This project uses **three environments** following professional best practices:
-
-| Environment | Database | Auth Method | URL | Purpose |
-|-------------|----------|-------------|-----|---------|
-| **Local Dev** | Local Supabase (Docker) | Email/password only | `localhost:3000` | Daily development, safe experimentation |
-| **Vercel Preview** | Production Supabase | Google OAuth + email | `*.vercel.app` | Test OAuth, PR reviews, stakeholder demos |
-| **Production** | Production Supabase | Google OAuth + email | Your domain | Real users |
-
-### Why This Setup?
-
-**Google OAuth requires HTTPS** with registered redirect URIs. Rather than complex local OAuth configuration, we use the industry-standard approach:
-
-1. **Develop locally** with email/password auth (fast, no OAuth setup)
-2. **Test OAuth on Vercel Preview** branches (automatic HTTPS, real OAuth flow)
-3. **Deploy to Production** when ready
-
-### Quick Reference
-
-```bash
-# Local development (email/password auth)
-supabase start && npm run dev     # localhost:3000
-
-# Test Google OAuth
-git push origin feature/my-branch # Creates Vercel preview at feature-my-branch-*.vercel.app
-
-# Switch to production DB temporarily (if needed)
-cp .env.production.backup .env.local
-
-# Switch back to local DB
-cp .env.local.example .env.local  # Then update with `supabase status` output
-```
-
-### Environment Files
-
-| File | Purpose | Git Status |
-|------|---------|------------|
-| `.env.local` | Your active config (should be LOCAL credentials) | Ignored |
-| `.env.local.example` | Template for new developers | Committed |
-| `.env.production.backup` | Backup of production credentials | Ignored |
-
-**Rule of thumb:** `.env.local` should always point to local Supabase. Only temporarily switch to production if absolutely necessary, then switch back.
+---
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- Docker Desktop (required for local Supabase)
+- Docker Desktop (for local Supabase)
 - Supabase CLI
 
 ### 1. Clone and Install
@@ -121,233 +87,142 @@ supabase start
 # Copy environment template
 cp .env.local.example .env.local
 
-# Update .env.local with credentials shown from `supabase start`
-# The output shows ANON_KEY, SERVICE_ROLE_KEY, and API_URL
+# Update .env.local with credentials from `supabase start` output
 
 # Start development server
 npm run dev
 ```
 
-### 4. Access Local Services
+### 4. Local Services
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| App | http://localhost:3000 | Your application |
-| Supabase Studio | http://127.0.0.1:54323 | Database browser, SQL editor |
-| Mailpit | http://127.0.0.1:54324 | Email testing inbox |
+| Service | URL |
+|---------|-----|
+| App | http://localhost:3000 |
+| Supabase Studio | http://127.0.0.1:54323 |
+| Mailpit (email inbox) | http://127.0.0.1:54324 |
 
-### 5. Environment Variables
+### 5. Test Accounts (Local Only)
 
-Your `.env.local` should contain:
+| Role | Email | Password | Org Slug |
+|------|-------|----------|----------|
+| Admin | test@org.com | testadmin | testorg |
+| Staff | test@staff.com | teststaff | testorg |
 
-```env
-# Supabase (Local Development)
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<from supabase start output>
-SUPABASE_SERVICE_ROLE_KEY=<from supabase start output>
+See `scripts/test-login-info.md` for setup details.
 
-# Gmail SMTP (optional for local dev)
-GMAIL_USER=yourcompany.hr@gmail.com
-GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+---
 
-# Google Sheets (optional for local dev)
-GOOGLE_SERVICE_ACCOUNT_EMAIL=<service-account>@<project>.iam.gserviceaccount.com
-GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+## Environments
 
-# App URL
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+This project uses three environments following professional best practices:
+
+| Environment | Database | Auth | URL |
+|-------------|----------|------|-----|
+| **Local Dev** | Local Supabase (Docker) | Email/password only | `localhost:3000` |
+| **Vercel Preview** | Production Supabase | Google OAuth + email | `*.vercel.app` |
+| **Production** | Production Supabase | Google OAuth + email | Your domain |
+
+### Why No Local OAuth?
+
+Google OAuth requires HTTPS with registered redirect URIs. Rather than complex local configuration:
+
+1. **Develop locally** with email/password auth (fast, no OAuth setup)
+2. **Test OAuth on Vercel Preview** branches (automatic HTTPS)
+3. **Deploy to Production** when ready
+
+### Environment Files
+
+| File | Purpose | Git Status |
+|------|---------|------------|
+| `.env.local` | Your active config (should point to LOCAL DB) | Ignored |
+| `.env.local.example` | Template for new developers | Committed |
+
+**Rule:** `.env.local` should always point to local Supabase. Only temporarily switch to production if absolutely necessary.
+
+---
 
 ## Testing
 
-### Quick Reference
+### Commands
 
 | Command | What It Does | When to Use |
 |---------|--------------|-------------|
-| `npm run test` | E2E + unit tests | Before creating PR, or anytime |
+| `npm run test` | E2E + unit tests | Before creating PR |
 | `npm run test:local` | Unit tests + lint only | Quick check (no DB needed) |
-| `npm run test:e2e` | E2E tests only | Debug specific E2E failures |
-| `npm run test:unit` | Unit tests only | Fast iteration on logic |
+| `npm run test:e2e` | E2E tests only | Debug E2E failures |
+| `npm run test:unit` | Unit tests only | Fast iteration |
 
-### Safety: Production Database Protection
+### Production Database Protection
 
-E2E tests create test data, so there's a **built-in safety check** that blocks E2E tests if your `.env.local` points to production:
+E2E tests are blocked if `.env.local` points to production:
 
-| Your `NEXT_PUBLIC_SUPABASE_URL` | E2E Tests |
-|----------------------------------|-----------|
-| `http://127.0.0.1:54321` (local) | ✅ Allowed |
-| `https://xxx.supabase.co` (prod) | 🛑 Blocked |
-
-This means:
-- **With local Supabase running:** All tests are safe, run anything
-- **If you accidentally point to production:** E2E tests refuse to run (you'll see a big warning)
-
-### Recommended Workflow
-
-```bash
-# Daily development - run everything locally
-supabase start              # Start local database
-npm run test                # Run full test suite (safe!)
-
-# Quick check (no database needed)
-npm run test:local          # Just unit tests + lint
-
-# When CI E2E fails and you need to debug
-npm run test:e2e            # Run E2E locally to reproduce
-```
-
-### What Runs Where
-
-| Where | What Runs | Database |
-|-------|-----------|----------|
-| **Your machine** | `npm run test` | Local Supabase |
-| **GitHub Actions** | Full suite (automatic) | Fresh ephemeral Supabase |
-| **Vercel Preview** | Nothing (deploy only) | Production Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | E2E Tests |
+|---------------------------|-----------|
+| `http://127.0.0.1:54321` | Allowed |
+| `https://xxx.supabase.co` | Blocked |
 
 ### Test Structure
 
 ```
 tests/
 ├── unit/                    # Vitest - fast, no DB needed
-│   └── *.test.ts           # Timezone logic, validation
-├── e2e/                     # Playwright - unauthenticated tests
-│   ├── auth-flow.spec.ts   # Login, registration
-│   ├── navigation.spec.ts  # Page navigation
-│   ├── admin-settings.spec.ts      # Admin page (unauthenticated checks)
-│   └── admin-settings.auth.spec.ts # Admin page (authenticated) ← NEW
-├── sanity/                  # Quick sanity checks
+├── e2e/                     # Playwright - browser tests
+│   ├── *.spec.ts            # Unauthenticated tests
+│   └── *.auth.spec.ts       # Authenticated tests (use saved session)
 ├── .auth/                   # Saved auth state (gitignored)
-│   └── admin.json          # Admin session for auth tests
-├── auth.setup.ts           # Logs in and saves session
-├── setup.ts                # Test utilities
-└── global-setup.ts         # Production database safeguard
+├── auth.setup.ts            # Logs in and saves session
+└── global-setup.ts          # Production database safeguard
 ```
 
 ### Authenticated E2E Tests
 
-Tests ending in `.auth.spec.ts` run with a logged-in admin session:
+Tests ending in `.auth.spec.ts` run with a logged-in session:
 
 ```bash
-# Run only authenticated tests
-npx playwright test --project=authenticated
-
-# Run only unauthenticated tests
-npx playwright test --project=chromium
-
-# Run everything
-npm run test:e2e
+npx playwright test --project=authenticated  # Auth tests only
+npx playwright test --project=chromium       # Unauth tests only
+npm run test:e2e                             # Everything
 ```
 
-**How it works:**
-1. `auth.setup.ts` logs in with test credentials and saves session to `.auth/admin.json`
-2. Tests in `*.auth.spec.ts` files automatically use that saved session
-3. No repeated logins - tests start already authenticated
+### Bug-Driven Testing
 
-**Test accounts (local Supabase only):**
-
-| Role | Email | Password | Org |
-|------|-------|----------|-----|
-| Admin | test@org.com | testadmin | testorg |
-| Staff | test@staff.com | teststaff | testorg |
-
-See `scripts/test-login-info.md` for setup details.
-
-### Bug-Driven Testing (How to Fix Bugs Properly)
-
-When a bug is reported, **always write a failing test first** before fixing it. This ensures the bug is reproducible, the fix actually works, and the bug never comes back.
-
-**The Workflow:**
+When a bug is reported, **write a failing test first** before fixing it:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  BUG REPORTED                                                               │
-│  "Users can access other organizations' dashboards"                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  STEP 1: Write a Failing Test                                               │
-│                                                                             │
-│  // tests/unit/org-access-bug.test.ts                                      │
-│  it('denies access when user org does not match requested org', () => {    │
-│      const result = canAccessOrg('org-123', 'org-456');                    │
-│      expect(result).toBe(false);  // Should deny cross-org access          │
-│  });                                                                        │
-│                                                                             │
-│  npm run test:unit → ❌ FAILS (good! we reproduced the bug)                │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  STEP 2: Fix the Bug in Source Code                                        │
-│                                                                             │
-│  // src/app/org/[slug]/layout.tsx                                          │
-│  if (profile.organization_id !== organization.id) {                        │
-│      redirect(`/org/${userOrg.slug}/dashboard`);  // ← Add this check      │
-│  }                                                                          │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  STEP 3: Run Test Again                                                     │
-│                                                                             │
-│  npm run test:unit → ✅ PASSES (bug is fixed!)                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  STEP 4: Commit Both Together                                               │
-│                                                                             │
-│  git add .                                                                  │
-│  git commit -m "fix: prevent cross-org dashboard access                    │
-│                                                                             │
-│  - Added org ID validation in layout                                       │
-│  - Added regression test for org access"                                   │
-└─────────────────────────────────────────────────────────────────────────────┘
+BUG REPORTED: "Users can access other organizations' dashboards"
+     │
+     ▼
+STEP 1: Write failing test
+     │  npm run test:unit → ❌ FAILS (bug reproduced)
+     ▼
+STEP 2: Fix the bug in source code
+     │
+     ▼
+STEP 3: Run test again
+     │  npm run test:unit → ✅ PASSES (fixed!)
+     ▼
+STEP 4: Commit test + fix together
 ```
 
-**Example Commands:**
-
-```bash
-# 1. Create test file for the bug
-touch tests/unit/bug-fix-ISSUE-123.test.ts
-
-# 2. Write your failing test, then run it
-npm run test:unit -- tests/unit/bug-fix-ISSUE-123.test.ts
-# → Should FAIL (proves bug exists)
-
-# 3. Fix the bug in source code
-
-# 4. Run test again
-npm run test:unit -- tests/unit/bug-fix-ISSUE-123.test.ts
-# → Should PASS (proves fix works)
-
-# 5. Run full test suite to check for regressions
-npm run test
-
-# 6. Commit test + fix together
-git add .
-git commit -m "fix: description of bug fix"
-```
-
-**Why This Matters:**
+**Why this matters:**
 
 | Without Test-First | With Test-First |
 |-------------------|-----------------|
-| "I think I fixed it" | "The test proves it's fixed" |
-| Bug might come back later | Test prevents regression forever |
-| No documentation of bug | Test documents the exact issue |
-| Can't verify fix in CI | CI will catch if bug returns |
+| "I think I fixed it" | Test proves it's fixed |
+| Bug might return | Test prevents regression |
+| No documentation | Test documents the issue |
+
+---
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (public)/           # Public routes (Home, Announcements)
-│   ├── (auth)/             # Login, Register, Register-Org
+│   ├── (public)/           # Home page, documentation
+│   ├── (auth)/             # Login, register pages
 │   ├── org/[slug]/         # Multi-tenant org routes
-│   │   ├── dashboard/      # Employee dashboard
+│   │   ├── dashboard/      # Staff forms (vacation, sick day, etc.)
 │   │   ├── admin/          # Admin dashboard
 │   │   └── calendar/       # Team calendar
 │   ├── api/                # API routes
@@ -364,18 +239,22 @@ src/
 └── middleware.ts           # Auth & route protection
 ```
 
+---
+
 ## Database
 
-### Key Tables
+### Tables
 
-- `organizations` - Multi-tenant organizations
-- `profiles` - User profiles (linked to org)
-- `leave_requests` - Time-off requests
-- `leave_request_dates` - Individual dates per request
-- `leave_types` - Request types (Vacation, Sick, etc.)
-- `pay_periods` - T4 year pay periods (reference data, easy to delete/augment via SQL)
-- `announcements` - Org announcements
-- `notification_recipients` - Email settings
+| Table | Purpose |
+|-------|---------|
+| `organizations` | Multi-tenant organizations (slug, name, sheet_id) |
+| `profiles` | User profiles linked to organization |
+| `leave_requests` | Time-off requests |
+| `leave_request_dates` | Individual dates per request |
+| `leave_types` | Request types (Vacation, Sick, etc.) |
+| `pay_periods` | Pay period reference data |
+| `announcements` | Org-scoped announcements |
+| `notification_recipients` | Email notification settings |
 
 ### Type Generation
 
@@ -383,343 +262,190 @@ src/
 npx supabase gen types typescript --local > src/lib/types/database.types.ts
 ```
 
-## Database Schema Consistency
-
-### The Golden Rule
+### Schema Consistency
 
 > **Migrations are the single source of truth.** All environments get identical schemas by applying the same migration files.
 
 ```
 supabase/migrations/
-├── 000_initial_schema.sql      # Tables, RLS policies
+├── 000_initial_schema.sql
 ├── 001_add_leave_request_dates.sql
-├── 002_add_notifications.sql
 ├── ...
-└── 008_multi_tenancy.sql       # Latest migration
+└── 008_multi_tenancy.sql
 ```
 
-### How Each Environment Gets Its Schema
+### How Schemas Are Applied
 
-| Environment | How Schema Is Applied | When |
-|-------------|----------------------|------|
-| **Local Dev** | `supabase start` | Automatically applies all migrations |
-| **CI (GitHub Actions)** | `supabase start` in workflow | Fresh DB per test run |
-| **Production** | `supabase db push` or Dashboard | You apply manually after merge |
+| Environment | Method | When |
+|-------------|--------|------|
+| Local Dev | `supabase start` | Automatic |
+| CI | `supabase start` in workflow | Fresh DB per run |
+| Production | `supabase db push` or Dashboard | Manual after merge |
 
-### Schema vs Data
-
-|  | Local | CI | Production |
-|--|-------|----|----|
-| **Schema** | ✅ Identical | ✅ Identical | ✅ Identical |
-| **Data** | Test data | Ephemeral test data | Real user data |
-
-The schema (tables, columns, RLS policies, functions) is the same everywhere. Only the data differs.
-
-### Professional Workflow for Schema Changes
+### Schema Change Workflow
 
 ```bash
-# 1. Create a new migration file
+# 1. Create migration file
 touch supabase/migrations/009_add_feature_x.sql
-# Or generate from changes made in Studio:
-supabase db diff -f add_feature_x
 
-# 2. Write your SQL
-cat > supabase/migrations/009_add_feature_x.sql << 'EOF'
--- Add new column for feature X
-ALTER TABLE profiles ADD COLUMN department TEXT;
+# 2. Write your SQL changes
 
--- Add RLS policy
-CREATE POLICY "Users can see own department"
-ON profiles FOR SELECT
-USING (auth.uid() = id);
-EOF
-
-# 3. Test locally (applies migration fresh)
-supabase db reset
-npm run test
+# 3. Test locally
+supabase db reset && npm run test
 
 # 4. Commit and push
 git add supabase/migrations/
-git commit -m "feat: add department field to profiles"
-git push
+git commit -m "feat: add department field"
 
-# 5. CI runs tests with new migration ✅
-
-# 6. After PR merge, apply to production
-supabase link --project-ref your-project-ref
+# 5. After PR merge, apply to production
 supabase db push
-# Or: Apply via Supabase Dashboard > SQL Editor
 ```
 
-### Verifying Schema Consistency
-
-**The "Am I in Sync?" Check:**
+### Verifying Schema Sync
 
 ```bash
-# 1. Link to production (one-time setup)
-supabase link --project-ref your-project-ref
-
-# 2. Dry run - shows what WOULD be applied without doing it
 supabase db push --dry-run
 ```
 
-| Output | Meaning | Action |
-|--------|---------|--------|
-| `No changes to push` | ✅ Prod = Local = CI | You're good! |
-| `Would apply: 008_xxx.sql` | ⚠️ Prod is behind | Run `supabase db push` |
+| Output | Meaning |
+|--------|---------|
+| `No changes to push` | Production = Local |
+| `Would apply: 009_xxx.sql` | Production is behind |
 
-**Full verification checklist:**
-
-```bash
-# Step 1: Ensure local is clean (matches migration files)
-supabase db reset              # Reapply all migrations fresh
-supabase db diff               # Should show NO differences
-
-# Step 2: Ensure tests pass (proves CI will pass too)
-npm run test                   # All green = CI will be green
-
-# Step 3: Check production sync status
-supabase db push --dry-run     # "No changes" = prod is in sync
-
-# Step 4: If prod is behind, apply migrations
-supabase db push               # Actually apply to production
-```
-
-**Why this works:**
-- `supabase db reset` proves your local matches migration files
-- `npm run test` proves CI will pass (same migrations, same code)
-- `supabase db push --dry-run` proves production matches
-- If all three pass, **Local = CI = Production** ✅
-
-### Common Scenarios & Solutions
-
-| Scenario | Symptom | Solution |
-|----------|---------|----------|
-| Local behind prod | Missing tables/columns locally | `git pull && supabase db reset` |
-| Prod behind local | New migration not in prod | `supabase db push` after merge |
-| CI fails, local works | Migration not committed | `git add supabase/migrations/` |
-| Schema drift | Direct prod edits (bad!) | Generate migration from diff, commit it |
-
-### Anti-Patterns to Avoid
-
-| ❌ Don't | ✅ Do Instead |
-|----------|---------------|
-| Edit production schema directly in Dashboard | Create migration file, test locally, then push |
-| Forget to commit migration files | Always `git add supabase/migrations/` |
-| Test migrations only on prod | Test with `supabase db reset` locally first |
-| Make schema changes without migrations | Even small changes need migration files |
-
-### How CI Ensures Consistency
-
-GitHub Actions workflow:
-```yaml
-- name: Start Supabase
-  run: supabase start  # ← Applies ALL migrations to fresh DB
-
-- name: Run tests
-  run: npm run test    # ← Tests run against migrated schema
-```
-
-If a migration is broken, CI fails. If you forget to commit a migration, CI fails (schema won't match your code). This catches issues before they reach production.
-
-### Quick Reference Commands
-
-```bash
-# Local development
-supabase start           # Start local DB, apply all migrations
-supabase db reset        # Nuke data, reapply migrations (useful for testing)
-supabase status          # Show local DB connection info
-
-# Schema changes
-supabase db diff -f name # Generate migration from Studio changes
-supabase db push         # Apply migrations to linked remote DB
-supabase db push --dry-run  # Preview what would be applied
-
-# Troubleshooting
-supabase db diff         # Show uncommitted schema changes
-supabase db lint         # Check for schema issues
-```
+---
 
 ## Development Workflow
 
 ### Protected Main Branch
 
-The `main` branch requires Pull Requests. Never push directly.
+All changes go through Pull Requests:
 
 ```bash
-# 1. Create feature branch
 git checkout -b feature/my-feature
-
-# 2. Make changes and commit
 git add .
 git commit -m "feat: add my feature"
-
-# 3. Push and create PR
 git push -u origin feature/my-feature
-
-# 4. GitHub Actions runs tests automatically
-# 5. Merge after tests pass and review
+# Create PR, tests run automatically, merge after passing
 ```
 
-### CI/CD Pipeline
+### CI Pipeline
 
 GitHub Actions runs on every PR:
 - Unit tests (Vitest)
-- E2E tests (Playwright + local Supabase)
+- E2E tests (Playwright + ephemeral Supabase)
 - Lint + Type check
 - Build verification
 
-Tests run against ephemeral local Supabase - never production.
-
 ### Pre-Merge Smoke Test (Vercel Preview)
 
-Tests verify code logic but **cannot catch** infrastructure issues. Before merging, manually test these on your Vercel Preview deployment:
+Tests verify code logic but **cannot catch** infrastructure issues. Before merging, manually test on Vercel Preview:
 
-| Check | What to Verify | Why Tests Miss It |
-|-------|---------------|-------------------|
-| **Login** | Redirects to dashboard (not blank page) | Tests mock auth, don't verify post-login flow |
-| **Dropdowns** | Pay periods & leave types load | GRANT permissions not tested |
-| **Form Submit** | Success toast appears | Real API integration |
-| **Google Sheet** | Row appears (if sheet linked) | Tests mock googleapis |
-| **Cross-org Access** | User from Org A can't access `/org/org-b/dashboard` | RLS tested but GRANT drift possible |
-| **Sick Day PDF** | Upload doctor note → PDF generates & attaches to email | Tests mock file upload and PDF generation |
+| Check | What to Verify |
+|-------|---------------|
+| Login | Redirects to dashboard (not blank) |
+| Dropdowns | Pay periods & leave types load |
+| Form Submit | Success toast appears |
+| Google Sheet | Row appears (if linked) |
+| Cross-org | Can't access other orgs' URLs |
+| Sick Day PDF | Doctor note generates PDF attachment |
 
-**Quick checklist:**
-
-```
-□ Open Vercel Preview URL
-□ Log in with Google OAuth → lands on dashboard
-□ Open a form → dropdowns populated
-□ Submit a request → success toast
-□ Check Google Sheet → new row appears
-□ Try accessing another org's URL → redirected or denied
-□ Submit sick day with doctor note → verify PDF attachment in email
-```
-
-If all pass, you're safe to merge. If any fail, the issue is likely:
-- Missing GRANT permissions (see Troubleshooting section)
-- Environment variable misconfiguration
-- Google Sheets not shared with service account
+---
 
 ## Production Deployment
 
-### Vercel
+### Vercel Setup
 
 1. Connect repository to Vercel
 2. Add environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL` (production Supabase)
+   - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `GMAIL_USER`
-   - `GMAIL_APP_PASSWORD`
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `GOOGLE_PRIVATE_KEY`
+   - `GMAIL_USER`, `GMAIL_APP_PASSWORD`
+   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`
    - `NEXT_PUBLIC_APP_URL`
+3. Merges to `main` auto-deploy
 
-3. Deploy - merges to `main` auto-deploy
-
-### Vercel Preview Deployments
-
-Every push to a feature branch creates a preview deployment:
-- URL pattern: `feature-branch-name-*.vercel.app`
-- Uses production Supabase (same env vars as production)
-- **Google OAuth works** on preview deployments (HTTPS + registered redirect URIs)
-- Use this to test OAuth flows before merging to main
-
-### Google OAuth Setup (Supabase + Google Cloud)
-
-For OAuth to work on Vercel (preview + production):
+### Google OAuth Setup
 
 1. **Google Cloud Console** → APIs & Services → Credentials
-2. Add authorized redirect URIs:
-   - `https://your-project.supabase.co/auth/v1/callback` (Supabase handles OAuth)
+2. Add redirect URI: `https://your-project.supabase.co/auth/v1/callback`
 3. **Supabase Dashboard** → Authentication → Providers → Google
-   - Add your Google Client ID and Client Secret
-4. Vercel preview deployments automatically work because Supabase handles the OAuth callback
+4. Add Client ID and Secret
 
-### Database Migrations
+---
 
-For production schema changes:
-1. Test migration locally with `supabase db reset`
-2. Apply to production via Supabase Dashboard SQL Editor
-3. Schedule during low-traffic periods
+## External Service Setup
 
-## Gmail Setup (for notifications)
+### Gmail (for notifications)
 
 1. Create Gmail account for notifications
 2. Enable 2-Factor Authentication
-3. Generate App Password:
-   - Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-   - Select "Mail" and generate
-   - Use the 16-character password in `GMAIL_APP_PASSWORD`
+3. Generate App Password at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+4. Use 16-character password in `GMAIL_APP_PASSWORD`
 
-## Google Sheets Setup (for logging)
+### Google Sheets (for logging)
 
-1. Create a Google Cloud project
+1. Create Google Cloud project
 2. Enable Google Sheets API
-3. Create a Service Account
-4. Download JSON key and extract:
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `GOOGLE_PRIVATE_KEY`
+3. Create Service Account and download JSON key
+4. Extract `GOOGLE_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_PRIVATE_KEY`
 5. Share your Google Sheet with the service account email
+
+---
 
 ## Troubleshooting
 
-### Tables Not Loading / Empty Dropdowns (RLS vs GRANT issue)
+### Empty Dropdowns (GRANT vs RLS)
 
-**Symptom:** Data exists in Supabase SQL Editor but the app shows empty dropdowns (pay periods, leave types, etc.). No errors in browser console.
+**Symptom:** Data exists in Supabase but dropdowns are empty in app.
 
-**Cause:** Missing table-level GRANT permissions. Supabase has two layers of security:
-1. **GRANT** - Table-level: Can this role access this table at all?
-2. **RLS** - Row-level: Which specific rows can this role see?
+**Cause:** Missing GRANT permissions. Supabase has two security layers:
+1. **GRANT** - Can this role access this table at all?
+2. **RLS** - Which rows can this role see?
 
-Even with correct RLS policies, if GRANT permissions are missing, the role cannot access the table.
-
-**Fix:** Run these GRANT statements in Supabase SQL Editor:
+**Fix:** Run in Supabase SQL Editor:
 
 ```sql
--- Core reference tables (read-only for app users)
 GRANT SELECT ON leave_types TO authenticated, anon;
 GRANT SELECT ON pay_periods TO authenticated, anon;
-
--- Request tables (full access for authenticated users)
 GRANT SELECT, INSERT, UPDATE, DELETE ON leave_requests TO authenticated, anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON leave_request_dates TO authenticated, anon;
-
--- If other tables are affected, grant as needed:
 GRANT SELECT ON organizations TO authenticated, anon;
 GRANT SELECT, INSERT, UPDATE ON profiles TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON announcements TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON notification_recipients TO authenticated;
 ```
 
-**When this happens:** After running migrations that create new tables, or if table permissions get reset.
+### Google Sheets Not Logging
 
-## TODO (Multi-tenancy PR cleanup)
+Check in order:
+1. Tab names match exactly (case-sensitive)
+2. Sheet shared with service account email
+3. Correct Sheet ID in Admin Settings
+4. `GOOGLE_PRIVATE_KEY` format: literal `\n` chars, include BEGIN/END markers
 
-- [ ] Create migration file for GRANT statements (currently manually applied to prod Supabase):
+### Redirect Loop After Login
+
+1. Check `profiles.organization_id` is set
+2. Check middleware config in `src/lib/supabase/middleware.ts`
+3. Clear browser cookies
+4. Verify OAuth callback URLs in Supabase
+
+### Works Locally, Fails on Vercel
+
+Verify env vars are set in Vercel dashboard.
+
+---
+
+## TODO
+
+- [ ] Create migration file for GRANT statements (currently manually applied):
   ```sql
   GRANT ALL ON organizations TO service_role, authenticated;
   GRANT SELECT ON organizations TO anon;
-  GRANT ALL ON profiles TO service_role, authenticated;
-  GRANT SELECT ON profiles TO anon;
-  GRANT ALL ON leave_requests TO service_role, authenticated;
-  GRANT SELECT, INSERT, UPDATE, DELETE ON leave_requests TO anon;
-  GRANT ALL ON leave_request_dates TO service_role, authenticated;
-  GRANT SELECT, INSERT, UPDATE, DELETE ON leave_request_dates TO anon;
-  GRANT ALL ON leave_types TO service_role, authenticated;
-  GRANT SELECT ON leave_types TO anon;
-  GRANT ALL ON pay_periods TO service_role, authenticated;
-  GRANT SELECT ON pay_periods TO anon;
-  GRANT ALL ON notification_recipients TO service_role, authenticated;
-  GRANT ALL ON announcements TO service_role, authenticated;
-  GRANT SELECT ON announcements TO anon;
-  GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO service_role, authenticated, anon;
+  -- etc.
   ```
-- [ ] Clean up test data from prod Supabase:
-  - Delete `test-debug` organization
-  - Delete `playwright-test-clinic` organization
-  - Delete associated test users
+- [ ] Clean up test data from prod Supabase (test organizations)
+
+---
 
 ## License
 
