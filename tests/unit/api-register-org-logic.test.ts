@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 /**
  * High-Value Tests: Register Organization API Logic
@@ -56,7 +56,7 @@ async function generateUniqueSlug(
     baseName: string,
     checkExists: (slug: string) => Promise<boolean>
 ): Promise<string> {
-    let slug = generateSlug(baseName);
+    const slug = generateSlug(baseName);
     let suffix = 0;
 
     while (true) {
