@@ -305,3 +305,4 @@ If your feature requires Database changes (Supabase):
     ```bash
     npx supabase gen types typescript --project-id "your-project-id" > src/lib/types/database.types.ts
     ```
+
