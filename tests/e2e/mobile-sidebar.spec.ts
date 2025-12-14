@@ -27,12 +27,12 @@ test.describe('Mobile Sidebar Behavior', () => {
             // Wait for sidebar to be visible
             await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
 
-            // Click on a navigation link (Documentation)
-            const docLink = page.getByRole('link', { name: /documentation/i });
-            await docLink.click();
+            // Click on Sign In link (available in public sidebar)
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await signInLink.click();
 
             // Wait for navigation
-            await page.waitForURL('**/documentation');
+            await page.waitForURL('**/login');
 
             // Sidebar should be closed (the sheet/drawer should not be visible)
             await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
@@ -60,8 +60,8 @@ test.describe('Mobile Sidebar Behavior', () => {
         });
 
         test('sidebar closes when clicking Home link', async ({ page }) => {
-            // Start on documentation page
-            await page.goto(TEST_URLS.documentation);
+            // Start on login page
+            await page.goto(TEST_URLS.login);
 
             // Open the sidebar
             const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
@@ -159,10 +159,10 @@ test.describe('Mobile Sidebar Behavior', () => {
             await menuButton.click();
             await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
 
-            // Navigate to close (using Documentation link since Announcements is now org-scoped)
-            const documentationLink = page.getByRole('link', { name: /documentation/i });
-            await documentationLink.click();
-            await page.waitForURL('**/documentation');
+            // Navigate to close (using Sign In link)
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await signInLink.click();
+            await page.waitForURL('**/login');
 
             // Sidebar should be closed
             await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
@@ -188,12 +188,12 @@ test.describe('Desktop Sidebar Behavior', () => {
     test('sidebar navigation links work on desktop', async ({ page }) => {
         await page.goto(TEST_URLS.home);
 
-        // Click on Documentation link (in sidebar)
-        const docLink = page.getByRole('link', { name: /documentation/i }).first();
-        await docLink.click();
+        // Click on Home link (in sidebar) - Documentation is now org-scoped
+        const homeLink = page.getByRole('link', { name: /^home$/i }).first();
+        await homeLink.click();
 
-        // Should navigate
-        await page.waitForURL('**/documentation');
+        // Should stay on home
+        await expect(page).toHaveURL('/');
 
         // Sidebar should still be visible on desktop (not hidden)
         await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();

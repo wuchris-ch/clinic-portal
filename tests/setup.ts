@@ -41,7 +41,6 @@ export const TEST_ORG_2 = {
 export const TEST_URLS = {
     // Public routes
     home: '/',
-    documentation: '/documentation',
 
     // Auth routes
     login: '/login',
@@ -61,6 +60,7 @@ export function getOrgUrls(orgSlug: string) {
     const basePath = `/org/${orgSlug}`;
     return {
         announcements: `${basePath}/announcements`,
+        documentation: `${basePath}/documentation`,
         dashboard: `${basePath}/dashboard`,
         dashboardDayOff: `${basePath}/dashboard/day-off`,
         dashboardTimeClock: `${basePath}/dashboard/time-clock`,

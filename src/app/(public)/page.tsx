@@ -196,15 +196,10 @@ export default function HomePage() {
             {/* Footer */}
             <footer className="border-t border-border">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center justify-center">
                         <div className="flex items-center gap-2">
                             <CalendarDays className="w-4 h-4 text-primary" />
                             <span className="text-sm font-medium text-foreground">StaffHub</span>
-                        </div>
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <Link href="/documentation" className="hover:text-foreground transition-colors">
-                                Documentation
-                            </Link>
                         </div>
                     </div>
                 </div>

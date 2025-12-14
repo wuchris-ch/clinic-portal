@@ -353,10 +353,8 @@ test.describe('Authentication Flow Smoke Tests', () => {
             await expect(page).toHaveURL('/');
         });
 
-        test('documentation page is accessible without authentication', async ({ page }) => {
-            await page.goto(TEST_URLS.documentation);
-            await expect(page).not.toHaveURL(/login/);
-        });
+        // Documentation is now org-scoped and requires authentication
+        // See documentation.spec.ts for protected documentation tests
 
         test('login page is accessible without authentication', async ({ page }) => {
             await page.goto(TEST_URLS.login);

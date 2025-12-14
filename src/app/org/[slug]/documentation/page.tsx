@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft, FileText, BookOpen, ClipboardList } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { useOrganization } from "@/components/organization-context";
 
 // Documentation sections - empty for now, can be populated later
 const documentationSections = [
@@ -27,18 +29,17 @@ const documentationSections = [
   },
 ];
 
-export default async function DocumentationPage() {
-  const supabase = await createClient();
-  await supabase.auth.getUser();
+export default function DocumentationPage() {
+  const { basePath } = useOrganization();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="bg-blue-500 py-8 rounded-xl shadow-sm">
         <div className="px-6 lg:px-8">
-          <Link href="/" className="inline-flex items-center text-white/80 hover:text-white mb-4 text-sm">
+          <Link href={`${basePath}/announcements`} className="inline-flex items-center text-white/80 hover:text-white mb-4 text-sm">
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to Help Center
+            Back to Announcements
           </Link>
           <h1 className="text-3xl font-bold text-white">Documentation</h1>
           <p className="text-white/80 mt-2">
@@ -86,9 +87,6 @@ export default async function DocumentationPage() {
           );
         })}
       </div>
-
-
     </div>
   );
 }
-
