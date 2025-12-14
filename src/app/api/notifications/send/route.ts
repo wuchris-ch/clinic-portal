@@ -8,6 +8,7 @@ import { NewRequestEmail } from "@/components/emails/new-request-email";
 import { TimeClockRequestEmail } from "@/components/emails/time-clock-request-email";
 import { OvertimeRequestEmail } from "@/components/emails/overtime-request-email";
 import { appendRowToSheet } from "@/lib/google-sheets";
+import { SHEET_TAB_NAMES } from "@/lib/constants/google-sheets";
 import { getPSTDateTime } from "@/lib/utils";
 
 function getMailTransporter() {
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
             coverageEmail || "N/A",                // L: Coverage Email
             notes || "N/A",                        // M: Notes
           ],
-          "Vacation Requests",
+          SHEET_TAB_NAMES.VACATION,
           googleSheetId // Pass org-specific sheet ID (undefined falls back to global)
         );
         console.log("Vacation request logged to Google Sheets");
@@ -203,7 +204,7 @@ export async function POST(request: Request) {
           payPeriodLabel || "N/A",                              // L: Pay Period
           coverageName || "N/A",                                // M: Coverage Name
           coverageEmail || "N/A"                                // N: Coverage Email
-        ], "Day Off Requests", googleSheetId);
+        ], SHEET_TAB_NAMES.DAY_OFF, googleSheetId);
         console.log("Day off request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log leave request to Sheets:", sheetError);
@@ -283,7 +284,7 @@ export async function POST(request: Request) {
           clockInReason || "",          // I: Reason In
           clockOutReason || "",         // J: Reason Out
           payPeriodLabel || "N/A"       // K: Pay Period
-        ], "Time Clock Adjustments", googleSheetId);
+        ], SHEET_TAB_NAMES.TIME_CLOCK, googleSheetId);
         console.log("Time clock request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log time clock to Sheets:", sheetError);
@@ -349,7 +350,7 @@ export async function POST(request: Request) {
           askedDoctor ? "Yes" : "No",   // H: Asked Doctor
           seniorStaffName || "N/A",     // I: Senior Staff
           payPeriodLabel || "N/A"       // J: Pay Period
-        ], "Overtime Requests", googleSheetId);
+        ], SHEET_TAB_NAMES.OVERTIME, googleSheetId);
         console.log("Overtime request logged to Google Sheets");
       } catch (sheetError) {
         console.error("Failed to log overtime to Sheets:", sheetError);
