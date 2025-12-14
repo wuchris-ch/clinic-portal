@@ -17,7 +17,37 @@ import {
     Check,
     Building2,
     Link2,
+    TableProperties,
 } from "lucide-react";
+
+// Column headers for each form type (tab-separated for easy paste into Google Sheets)
+const SHEET_COLUMN_HEADERS = {
+    dayOff: {
+        label: "Day Off Requests",
+        tabName: "Day Off Requests",
+        columns: "Submission Date\tTime of Day\tDay of Week\tType\tName\tEmail\tLeave Type\tStart Date\tEnd Date\tTotal Days\tReason\tPay Period\tCoverage Name\tCoverage Person's Email",
+    },
+    timeClock: {
+        label: "Time Clock Adjustments",
+        tabName: "Time Clock Adjustments",
+        columns: "Submission Date\tTime of Day\tDay of Week\tType\tName\tEmail\tClock In\tClock Out\tReason In\tReason Out\tPay Period",
+    },
+    overtime: {
+        label: "Overtime Requests",
+        tabName: "Overtime Requests",
+        columns: "Submission Date\tTime of Day\tDay of Week\tType\tName\tEmail\tOvertime Date\tAsked Doctor?\tAsked Senior Staff Name\tPay Period",
+    },
+    vacation: {
+        label: "Vacation Requests",
+        tabName: "Vacation Requests",
+        columns: "Submission Date\tTime\tDay of Week\tType\tName\tEmail\tStart Date Vacation\tEnd Date Vacation\t# of Days\tPay Period\tCover Name\tCover Email\tNotes / Reason (optional)",
+    },
+    sickDay: {
+        label: "Sick Days",
+        tabName: "Sick Days",
+        columns: "Submission Date\tTime of Day\tDay of Week\tName\tEmail\tPay Period\tDate Sick\tDoc Note?\tLink to PDF of Doc's Note",
+    },
+};
 
 interface OrganizationSettingsProps {
     organization: Organization;
@@ -28,6 +58,7 @@ export function OrganizationSettings({ organization, serviceAccountEmail }: Orga
     const router = useRouter();
     const [copied, setCopied] = useState(false);
     const [copiedServiceEmail, setCopiedServiceEmail] = useState(false);
+    const [copiedColumns, setCopiedColumns] = useState<string | null>(null);
 
     // Link existing sheet state
     const [sheetIdInput, setSheetIdInput] = useState("");
@@ -70,6 +101,19 @@ export function OrganizationSettings({ organization, serviceAccountEmail }: Orga
     const handleOpenSheet = () => {
         if (sheetUrl) {
             window.open(sheetUrl, "_blank", "noopener,noreferrer");
+        }
+    };
+
+    const handleCopyColumns = async (key: keyof typeof SHEET_COLUMN_HEADERS) => {
+        try {
+            await navigator.clipboard.writeText(SHEET_COLUMN_HEADERS[key].columns);
+            setCopiedColumns(key);
+            toast.success(`${SHEET_COLUMN_HEADERS[key].label} columns copied!`, {
+                description: "Paste into row 1 of your Google Sheet tab",
+            });
+            setTimeout(() => setCopiedColumns(null), 2000);
+        } catch {
+            toast.error("Failed to copy");
         }
     };
 
@@ -256,8 +300,8 @@ export function OrganizationSettings({ organization, serviceAccountEmail }: Orga
             {/* Link Existing Sheet Section */}
             <div className="pt-4 border-t border-border/50">
                 <details className="group" open={!hasSheet}>
-                    <summary className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors list-none">
-                        <Link2 className="w-4 h-4" />
+                    <summary className="flex items-center gap-2 cursor-pointer text-sm md:text-base text-muted-foreground md:text-foreground md:font-medium hover:text-foreground transition-colors list-none">
+                        <Link2 className="w-4 h-4 md:w-5 md:h-5" />
                         <span>Link your Google Sheet</span>
                         <span className="ml-auto text-xs opacity-50 group-open:rotate-90 transition-transform">▶</span>
                     </summary>
@@ -382,6 +426,61 @@ export function OrganizationSettings({ organization, serviceAccountEmail }: Orga
                                 )}
                             </Button>
                         </div>
+                    </div>
+                </details>
+            </div>
+
+            {/* Google Sheet Column Headers */}
+            <div className="pt-4 border-t border-border/50">
+                <details className="group">
+                    <summary className="flex items-center gap-2 cursor-pointer text-sm md:text-base text-muted-foreground md:text-foreground md:font-medium hover:text-foreground transition-colors list-none">
+                        <TableProperties className="w-4 h-4 md:w-5 md:h-5" />
+                        <span>Google Sheet Column Headers</span>
+                        <span className="ml-auto text-xs opacity-50 group-open:rotate-90 transition-transform">▶</span>
+                    </summary>
+                    <div className="mt-4 space-y-4">
+                        <p className="text-xs text-muted-foreground">
+                            Copy these column headers and paste them into row 1 of each tab in your Google Sheet.
+                            Create a tab for each form type you want to track.
+                        </p>
+
+                        <div className="space-y-3">
+                            {(Object.keys(SHEET_COLUMN_HEADERS) as Array<keyof typeof SHEET_COLUMN_HEADERS>).map((key) => {
+                                const { label, tabName } = SHEET_COLUMN_HEADERS[key];
+                                const isCopied = copiedColumns === key;
+                                return (
+                                    <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-medium">{label}</p>
+                                            <p className="text-xs text-muted-foreground">Tab name: &quot;{tabName}&quot;</p>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleCopyColumns(key)}
+                                            className="flex-shrink-0"
+                                        >
+                                            {isCopied ? (
+                                                <>
+                                                    <Check className="w-4 h-4 mr-1.5 text-success" />
+                                                    Copied
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="w-4 h-4 mr-1.5" />
+                                                    Copy
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+                            <strong>Tip:</strong> After pasting, the columns will auto-separate into cells.
+                            Make sure your tab names match exactly (case-sensitive).
+                        </p>
                     </div>
                 </details>
             </div>
