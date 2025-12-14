@@ -78,12 +78,11 @@ async function ensureTestUser(
                 .single();
 
             if (!profile) {
-                // Fallback: try to get from auth users list with filter
-                const { data: users } = await adminClient.auth.admin.listUsers({
-                    filter: { email: email },
-                });
-                if (users?.users?.[0]) {
-                    userId = users.users[0].id;
+                // Fallback: iterate through auth users to find by email
+                const { data: users } = await adminClient.auth.admin.listUsers();
+                const matchingUser = users?.users?.find((u) => u.email === email);
+                if (matchingUser) {
+                    userId = matchingUser.id;
                 } else {
                     console.warn(`  → Could not find user ID for ${email}, skipping profile update`);
                     return;
