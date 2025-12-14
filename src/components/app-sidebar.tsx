@@ -151,7 +151,7 @@ export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
         >
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
-        <a
+        <Link
           href="/"
           className="flex items-center gap-3 px-2 py-3 hover:bg-sidebar-accent rounded-lg transition-colors"
         >
@@ -162,7 +162,7 @@ export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
             <span className="font-bold text-lg">StaffHub</span>
             <span className="text-xs text-muted-foreground">Time Off Portal</span>
           </div>
-        </a>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

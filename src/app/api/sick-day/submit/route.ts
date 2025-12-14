@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { render } from "@react-email/components";
 import { SickDayEmail } from "@/components/emails/sick-day-email";
 import { appendRowToSheet } from "@/lib/google-sheets";
+import { SHEET_TAB_NAMES } from "@/lib/constants/google-sheets";
 import { uploadDoctorNote } from "@/lib/google-drive";
 import { getPSTDateTime } from "@/lib/utils";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
                 sickDate,                             // G: Sick Date
                 hasDoctorNote ? "Yes" : "No",         // H: Has Doctor Note
                 doctorNoteLink || "N/A",              // I: Doctor Note Link
-            ], "Sick Days", googleSheetId);
+            ], SHEET_TAB_NAMES.SICK_DAY, googleSheetId);
             console.log("Sick day logged to Google Sheets");
         } catch (sheetError) {
             console.error("Failed to log sick day to Sheets:", sheetError);
