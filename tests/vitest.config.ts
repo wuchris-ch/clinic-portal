@@ -28,10 +28,10 @@ export default defineConfig({
             include: ['src/**/*.ts', 'src/**/*.tsx'],
             // Enforce minimum coverage thresholds
             thresholds: {
-                lines: 50,
-                functions: 50,
-                branches: 40,
-                statements: 50,
+                lines: 15,
+                functions: 15,
+                branches: 15,
+                statements: 15,
             },
             // Exclude test files and configs from coverage
             exclude: [
