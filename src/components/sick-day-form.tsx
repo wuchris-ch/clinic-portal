@@ -27,12 +27,14 @@ interface SickDayFormProps {
     payPeriods?: PayPeriod[];
     userEmail: string;
     userName: string;
+    googleSheetId?: string;
+    organizationId?: string;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
 
-export function SickDayForm({ payPeriods = [], userEmail, userName }: SickDayFormProps) {
+export function SickDayForm({ payPeriods = [], userEmail, userName, googleSheetId, organizationId }: SickDayFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,7 +114,8 @@ export function SickDayForm({ payPeriods = [], userEmail, userName }: SickDayFor
             return;
         }
 
-        if (!selectedPayPeriodId) {
+        // Pay period is only required if pay periods are available
+        if (payPeriods.length > 0 && !selectedPayPeriodId) {
             toast.error("Please select a pay period");
             return;
         }
@@ -152,6 +155,13 @@ export function SickDayForm({ payPeriods = [], userEmail, userName }: SickDayFor
 
             if (doctorNoteFile) {
                 formData.append("doctorNote", doctorNoteFile);
+            }
+
+            if (googleSheetId) {
+                formData.append("googleSheetId", googleSheetId);
+            }
+            if (organizationId) {
+                formData.append("organizationId", organizationId);
             }
 
             const response = await fetch("/api/sick-day/submit", {

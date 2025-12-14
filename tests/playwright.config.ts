@@ -1,9 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Load .env.local for local development (CI sets these via GITHUB_ENV)
+const envPath = path.resolve(__dirname, '../.env.local');
+if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, 'utf-8');
+    for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const [key, ...valueParts] = trimmed.split('=');
+        if (key && valueParts.length > 0 && !process.env[key.trim()]) {
+            process.env[key.trim()] = valueParts.join('=').trim();
+        }
+    }
+}
 
 /**
  * Playwright configuration for HR Employee Portal E2E and Sanity tests.
  */
 export default defineConfig({
+    // Global setup - checks we're not running against production
+    globalSetup: require.resolve('./global-setup.ts'),
+
     // Test directory
     testDir: './',
 
@@ -40,20 +59,38 @@ export default defineConfig({
         screenshot: 'only-on-failure',
     },
 
-    // Configure projects for major browsers
+    // Configure projects
     projects: [
+        // Setup project - runs first to authenticate
         {
-            name: 'chromium',
+            name: 'setup',
+            testMatch: /auth\.setup\.ts/,
             use: { ...devices['Desktop Chrome'] },
         },
+
+        // Authenticated tests - use saved auth state
+        {
+            name: 'authenticated',
+            testMatch: /.*\.auth\.spec\.ts/,
+            dependencies: ['setup'],
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: 'tests/.auth/admin.json',
+            },
+        },
+
+        // Default project - unauthenticated tests
+        {
+            name: 'chromium',
+            testMatch: /(?<!\.auth)\.spec\.ts$/,
+            testIgnore: /auth\.setup\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+        },
+
         // Add more browsers as needed:
         // {
         //   name: 'firefox',
         //   use: { ...devices['Desktop Firefox'] },
-        // },
-        // {
-        //   name: 'webkit',
-        //   use: { ...devices['Desktop Safari'] },
         // },
     ],
 

@@ -10,8 +10,43 @@ export type UserRole = "staff" | "admin";
 export type RequestStatus = "pending" | "approved" | "denied";
 
 export interface Database {
+  __InternalSupabase: {
+    PostgrestVersion: "12";
+  };
   public: {
     Tables: {
+      organizations: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          admin_email: string;
+          google_sheet_id: string | null;
+          settings: Record<string, unknown>;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          admin_email: string;
+          google_sheet_id?: string | null;
+          settings?: Record<string, unknown>;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          admin_email?: string;
+          google_sheet_id?: string | null;
+          settings?: Record<string, unknown>;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       profiles: {
         Row: {
           id: string;
@@ -19,6 +54,7 @@ export interface Database {
           full_name: string;
           role: UserRole;
           avatar_url: string | null;
+          organization_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -28,6 +64,7 @@ export interface Database {
           full_name: string;
           role?: UserRole;
           avatar_url?: string | null;
+          organization_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -37,6 +74,7 @@ export interface Database {
           full_name?: string;
           role?: UserRole;
           avatar_url?: string | null;
+          organization_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -96,6 +134,7 @@ export interface Database {
           user_id: string;
           leave_type_id: string;
           pay_period_id: string | null;
+          organization_id: string | null;
           submission_date: string;
           start_date: string;
           end_date: string;
@@ -114,6 +153,7 @@ export interface Database {
           user_id: string;
           leave_type_id: string;
           pay_period_id?: string | null;
+          organization_id?: string | null;
           submission_date: string;
           start_date: string;
           end_date: string;
@@ -132,6 +172,7 @@ export interface Database {
           user_id?: string;
           leave_type_id?: string;
           pay_period_id?: string | null;
+          organization_id?: string | null;
           submission_date?: string;
           start_date?: string;
           end_date?: string;
@@ -198,6 +239,7 @@ export interface Database {
           email: string;
           name: string | null;
           is_active: boolean;
+          organization_id: string | null;
           added_by: string | null;
           created_at: string;
           updated_at: string;
@@ -207,6 +249,7 @@ export interface Database {
           email: string;
           name?: string | null;
           is_active?: boolean;
+          organization_id?: string | null;
           added_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -216,6 +259,7 @@ export interface Database {
           email?: string;
           name?: string | null;
           is_active?: boolean;
+          organization_id?: string | null;
           added_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -228,6 +272,7 @@ export interface Database {
           content: string;
           pinned: boolean;
           image_url: string | null;
+          organization_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -237,6 +282,7 @@ export interface Database {
           content: string;
           pinned?: boolean;
           image_url?: string | null;
+          organization_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -246,6 +292,7 @@ export interface Database {
           content?: string;
           pinned?: boolean;
           image_url?: string | null;
+          organization_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -265,6 +312,7 @@ export interface Database {
 }
 
 // Helper types for easier usage
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type LeaveType = Database["public"]["Tables"]["leave_types"]["Row"];
 export type PayPeriod = Database["public"]["Tables"]["pay_periods"]["Row"];

@@ -1,7 +1,6 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppHeader } from "@/components/app-header";
+import type { Profile, Organization } from "@/lib/types/database";
 
 export default async function PublicLayout({
   children,
@@ -13,25 +12,34 @@ export default async function PublicLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get user profile if logged in
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-    profile = data;
+  // Non-signed-in users see the landing page
+  if (!user) {
+    return <>{children}</>;
   }
 
-  return (
-    <SidebarProvider>
-      <AppSidebar user={user} profile={profile} />
-      <SidebarInset>
-        <AppHeader user={user} profile={profile} />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+  // Get user profile to find their organization
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+  const profile = profileData as Profile | null;
+
+  // If user has an org, redirect them to their dashboard
+  if (profile?.organization_id) {
+    const { data: orgData } = await supabase
+      .from("organizations")
+      .select("slug")
+      .eq("id", profile.organization_id)
+      .single();
+    const organization = orgData as Pick<Organization, "slug"> | null;
+
+    if (organization?.slug) {
+      redirect(`/org/${organization.slug}/dashboard`);
+    }
+  }
+
+  // User is logged in but has no org - show the landing page
+  return <>{children}</>;
 }
 

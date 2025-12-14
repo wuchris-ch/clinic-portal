@@ -27,9 +27,11 @@ interface OvertimeRequestFormProps {
     payPeriods?: PayPeriod[];
     userEmail: string;
     userName: string;
+    googleSheetId?: string;
+    organizationId?: string;
 }
 
-export function OvertimeRequestForm({ payPeriods = [], userEmail, userName }: OvertimeRequestFormProps) {
+export function OvertimeRequestForm({ payPeriods = [], userEmail, userName, googleSheetId, organizationId }: OvertimeRequestFormProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     // User details state (editable)
@@ -50,7 +52,8 @@ export function OvertimeRequestForm({ payPeriods = [], userEmail, userName }: Ov
             return;
         }
 
-        if (!selectedPayPeriodId) {
+        // Pay period is only required if pay periods are available
+        if (payPeriods.length > 0 && !selectedPayPeriodId) {
             toast.error("Please select a pay period");
             return;
         }
@@ -89,6 +92,8 @@ export function OvertimeRequestForm({ payPeriods = [], userEmail, userName }: Ov
                     overtimeDate: format(overtimeDate, "yyyy-MM-dd"),
                     askedDoctor,
                     seniorStaffName: !askedDoctor ? seniorStaffName : null,
+                    googleSheetId,
+                    organizationId,
                 }),
             });
 

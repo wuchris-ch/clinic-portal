@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import type { Profile } from "@/lib/types/database";
+import type { Profile, Organization } from "@/lib/types/database";
 import {
   Sidebar,
   SidebarContent,
@@ -28,10 +28,8 @@ import {
   Shield,
   Users,
   LogOut,
-  Home,
   Megaphone,
   FileText,
-  BookOpen,
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -40,111 +38,78 @@ import { useRouter } from "next/navigation";
 interface AppSidebarProps {
   user: User | null;
   profile: Profile | null;
+  organization?: Organization | null;
 }
 
-const helpCenterItems = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Announcements",
-    url: "/announcements",
-    icon: Megaphone,
-  },
-  {
-    title: "Documentation",
-    url: "/documentation",
-    icon: FileText,
-  },
-  {
-    title: "App Walkthrough",
-    url: "/walkthrough",
-    icon: BookOpen,
-  },
-];
 
-const quickFormItems = [
-  {
-    title: "Request 1 Day Off",
-    url: "/forms/day-off",
-    icon: CalendarOff,
-  },
-  {
-    title: "Vacation Request",
-    url: "/forms/vacation",
-    icon: Calendar,
-  },
-  {
-    title: "Time Clock Request",
-    url: "/forms/time-clock",
-    icon: Clock,
-  },
-  {
-    title: "Overtime Submission",
-    url: "/forms/overtime",
-    icon: Timer,
-  },
-  {
-    title: "Sick Day Submission",
-    url: "/forms/sick-day",
-    icon: Thermometer,
-  },
-];
+// Admin and staff nav items are now generated inside the component with org prefixes
 
-const staffNavItems = [
-  {
-    title: "Request 1 Day Off",
-    url: "/dashboard/day-off",
-    icon: CalendarOff,
-  },
-  {
-    title: "Vacation Request",
-    url: "/dashboard/vacation",
-    icon: Calendar,
-  },
-  {
-    title: "Time Clock Request",
-    url: "/dashboard/time-clock",
-    icon: Clock,
-  },
-  {
-    title: "Overtime Submission",
-    url: "/dashboard/overtime",
-    icon: Timer,
-  },
-  {
-    title: "Sick Day Submission",
-    url: "/dashboard/sick-day",
-    icon: Thermometer,
-  },
-  {
-    title: "Team Calendar",
-    url: "/calendar",
-    icon: CalendarDays,
-  },
-];
-
-const adminNavItems = [
-  {
-    title: "Admin Dashboard",
-    url: "/admin",
-    icon: Shield,
-  },
-  {
-    title: "Manage Staff",
-    url: "/admin/employees",
-    icon: Users,
-  },
-];
-
-export function AppSidebar({ user, profile }: AppSidebarProps) {
+export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const isAdmin = profile?.role === "admin";
   const { isMobile, setOpenMobile } = useSidebar();
+
+  // Base path for org-scoped routes
+  const basePath = organization ? `/org/${organization.slug}` : '';
+
+  // Generate org-scoped nav items
+  const staffNavItems = [
+    {
+      title: "Announcements",
+      url: `${basePath}/announcements`,
+      icon: Megaphone,
+    },
+    {
+      title: "Documentation",
+      url: `${basePath}/documentation`,
+      icon: FileText,
+    },
+    {
+      title: "Request 1 Day Off",
+      url: `${basePath}/dashboard/day-off`,
+      icon: CalendarOff,
+    },
+    {
+      title: "Vacation Request",
+      url: `${basePath}/dashboard/vacation`,
+      icon: Calendar,
+    },
+    {
+      title: "Time Clock Request",
+      url: `${basePath}/dashboard/time-clock`,
+      icon: Clock,
+    },
+    {
+      title: "Overtime Submission",
+      url: `${basePath}/dashboard/overtime`,
+      icon: Timer,
+    },
+    {
+      title: "Sick Day Submission",
+      url: `${basePath}/dashboard/sick-day`,
+      icon: Thermometer,
+    },
+    {
+      title: "Team Calendar",
+      url: `${basePath}/calendar`,
+      icon: CalendarDays,
+    },
+  ];
+
+  const adminNavItems = [
+    {
+      title: "Admin Dashboard",
+      url: `${basePath}/admin`,
+      icon: Shield,
+    },
+    {
+      title: "Manage Staff",
+      url: `${basePath}/admin/employees`,
+      icon: Users,
+    },
+  ];
 
   // Close sidebar on mobile after navigation
   const closeSidebarOnMobile = () => {
@@ -178,8 +143,8 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
         >
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
-        <a
-          href="https://clinic-portal-three.vercel.app/"
+        <Link
+          href="/"
           className="flex items-center gap-3 px-2 py-3 hover:bg-sidebar-accent rounded-lg transition-colors"
         >
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -187,57 +152,14 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-lg">StaffHub</span>
-            <span className="text-xs text-muted-foreground">Time Off Portal</span>
+            <span className="text-xs text-muted-foreground truncate max-w-[140px]">
+              {organization?.name || "Time Off Portal"}
+            </span>
           </div>
-        </a>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Help Center</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {helpCenterItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                  >
-                    <Link href={item.url} onClick={closeSidebarOnMobile}>
-                      <item.icon className="w-4 h-4" suppressHydrationWarning />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Quick Forms - always visible, for easy public access */}
-        {!user && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Quick Forms</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {quickFormItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                    >
-                      <Link href={item.url} onClick={closeSidebarOnMobile}>
-                        <item.icon className="w-4 h-4" suppressHydrationWarning />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {user && (
+        {user && organization && (
           <SidebarGroup>
             <SidebarGroupLabel>My Workspace</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -260,7 +182,7 @@ export function AppSidebar({ user, profile }: AppSidebarProps) {
           </SidebarGroup>
         )}
 
-        {isAdmin && user && (
+        {isAdmin && user && organization && (
           <SidebarGroup>
             <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>

@@ -68,7 +68,7 @@ describe('AppSidebar', () => {
     });
 
     describe('Basic Rendering', () => {
-        it('renders with StaffHub branding', () => {
+        it('renders with StaffHub branding and default subtitle', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -78,10 +78,11 @@ describe('AppSidebar', () => {
             });
 
             expect(container.textContent).toContain('StaffHub');
+            // Shows default subtitle when no organization
             expect(container.textContent).toContain('Time Off Portal');
         });
 
-        it('renders Help Center navigation items', () => {
+        it('does not render Help Center section (removed)', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -90,14 +91,11 @@ describe('AppSidebar', () => {
                 );
             });
 
-            expect(container.textContent).toContain('Help Center');
-            expect(container.textContent).toContain('Home');
-            expect(container.textContent).toContain('Announcements');
-            expect(container.textContent).toContain('Documentation');
-            expect(container.textContent).toContain('App Walkthrough');
+            // Help Center section was removed - logo is the only way to get to landing page
+            expect(container.textContent).not.toContain('Help Center');
         });
 
-        it('renders Quick Forms section when user is not logged in', () => {
+        it('does not show workspace sections when user is not logged in', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -106,12 +104,9 @@ describe('AppSidebar', () => {
                 );
             });
 
-            expect(container.textContent).toContain('Quick Forms');
-            expect(container.textContent).toContain('Request 1 Day Off');
-            expect(container.textContent).toContain('Vacation Request');
-            expect(container.textContent).toContain('Time Clock Request');
-            expect(container.textContent).toContain('Overtime Submission');
-            expect(container.textContent).toContain('Sick Day Submission');
+            // Without user/organization, workspace sections are hidden
+            expect(container.textContent).not.toContain('My Workspace');
+            expect(container.textContent).not.toContain('Administration');
         });
 
         it('shows Sign In link when user is not logged in', () => {
@@ -124,6 +119,66 @@ describe('AppSidebar', () => {
             });
 
             expect(container.textContent).toContain('Sign In');
+        });
+    });
+
+    describe('Organization Name Display', () => {
+        const mockUser = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            app_metadata: {},
+            user_metadata: {},
+            aud: 'authenticated',
+            created_at: '2025-01-01',
+        };
+
+        const mockProfile = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            full_name: 'Test User',
+            role: 'staff' as const,
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+            avatar_url: null,
+            organization_id: 'test-org-id',
+        };
+
+        const mockOrganization = {
+            id: 'test-org-id',
+            name: 'Sunrise Medical Clinic',
+            slug: 'sunrise-clinic',
+            admin_email: 'admin@test.com',
+            google_sheet_id: null,
+            settings: {},
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+        };
+
+        it('shows organization name instead of default subtitle when org is provided', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('StaffHub');
+            expect(container.textContent).toContain('Sunrise Medical Clinic');
+            expect(container.textContent).not.toContain('Time Off Portal');
+        });
+
+        it('shows default subtitle when no organization', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={null} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('StaffHub');
+            expect(container.textContent).toContain('Time Off Portal');
         });
     });
 
@@ -192,7 +247,7 @@ describe('AppSidebar', () => {
     });
 
     describe('Navigation Links', () => {
-        it('all Help Center links have onClick handlers', () => {
+        it('logo links to landing page', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -201,19 +256,13 @@ describe('AppSidebar', () => {
                 );
             });
 
-            const homeLink = container.querySelector('a[href="/"]');
-            const announcementsLink = container.querySelector('a[href="/announcements"]');
-            const documentationLink = container.querySelector('a[href="/documentation"]');
-            const walkthroughLink = container.querySelector('a[href="/walkthrough"]');
-
-            // Links should exist
-            expect(homeLink).toBeTruthy();
-            expect(announcementsLink).toBeTruthy();
-            expect(documentationLink).toBeTruthy();
-            expect(walkthroughLink).toBeTruthy();
+            // Logo should link to landing page (only way to get there now)
+            const logoLink = container.querySelector('a[href="/"]');
+            expect(logoLink).toBeTruthy();
+            expect(logoLink?.textContent).toContain('StaffHub');
         });
 
-        it('Quick Forms links have correct hrefs', () => {
+        it('has sign in link for unauthenticated users', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -222,17 +271,8 @@ describe('AppSidebar', () => {
                 );
             });
 
-            const dayOffLink = container.querySelector('a[href="/forms/day-off"]');
-            const vacationLink = container.querySelector('a[href="/forms/vacation"]');
-            const timeClockLink = container.querySelector('a[href="/forms/time-clock"]');
-            const overtimeLink = container.querySelector('a[href="/forms/overtime"]');
-            const sickDayLink = container.querySelector('a[href="/forms/sick-day"]');
-
-            expect(dayOffLink).toBeTruthy();
-            expect(vacationLink).toBeTruthy();
-            expect(timeClockLink).toBeTruthy();
-            expect(overtimeLink).toBeTruthy();
-            expect(sickDayLink).toBeTruthy();
+            const signInLink = container.querySelector('a[href="/login"]');
+            expect(signInLink).toBeTruthy();
         });
     });
 
@@ -254,13 +294,25 @@ describe('AppSidebar', () => {
             created_at: '2025-01-01',
             updated_at: '2025-01-01',
             avatar_url: null,
+            organization_id: 'test-org-id',
         };
 
-        it('shows My Workspace section when logged in', () => {
+        const mockOrganization = {
+            id: 'test-org-id',
+            name: 'Test Organization',
+            slug: 'test-org',
+            admin_email: 'admin@test.com',
+            google_sheet_id: null,
+            settings: {},
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+        };
+
+        it('shows My Workspace section when logged in with organization', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
-                        <AppSidebar user={mockUser} profile={mockProfile} />
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
                     </SidebarProvider>
                 );
             });
@@ -268,7 +320,41 @@ describe('AppSidebar', () => {
             expect(container.textContent).toContain('My Workspace');
         });
 
-        it('does not show Quick Forms section when logged in', () => {
+        it('shows Announcements link in My Workspace section (org-scoped)', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
+                    </SidebarProvider>
+                );
+            });
+
+            // Announcements should be in the My Workspace section for logged-in users with org
+            expect(container.textContent).toContain('Announcements');
+
+            // The link should point to the org-scoped announcements page
+            const announcementsLink = container.querySelector(`a[href="/org/${mockOrganization.slug}/announcements"]`);
+            expect(announcementsLink).toBeTruthy();
+        });
+
+        it('shows Documentation link in My Workspace section (org-scoped)', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
+                    </SidebarProvider>
+                );
+            });
+
+            // Documentation should be in the My Workspace section for logged-in users with org
+            expect(container.textContent).toContain('Documentation');
+
+            // The link should point to the org-scoped documentation page
+            const documentationLink = container.querySelector(`a[href="/org/${mockOrganization.slug}/documentation"]`);
+            expect(documentationLink).toBeTruthy();
+        });
+
+        it('does not show My Workspace without organization', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -277,7 +363,7 @@ describe('AppSidebar', () => {
                 );
             });
 
-            expect(container.textContent).not.toContain('Quick Forms');
+            expect(container.textContent).not.toContain('My Workspace');
         });
 
         it('shows Sign Out button when logged in', () => {
@@ -337,13 +423,25 @@ describe('AppSidebar', () => {
             created_at: '2025-01-01',
             updated_at: '2025-01-01',
             avatar_url: null,
+            organization_id: 'test-org-id',
         };
 
-        it('shows Administration section for admin users', () => {
+        const mockOrganization = {
+            id: 'test-org-id',
+            name: 'Test Organization',
+            slug: 'test-org',
+            admin_email: 'admin@test.com',
+            google_sheet_id: null,
+            settings: {},
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+        };
+
+        it('shows Administration section for admin users with organization', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
-                        <AppSidebar user={mockUser} profile={mockAdminProfile} />
+                        <AppSidebar user={mockUser} profile={mockAdminProfile} organization={mockOrganization} />
                     </SidebarProvider>
                 );
             });
@@ -353,11 +451,23 @@ describe('AppSidebar', () => {
             expect(container.textContent).toContain('Manage Staff');
         });
 
-        it('displays Administrator role label', () => {
+        it('does not show Administration without organization', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
                         <AppSidebar user={mockUser} profile={mockAdminProfile} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).not.toContain('Administration');
+        });
+
+        it('displays Administrator role label', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockAdminProfile} organization={mockOrganization} />
                     </SidebarProvider>
                 );
             });

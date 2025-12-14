@@ -27,6 +27,8 @@ interface VacationRequestFormProps {
   vacationLeaveTypeId?: string; // Required for DB insert
   userEmail: string;
   userName: string;
+  googleSheetId?: string; // Optional - org-specific sheet ID for multi-tenancy
+  organizationId?: string; // Required for multi-tenancy DB inserts
 }
 
 function getWeekdayDatesBetweenInclusive(start: Date, end: Date): Date[] {
@@ -45,6 +47,8 @@ export function VacationRequestForm({
   vacationLeaveTypeId,
   userEmail,
   userName,
+  googleSheetId,
+  organizationId,
 }: VacationRequestFormProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -101,7 +105,8 @@ export function VacationRequestForm({
       return;
     }
 
-    if (selectedPayPeriodIds.length === 0) {
+    // Pay periods are only required if pay periods are available
+    if (payPeriods.length > 0 && selectedPayPeriodIds.length === 0) {
       toast.error("Please select the pay periods affected by your vacation");
       return;
     }
@@ -139,6 +144,7 @@ export function VacationRequestForm({
           .insert({
             user_id: userId,
             leave_type_id: vacationLeaveTypeId,
+            organization_id: organizationId,
             // Vacation can span multiple pay periods, so we don't force a single pay_period_id.
             pay_period_id: null,
             submission_date: submissionDateStr,
@@ -193,6 +199,7 @@ export function VacationRequestForm({
           coverageEmail: coverageEmail.trim() ? coverageEmail.trim() : null,
           payPeriodLabel,
           notes: notes?.trim() || null,
+          googleSheetId, // Pass org-specific sheet ID for multi-tenancy
         }),
       });
 
@@ -438,3 +445,6 @@ export function VacationRequestForm({
     </form>
   );
 }
+
+
+

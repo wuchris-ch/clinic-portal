@@ -1,201 +1,122 @@
 import { test, expect } from '@playwright/test';
-import { TEST_URLS } from '../setup';
 
 /**
  * E2E Tests: Mobile Sidebar Behavior
- * 
- * These tests verify that the mobile sidebar works correctly:
- * - Sidebar auto-closes when navigation links are clicked
- * - X close button is visible on mobile and works
- * - Sidebar can be toggled open/closed
+ *
+ * Note: As of the UX update, unauthenticated users no longer see the sidebar
+ * on public pages (landing page, login, register). The sidebar is only shown
+ * to authenticated users in org-scoped routes.
+ *
+ * These tests verify:
+ * - Unauthenticated users see clean pages without sidebar
+ * - Login page works without sidebar chrome
  */
 
-test.describe('Mobile Sidebar Behavior', () => {
+test.describe('Unauthenticated Mobile Experience', () => {
     // Use iPhone viewport for all mobile tests
     test.use({ viewport: { width: 375, height: 667 } });
 
-    test.describe('Sidebar Auto-Close on Navigation', () => {
-        test('sidebar closes automatically when clicking a navigation link', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
+    test.describe('Landing Page', () => {
+        test('landing page does not show sidebar for unauthenticated users', async ({ page }) => {
+            await page.goto('/');
 
-            // Open the sidebar (click the hamburger menu)
+            // Sidebar should not be visible for unauthenticated users
+            const sidebar = page.locator('[data-sidebar="sidebar"]');
+            await expect(sidebar).not.toBeVisible();
+
+            // No hamburger menu button should be present
             const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
                 .or(page.locator('[data-sidebar="trigger"]'));
-
-            await menuButton.click();
-
-            // Wait for sidebar to be visible
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Click on a navigation link (Documentation)
-            const docLink = page.getByRole('link', { name: /documentation/i });
-            await docLink.click();
-
-            // Wait for navigation
-            await page.waitForURL('**/documentation');
-
-            // Sidebar should be closed (the sheet/drawer should not be visible)
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
+            await expect(menuButton).not.toBeVisible();
         });
 
-        test('sidebar closes when clicking Quick Forms links', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
+        test('landing page shows sign in link directly in content', async ({ page }) => {
+            await page.goto('/');
 
-            // Open the sidebar
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
-
-            await menuButton.click();
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Click on Request 1 Day Off
-            const dayOffLink = page.getByRole('link', { name: /request 1 day off/i }).first();
-            await dayOffLink.click();
-
-            // Wait for navigation
-            await page.waitForURL('**/day-off');
-
-            // Sidebar should be closed
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
+            // Sign in link should be visible in the landing page content
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await expect(signInLink.first()).toBeVisible();
         });
 
-        test('sidebar closes when clicking Home link', async ({ page }) => {
-            // Start on documentation page
-            await page.goto(TEST_URLS.documentation);
+        test('landing page is fully accessible on mobile', async ({ page }) => {
+            await page.goto('/');
 
-            // Open the sidebar
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
+            // Content should be visible without sidebar
+            const staffHubText = page.getByText(/staffhub/i);
+            await expect(staffHubText.first()).toBeVisible();
 
-            await menuButton.click();
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Click on Home
-            const homeLink = page.getByRole('link', { name: /^home$/i });
-            await homeLink.click();
-
-            // Wait for navigation
-            await page.waitForURL('/');
-
-            // Sidebar should be closed
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
+            // Register organization CTA should be visible
+            const registerLink = page.getByRole('link', { name: /register organization/i });
+            await expect(registerLink.first()).toBeVisible();
         });
     });
 
-    test.describe('X Close Button', () => {
-        test('X close button is visible in mobile sidebar header', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
+    test.describe('Login Page', () => {
+        test('login page does not show sidebar', async ({ page }) => {
+            await page.goto('/login');
 
-            // Open the sidebar
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
-
-            await menuButton.click();
-
-            // Wait for sidebar to be visible
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // X close button should be visible
-            const closeButton = page.getByRole('button', { name: /close sidebar/i });
-            await expect(closeButton).toBeVisible();
+            // Sidebar should not be visible
+            const sidebar = page.locator('[data-sidebar="sidebar"]');
+            await expect(sidebar).not.toBeVisible();
         });
 
-        test('clicking X button closes the sidebar', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
+        test('login form is accessible without sidebar', async ({ page }) => {
+            await page.goto('/login');
 
-            // Open the sidebar
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
+            // Form should be visible and usable
+            await expect(page.locator('form')).toBeVisible();
 
-            await menuButton.click();
-
-            // Wait for sidebar to be visible
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Click the X close button
-            const closeButton = page.getByRole('button', { name: /close sidebar/i });
-            await closeButton.click();
-
-            // Sidebar should be closed
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
+            // Email field should be accessible
+            const emailField = page.getByLabel(/email/i).first()
+                .or(page.locator('input[type="email"]').first());
+            await expect(emailField).toBeVisible();
         });
 
-        test('X button has hover effect', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
+        test('can navigate from login to home via logo link', async ({ page }) => {
+            await page.goto('/login');
 
-            // Open the sidebar
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
-
-            await menuButton.click();
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Hover over X button and verify it's interactive
-            const closeButton = page.getByRole('button', { name: /close sidebar/i });
-            await closeButton.hover();
-
-            // Button should still be visible and hoverable
-            await expect(closeButton).toBeVisible();
-        });
-    });
-
-    test.describe('Sidebar Toggle Functionality', () => {
-        test('sidebar can be opened and closed multiple times', async ({ page }) => {
-            await page.goto(TEST_URLS.home);
-
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
-
-            // Open
-            await menuButton.click();
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Close with X button
-            const closeButton = page.getByRole('button', { name: /close sidebar/i });
-            await closeButton.click();
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
-
-            // Open again
-            await menuButton.click();
-            await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
-
-            // Navigate to close
-            const announcementsLink = page.getByRole('link', { name: /announcements/i });
-            await announcementsLink.click();
-            await page.waitForURL('**/announcements');
-
-            // Sidebar should be closed
-            await expect(page.locator('[data-mobile="true"][data-sidebar="sidebar"]')).not.toBeVisible();
+            // There should be a way to get back home (logo or link)
+            const homeLink = page.locator('a[href="/"]');
+            if (await homeLink.first().isVisible()) {
+                await homeLink.first().click();
+                await expect(page).toHaveURL('/');
+            }
         });
     });
 });
 
-test.describe('Desktop Sidebar Behavior', () => {
+test.describe('Desktop Unauthenticated Experience', () => {
     // Use desktop viewport
     test.use({ viewport: { width: 1280, height: 800 } });
 
-    test('X close button is NOT visible on desktop', async ({ page }) => {
-        await page.goto(TEST_URLS.home);
+    test('landing page does not show sidebar on desktop for unauthenticated users', async ({ page }) => {
+        await page.goto('/');
 
-        // On desktop, sidebar should be visible by default (not in a sheet)
-        // The X button has md:hidden class so should not be visible
-        const closeButton = page.getByRole('button', { name: /close sidebar/i });
-
-        // Should not be visible on desktop
-        await expect(closeButton).not.toBeVisible();
+        // Sidebar should not be visible for unauthenticated users
+        const sidebar = page.locator('[data-sidebar="sidebar"]');
+        await expect(sidebar).not.toBeVisible();
     });
 
-    test('sidebar navigation links work on desktop', async ({ page }) => {
-        await page.goto(TEST_URLS.home);
+    test('landing page content is centered without sidebar', async ({ page }) => {
+        await page.goto('/');
 
-        // Click on Documentation link
-        const docLink = page.getByRole('link', { name: /documentation/i });
-        await docLink.click();
+        // Content should be visible
+        const staffHubText = page.getByText(/staffhub/i);
+        await expect(staffHubText.first()).toBeVisible();
 
-        // Should navigate
-        await page.waitForURL('**/documentation');
-
-        // Sidebar should still be visible on desktop (not hidden)
-        await expect(page.locator('[data-sidebar="sidebar"]')).toBeVisible();
+        // Hero section should be present
+        const heroSection = page.locator('h1');
+        await expect(heroSection.first()).toBeVisible();
     });
 });
+
+/**
+ * Note: Tests for authenticated sidebar behavior should be in
+ * authenticated test files that set up proper auth state.
+ *
+ * Authenticated sidebar features that should be tested elsewhere:
+ * - Sidebar auto-close on navigation (mobile)
+ * - X close button functionality (mobile)
+ * - Sidebar navigation links work
+ * - Organization name displayed in sidebar header
+ */

@@ -2,173 +2,106 @@ import { test, expect } from '@playwright/test';
 import { TEST_URLS } from '../setup';
 
 /**
- * Smoke Tests: Public Pages Accessibility
- * 
+ * E2E Tests: Public Pages Accessibility
+ *
  * These tests verify that all public pages load correctly without authentication.
- * They are fast, high-level tests designed to catch critical failures early.
+ * Note: Public forms have been removed - forms are now org-scoped and require auth.
  */
 
-test.describe('Public Pages Smoke Tests', () => {
+test.describe('Public Pages E2E Tests', () => {
 
-    test('homepage loads successfully', async ({ page }) => {
-        await page.goto(TEST_URLS.home);
+    test.describe('Homepage', () => {
+        test('homepage loads successfully', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
 
-        // Check page loads without errors
-        await expect(page).toHaveTitle(/StaffHub|Clinic|Portal/i);
+            // Check page loads without errors
+            await expect(page).toHaveTitle(/StaffHub|Clinic|Portal/i);
 
-        // Check main content is visible
-        await expect(page.locator('body').first()).toBeVisible();
+            // Check main content is visible
+            await expect(page.locator('body').first()).toBeVisible();
 
-        // Check for key homepage elements - look for any content on the page
-        const pageContent = page.getByText(/StaffHub|Help|Announcements|Forms/i);
-        await expect(pageContent.first()).toBeVisible();
-    });
-
-    test('homepage has help topic cards', async ({ page }) => {
-        await page.goto(TEST_URLS.home);
-
-        // Check for announcements link/card
-        const announcementsCard = page.getByText(/Announcements/i).first();
-        await expect(announcementsCard).toBeVisible();
-
-        // Check for day off form link
-        const dayOffLink = page.getByText(/Day Off|Request Day/i).first();
-        await expect(dayOffLink).toBeVisible();
-
-        // Check for time clock link
-        const timeClockLink = page.getByText(/Time Clock/i).first();
-        await expect(timeClockLink).toBeVisible();
-
-        // Check for overtime link
-        const overtimeLink = page.getByText(/Overtime/i).first();
-        await expect(overtimeLink).toBeVisible();
-    });
-
-    test('announcements page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.announcements);
-
-        // Page should load (might redirect to announcements list or show content)
-        await expect(page).not.toHaveURL(/error|404/);
-
-        // Should have some announcement-related content
-        const heading = page.getByRole('heading', { level: 1 }).or(
-            page.getByRole('heading', { level: 2 })
-        ).first();
-        await expect(heading).toBeVisible();
-    });
-
-    test('documentation page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.documentation);
-
-        // Page should load without error
-        await expect(page).not.toHaveURL(/error|404/);
-
-        // Should have documentation content
-        await expect(page.locator('body')).toContainText(/documentation|handbook|protocol/i);
-    });
-
-    test('walkthrough page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.walkthrough);
-
-        // Page should load without error
-        await expect(page).not.toHaveURL(/error|404/);
-
-        // Should have walkthrough content
-        await expect(page.locator('body')).toContainText(/walkthrough|guide|how to/i);
-    });
-
-    test('walkthrough page has correct header text', async ({ page }) => {
-        await page.goto(TEST_URLS.walkthrough);
-
-        // Header should say "App Walkthrough" not "Dashboard"
-        const heading = page.getByRole('heading', { level: 1, name: /App Walkthrough/i });
-        await expect(heading).toBeVisible();
-    });
-
-    test('tech page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.tech);
-
-        // Page should load without error
-        await expect(page).not.toHaveURL(/error|404/);
-
-        // Should have the main heading
-        const heading = page.getByRole('heading', { level: 1, name: /Under the Hood/i });
-        await expect(heading).toBeVisible();
-    });
-
-    test('tech page has key sections', async ({ page }) => {
-        await page.goto(TEST_URLS.tech);
-
-        // Check for major tech sections
-        await expect(page.getByText(/Core Stack/i)).toBeVisible();
-        await expect(page.getByText(/Database.*Authentication/i)).toBeVisible();
-        await expect(page.getByText(/CI\/CD Pipeline/i)).toBeVisible();
-    });
-
-    test('tech page has back link to walkthrough', async ({ page }) => {
-        await page.goto(TEST_URLS.tech);
-
-        const backLink = page.getByRole('link', { name: /Back to App Walkthrough/i });
-        await expect(backLink).toBeVisible();
-    });
-
-    test('public day-off form page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.publicDayOff);
-
-        // Form page should load
-        await expect(page.locator('form')).toBeVisible();
-
-        // Should have name input
-        const nameInput = page.getByLabel(/name/i).or(page.locator('input[placeholder*="name" i]'));
-        await expect(nameInput.first()).toBeVisible();
-
-        // Should have email input
-        const emailInput = page.getByLabel(/email/i).or(page.locator('input[type="email"]'));
-        await expect(emailInput.first()).toBeVisible();
-    });
-
-    test('public time-clock form page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.publicTimeClock);
-
-        // Form page should load
-        await expect(page.locator('form')).toBeVisible();
-
-        // Should have name input
-        const nameInput = page.getByLabel(/name/i).or(page.locator('input[placeholder*="name" i]'));
-        await expect(nameInput.first()).toBeVisible();
-    });
-
-    test('public overtime form page loads', async ({ page }) => {
-        await page.goto(TEST_URLS.publicOvertime);
-
-        // Form page should load
-        await expect(page.locator('form')).toBeVisible();
-
-        // Should have name input
-        const nameInput = page.getByLabel(/name/i).or(page.locator('input[placeholder*="name" i]'));
-        await expect(nameInput.first()).toBeVisible();
-    });
-
-    test('pages load without JavaScript errors', async ({ page }) => {
-        const errors: string[] = [];
-
-        page.on('pageerror', (error) => {
-            errors.push(error.message);
+            // Check for key homepage elements
+            const pageContent = page.getByText(/StaffHub/i);
+            await expect(pageContent.first()).toBeVisible();
         });
 
-        // Visit critical public pages
-        await page.goto(TEST_URLS.home);
-        await page.goto(TEST_URLS.publicDayOff);
-        await page.goto(TEST_URLS.publicTimeClock);
-        await page.goto(TEST_URLS.publicOvertime);
+        test('homepage has registration options', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
 
-        // Filter out benign errors (like React hydration warnings in dev)
-        const criticalErrors = errors.filter(e =>
-            !e.includes('Hydration') &&
-            !e.includes('Warning:') &&
-            !e.includes('ResizeObserver')
-        );
+            // Check for organization registration link
+            const registerOrgLink = page.getByRole('link', { name: /register organization/i });
+            await expect(registerOrgLink.first()).toBeVisible();
 
-        expect(criticalErrors).toHaveLength(0);
+            // Check for staff registration link
+            const staffLink = page.getByRole('link', { name: /register as staff/i });
+            await expect(staffLink.first()).toBeVisible();
+
+            // Check for sign in link
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await expect(signInLink.first()).toBeVisible();
+        });
+
+        test('homepage has feature descriptions', async ({ page }) => {
+            await page.goto(TEST_URLS.home);
+
+            // Check for feature mentions
+            const features = [
+                /Day Off|Request/i,
+                /Time Clock/i,
+                /Overtime/i,
+            ];
+
+            for (const feature of features) {
+                const element = page.getByText(feature).first();
+                await expect(element).toBeVisible();
+            }
+        });
+    });
+
+    // Documentation page has been moved to org-scoped protected routes
+    // Tests for protected documentation are in documentation.spec.ts
+
+    test.describe('Auth Pages Are Publicly Accessible', () => {
+        test('login page is accessible', async ({ page }) => {
+            await page.goto(TEST_URLS.login);
+            await expect(page).toHaveURL(/login/);
+            await expect(page.locator('form')).toBeVisible();
+        });
+
+        test('register page is accessible', async ({ page }) => {
+            await page.goto(TEST_URLS.register);
+            await expect(page).toHaveURL(/register/);
+            await expect(page.locator('form')).toBeVisible();
+        });
+
+        test('register-org page is accessible', async ({ page }) => {
+            await page.goto(TEST_URLS.registerOrg);
+            await expect(page).toHaveURL(/register-org/);
+            await expect(page.locator('form')).toBeVisible();
+        });
+    });
+
+    test.describe('Page Error Handling', () => {
+        test('pages load without JavaScript errors', async ({ page }) => {
+            const errors: string[] = [];
+
+            page.on('pageerror', (error) => {
+                errors.push(error.message);
+            });
+
+            // Visit critical public pages
+            await page.goto(TEST_URLS.home);
+            await page.goto(TEST_URLS.login);
+            await page.goto(TEST_URLS.register);
+
+            // Filter out benign errors (like React hydration warnings in dev)
+            const criticalErrors = errors.filter(e =>
+                !e.includes('Hydration') &&
+                !e.includes('Warning:') &&
+                !e.includes('ResizeObserver')
+            );
+
+            expect(criticalErrors).toHaveLength(0);
+        });
     });
 });

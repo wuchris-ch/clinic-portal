@@ -49,6 +49,7 @@ describe('Database Types', () => {
                 full_name: 'Test User',
                 role: 'staff',
                 avatar_url: null,
+                organization_id: null,
                 created_at: '2025-12-08T00:00:00Z',
                 updated_at: '2025-12-08T00:00:00Z',
             };
@@ -103,6 +104,7 @@ describe('Database Types', () => {
                 user_id: 'user-id',
                 leave_type_id: 'leave-type-id',
                 pay_period_id: null,
+                organization_id: null,
                 submission_date: '2025-12-08',
                 start_date: '2025-12-09',
                 end_date: '2025-12-09',
@@ -131,6 +133,7 @@ describe('Database Types', () => {
                 content: 'This is a test announcement content.',
                 pinned: false,
                 image_url: null,
+                organization_id: null,
                 created_at: '2025-12-08T00:00:00Z',
                 updated_at: '2025-12-08T00:00:00Z',
             };
@@ -148,6 +151,7 @@ describe('Database Types', () => {
                 content: 'Content here',
                 pinned: true,
                 image_url: 'https://example.com/image.jpg',
+                organization_id: null,
                 created_at: '2025-12-08T00:00:00Z',
                 updated_at: '2025-12-08T00:00:00Z',
             };
