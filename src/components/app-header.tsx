@@ -13,7 +13,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { Home, FileText, LogOut, LogIn } from "lucide-react";
+import { Home, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,8 +24,8 @@ interface AppHeaderProps {
 
 const pageTitles: Record<string, string> = {
   "/": "Home",
-  "/documentation": "Documentation",
   // Org-scoped pages (slug is dynamic, matched by suffix below)
+  "/documentation": "Documentation",
   "/announcements": "Announcements",
   "/calendar": "Team Calendar",
   "/admin": "Admin Dashboard",
@@ -70,7 +70,7 @@ export function AppHeader({ user, profile }: AppHeaderProps) {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto flex items-center gap-2 md:gap-4">
-        {/* Help Center Quick Links - Hidden on mobile */}
+        {/* Home Quick Link - Hidden on mobile */}
         <div className="hidden md:flex items-center gap-1">
           <Link
             href="/"
@@ -78,13 +78,6 @@ export function AppHeader({ user, profile }: AppHeaderProps) {
           >
             <Home className="w-3.5 h-3.5" />
             <span>Home</span>
-          </Link>
-          <Link
-            href="/documentation"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Docs</span>
           </Link>
         </div>
         <Separator orientation="vertical" className="hidden md:block h-4" />

@@ -92,7 +92,8 @@ describe('AppSidebar', () => {
 
             expect(container.textContent).toContain('Help Center');
             expect(container.textContent).toContain('Home');
-            expect(container.textContent).toContain('Documentation');
+            // Documentation is now org-scoped, not in Help Center
+            expect(container.textContent).not.toContain('Documentation');
             // Announcements is now org-scoped, not in Help Center
             expect(container.textContent).not.toContain('Announcements');
         });
@@ -199,11 +200,12 @@ describe('AppSidebar', () => {
             });
 
             const homeLink = container.querySelector('a[href="/"]');
-            const documentationLink = container.querySelector('a[href="/documentation"]');
 
             // Links should exist
             expect(homeLink).toBeTruthy();
-            expect(documentationLink).toBeTruthy();
+            // Documentation is now org-scoped, not in Help Center for unauthenticated users
+            const documentationLink = container.querySelector('a[href="/documentation"]');
+            expect(documentationLink).toBeNull();
         });
 
         it('Help Center links have correct hrefs', () => {
@@ -216,11 +218,9 @@ describe('AppSidebar', () => {
             });
 
             const homeLink = container.querySelector('a[href="/"]');
-            const documentationLink = container.querySelector('a[href="/documentation"]');
             const signInLink = container.querySelector('a[href="/login"]');
 
             expect(homeLink).toBeTruthy();
-            expect(documentationLink).toBeTruthy();
             expect(signInLink).toBeTruthy();
         });
     });
@@ -284,6 +284,23 @@ describe('AppSidebar', () => {
             // The link should point to the org-scoped announcements page
             const announcementsLink = container.querySelector(`a[href="/org/${mockOrganization.slug}/announcements"]`);
             expect(announcementsLink).toBeTruthy();
+        });
+
+        it('shows Documentation link in My Workspace section (org-scoped)', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
+                    </SidebarProvider>
+                );
+            });
+
+            // Documentation should be in the My Workspace section for logged-in users with org
+            expect(container.textContent).toContain('Documentation');
+
+            // The link should point to the org-scoped documentation page
+            const documentationLink = container.querySelector(`a[href="/org/${mockOrganization.slug}/documentation"]`);
+            expect(documentationLink).toBeTruthy();
         });
 
         it('does not show My Workspace without organization', () => {

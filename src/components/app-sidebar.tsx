@@ -48,11 +48,6 @@ const helpCenterItems = [
     url: "/",
     icon: Home,
   },
-  {
-    title: "Documentation",
-    url: "/documentation",
-    icon: FileText,
-  },
 ];
 
 // Admin and staff nav items are now generated inside the component with org prefixes
@@ -73,6 +68,11 @@ export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
       title: "Announcements",
       url: `${basePath}/announcements`,
       icon: Megaphone,
+    },
+    {
+      title: "Documentation",
+      url: `${basePath}/documentation`,
+      icon: FileText,
     },
     {
       title: "Request 1 Day Off",
