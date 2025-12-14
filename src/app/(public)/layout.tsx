@@ -1,7 +1,5 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppHeader } from "@/components/app-header";
 import type { Profile, Organization } from "@/lib/types/database";
 
 export default async function PublicLayout({
@@ -14,37 +12,34 @@ export default async function PublicLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get user profile and organization if logged in
-  let profile: Profile | null = null;
-  let organization: Organization | null = null;
+  // Non-signed-in users see the landing page
+  if (!user) {
+    return <>{children}</>;
+  }
 
-  if (user) {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
+  // Get user profile to find their organization
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+  const profile = profileData as Profile | null;
+
+  // If user has an org, redirect them to their dashboard
+  if (profile?.organization_id) {
+    const { data: orgData } = await supabase
+      .from("organizations")
+      .select("slug")
+      .eq("id", profile.organization_id)
       .single();
-    profile = profileData as Profile | null;
+    const organization = orgData as Pick<Organization, "slug"> | null;
 
-    // If user has an org, fetch it
-    if (profile?.organization_id) {
-      const { data: orgData } = await supabase
-        .from("organizations")
-        .select("*")
-        .eq("id", profile.organization_id)
-        .single();
-      organization = orgData as Organization | null;
+    if (organization?.slug) {
+      redirect(`/org/${organization.slug}/dashboard`);
     }
   }
 
-  return (
-    <SidebarProvider>
-      <AppSidebar user={user} profile={profile} organization={organization} />
-      <SidebarInset>
-        <AppHeader user={user} profile={profile} />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+  // User is logged in but has no org - show the landing page
+  return <>{children}</>;
 }
 

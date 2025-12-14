@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { PendingRequestsQueue } from "@/components/admin/pending-requests-queue";
 import { RequestsHistory } from "@/components/admin/requests-history";
 import { NotificationRecipients } from "@/components/admin/notification-recipients";
-import { OrganizationSettings } from "@/components/admin/organization-settings";
+import { GoogleSheetsCard } from "@/components/admin/google-sheets-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, History, Shield, Users, CheckCircle, XCircle, Bell, Settings } from "lucide-react";
+import { Clock, History, Shield, Users, CheckCircle, XCircle, Bell, Building2 } from "lucide-react";
 import type { Profile, LeaveRequest, LeaveType, NotificationRecipient, Organization } from "@/lib/types/database";
 
 type RequestWithDetails = LeaveRequest & {
@@ -92,18 +92,31 @@ export default async function AdminPage({ params }: PageProps) {
     const deniedCount = allRequests.filter((r) => r.status === "denied").length;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
+            {/* Organization Header - Compact */}
+            {organization && (
+                <div className="flex items-center gap-3 px-1">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10">
+                        <Building2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-semibold tracking-tight">{organization.name}</h1>
+                        <p className="text-sm text-muted-foreground">/{organization.slug}</p>
+                    </div>
+                </div>
+            )}
+
             {/* Email Notifications */}
-            <Card className="border-border/50">
-                <CardHeader>
+            <Card className="border-border/40 shadow-sm">
+                <CardHeader className="pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center border border-primary/10">
                             <Bell className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <CardTitle>Email Notifications</CardTitle>
-                            <CardDescription>
-                                Manage who receives email notifications for new time-off requests
+                            <CardTitle className="text-base">Email Notifications</CardTitle>
+                            <CardDescription className="text-sm">
+                                Manage who receives alerts for new time-off requests
                             </CardDescription>
                         </div>
                     </div>
@@ -117,33 +130,53 @@ export default async function AdminPage({ params }: PageProps) {
                 </CardContent>
             </Card>
 
-            {/* Organization Settings (Google Sheets) */}
+            {/* Google Sheets Integration - Distinct section */}
             {organization && (
-                <Card className="border-border/50">
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                <Settings className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                                <CardTitle>Organization Settings</CardTitle>
-                                <CardDescription>
-                                    Manage your organization&apos;s configuration and integrations
-                                </CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <OrganizationSettings
-                            organization={organization}
-                            serviceAccountEmail={process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}
-                        />
-                    </CardContent>
-                </Card>
+                <GoogleSheetsCard
+                    organization={organization}
+                    serviceAccountEmail={process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}
+                />
             )}
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
+            {/* Time-Off Requests (Approval Queue) */}
+            <Card className="border-border/40 shadow-sm">
+                <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center border border-primary/10">
+                            <Shield className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-base">Time-Off Requests</CardTitle>
+                            <CardDescription className="text-sm">
+                                Review and manage employee leave requests
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="pending" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-6 h-11">
+                            <TabsTrigger value="pending" className="flex items-center gap-2 text-sm">
+                                <Clock className="w-4 h-4" />
+                                Pending ({pendingCount})
+                            </TabsTrigger>
+                            <TabsTrigger value="history" className="flex items-center gap-2 text-sm">
+                                <History className="w-4 h-4" />
+                                History ({processedRequests.length})
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="pending">
+                            <PendingRequestsQueue requests={pendingRequests} adminId={user.id} />
+                        </TabsContent>
+                        <TabsContent value="history">
+                            <RequestsHistory requests={processedRequests} />
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
+
+            {/* Stats Cards - At bottom */}
+            <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
                 <StatsCard
                     title="Total Staff"
                     value={staffCount}
@@ -169,43 +202,6 @@ export default async function AdminPage({ params }: PageProps) {
                     variant="destructive"
                 />
             </div>
-
-            {/* Time-Off Requests (Approval Queue) */}
-            <Card className="border-border/50">
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                            <CardTitle>Time-Off Requests</CardTitle>
-                            <CardDescription>
-                                Review and manage employee leave requests
-                            </CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="pending" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="pending" className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                Pending ({pendingCount})
-                            </TabsTrigger>
-                            <TabsTrigger value="history" className="flex items-center gap-2">
-                                <History className="w-4 h-4" />
-                                History ({processedRequests.length})
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="pending">
-                            <PendingRequestsQueue requests={pendingRequests} adminId={user.id} />
-                        </TabsContent>
-                        <TabsContent value="history">
-                            <RequestsHistory requests={processedRequests} />
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
         </div>
     );
 }
@@ -222,28 +218,44 @@ function StatsCard({
     variant: "default" | "warning" | "success" | "destructive";
 }) {
     const variantStyles = {
-        default: "bg-card border-border/50",
-        warning: "bg-warning/10 text-warning-foreground border-warning/20",
-        success: "bg-success/10 text-success border-success/20",
-        destructive: "bg-destructive/10 text-destructive border-destructive/20",
+        default: "bg-card border-border/40 shadow-sm",
+        warning: "bg-gradient-to-br from-amber-50 to-orange-50/50 border-amber-200/60 shadow-sm shadow-amber-100/50",
+        success: "bg-gradient-to-br from-emerald-50 to-green-50/50 border-emerald-200/60 shadow-sm shadow-emerald-100/50",
+        destructive: "bg-gradient-to-br from-rose-50 to-red-50/50 border-rose-200/60 shadow-sm shadow-rose-100/50",
     };
 
-    const iconStyles = {
+    const titleStyles = {
         default: "text-muted-foreground",
-        warning: "text-warning-foreground",
-        success: "text-success",
-        destructive: "text-destructive",
+        warning: "text-amber-700",
+        success: "text-emerald-700",
+        destructive: "text-rose-700",
+    };
+
+    const valueStyles = {
+        default: "text-foreground",
+        warning: "text-amber-900",
+        success: "text-emerald-900",
+        destructive: "text-rose-900",
+    };
+
+    const iconContainerStyles = {
+        default: "bg-muted/50 text-muted-foreground",
+        warning: "bg-amber-100/80 text-amber-600",
+        success: "bg-emerald-100/80 text-emerald-600",
+        destructive: "bg-rose-100/80 text-rose-600",
     };
 
     return (
-        <Card className={`border ${variantStyles[variant]}`}>
-            <CardContent className="p-3 md:p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-xs md:text-sm font-medium opacity-80">{title}</p>
-                        <p className="text-2xl md:text-3xl font-bold">{value}</p>
+        <Card className={`border overflow-hidden ${variantStyles[variant]}`}>
+            <CardContent className="p-4 md:p-5">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                        <p className={`text-xs md:text-sm font-medium ${titleStyles[variant]}`}>{title}</p>
+                        <p className={`text-2xl md:text-3xl font-bold tracking-tight ${valueStyles[variant]}`}>{value}</p>
                     </div>
-                    <div className={`${iconStyles[variant]} [&>svg]:w-3 [&>svg]:h-3 md:[&>svg]:w-4 md:[&>svg]:h-4`}>{icon}</div>
+                    <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center ${iconContainerStyles[variant]}`}>
+                        <div className="[&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-[18px] md:[&>svg]:h-[18px]">{icon}</div>
+                    </div>
                 </div>
             </CardContent>
         </Card>
