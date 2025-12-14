@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 /**
  * High-Value Tests: Link Sheet API Logic
@@ -23,11 +23,6 @@ interface User {
 interface Profile {
     role: string;
     organization_id: string | null;
-}
-
-interface LinkSheetInput {
-    sheetId: string;
-    organizationId: string;
 }
 
 type AuthResult =

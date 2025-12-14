@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getPSTDateTime, cn } from '@/lib/utils';
 
 /**
@@ -11,9 +11,6 @@ import { getPSTDateTime, cn } from '@/lib/utils';
  */
 
 describe('getPSTDateTime', () => {
-    // Store original timezone info
-    const realDate = Date;
-
     afterEach(() => {
         vi.useRealTimers();
     });
@@ -48,9 +45,7 @@ describe('getPSTDateTime', () => {
 
     describe('Default behavior', () => {
         it('uses current date when no argument provided', () => {
-            const before = new Date();
             const result = getPSTDateTime();
-            const after = new Date();
 
             // Result should be a valid date string
             expect(result.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
