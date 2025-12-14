@@ -571,6 +571,34 @@ GitHub Actions runs on every PR:
 
 Tests run against ephemeral local Supabase - never production.
 
+### Pre-Merge Smoke Test (Vercel Preview)
+
+Tests verify code logic but **cannot catch** infrastructure issues. Before merging, manually test these on your Vercel Preview deployment:
+
+| Check | What to Verify | Why Tests Miss It |
+|-------|---------------|-------------------|
+| **Login** | Redirects to dashboard (not blank page) | Tests mock auth, don't verify post-login flow |
+| **Dropdowns** | Pay periods & leave types load | GRANT permissions not tested |
+| **Form Submit** | Success toast appears | Real API integration |
+| **Google Sheet** | Row appears (if sheet linked) | Tests mock googleapis |
+| **Cross-org Access** | User from Org A can't access `/org/org-b/dashboard` | RLS tested but GRANT drift possible |
+
+**Quick checklist:**
+
+```
+□ Open Vercel Preview URL
+□ Log in with Google OAuth → lands on dashboard
+□ Open a form → dropdowns populated
+□ Submit a request → success toast
+□ Check Google Sheet → new row appears
+□ Try accessing another org's URL → redirected or denied
+```
+
+If all pass, you're safe to merge. If any fail, the issue is likely:
+- Missing GRANT permissions (see Troubleshooting section)
+- Environment variable misconfiguration
+- Google Sheets not shared with service account
+
 ## Production Deployment
 
 ### Vercel
