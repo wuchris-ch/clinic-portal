@@ -247,17 +247,28 @@ describe('AppSidebar', () => {
     });
 
     describe('Navigation Links', () => {
-        it('logo links to landing page', () => {
+        const mockOrg = {
+            id: 'test-org-id',
+            name: 'Test Organization',
+            slug: 'testorg',
+            admin_email: 'admin@test.com',
+            google_sheet_id: null,
+            settings: {},
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+        };
+
+        it('logo links to org home page when organization is present', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
-                        <AppSidebar user={null} profile={null} />
+                        <AppSidebar user={null} profile={null} organization={mockOrg} />
                     </SidebarProvider>
                 );
             });
 
-            // Logo should link to landing page (only way to get there now)
-            const logoLink = container.querySelector('a[href="/"]');
+            // Logo should link to org home page (about/landing page within app)
+            const logoLink = container.querySelector('a[href="/org/testorg/home"]');
             expect(logoLink).toBeTruthy();
             expect(logoLink?.textContent).toContain('StaffHub');
         });

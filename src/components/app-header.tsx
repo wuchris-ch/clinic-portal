@@ -25,6 +25,7 @@ interface AppHeaderProps {
 const pageTitles: Record<string, string> = {
   "/": "Home",
   // Org-scoped pages (slug is dynamic, matched by suffix below)
+  "/home": "About StaffHub",
   "/documentation": "Documentation",
   "/announcements": "Announcements",
   "/calendar": "Team Calendar",
