@@ -56,6 +56,7 @@ const mockRecipients = [
         added_by: 'admin1',
         organization_id: 'org1',
         created_at: '2025-01-15T10:00:00Z',
+        updated_at: '2025-01-15T10:00:00Z',
     },
     {
         id: 'rec2',
@@ -65,6 +66,7 @@ const mockRecipients = [
         added_by: 'admin1',
         organization_id: 'org1',
         created_at: '2025-01-10T10:00:00Z',
+        updated_at: '2025-01-10T10:00:00Z',
     },
     {
         id: 'rec3',
@@ -74,6 +76,7 @@ const mockRecipients = [
         added_by: 'admin1',
         organization_id: 'org1',
         created_at: '2025-01-05T10:00:00Z',
+        updated_at: '2025-01-05T10:00:00Z',
     },
 ];
 
