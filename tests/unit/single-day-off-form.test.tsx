@@ -46,9 +46,9 @@ vi.mock('sonner', () => {
 });
 
 const mockLeaveTypes = [
-    { id: 'lt1', name: 'Personal Day', color: '#3b82f6', created_at: '2025-01-01' },
-    { id: 'lt2', name: 'Sick Leave', color: '#ef4444', created_at: '2025-01-01' },
-    { id: 'lt3', name: 'Vacation', color: '#22c55e', created_at: '2025-01-01' }, // Should be filtered out
+    { id: 'lt1', name: 'Personal Day', color: '#3b82f6', is_single_day: true, created_at: '2025-01-01' },
+    { id: 'lt2', name: 'Sick Leave', color: '#ef4444', is_single_day: true, created_at: '2025-01-01' },
+    { id: 'lt3', name: 'Vacation', color: '#22c55e', is_single_day: false, created_at: '2025-01-01' }, // Should be filtered out
 ];
 
 const mockPayPeriods = [

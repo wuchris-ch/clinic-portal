@@ -69,6 +69,7 @@ const mockRequests = [
         reviewed_by: null,
         reviewed_at: null,
         created_at: '2025-01-15T10:00:00Z',
+        updated_at: '2025-01-15T10:00:00Z',
         profiles: {
             id: 'user1',
             full_name: 'John Doe',
@@ -79,6 +80,7 @@ const mockRequests = [
             id: 'lt1',
             name: 'Personal Day',
             color: '#3b82f6',
+            is_single_day: true,
             created_at: '2025-01-01',
         },
     },
@@ -99,6 +101,7 @@ const mockRequests = [
         reviewed_by: null,
         reviewed_at: null,
         created_at: '2025-01-14T10:00:00Z',
+        updated_at: '2025-01-14T10:00:00Z',
         profiles: {
             id: 'user2',
             full_name: 'Alice Johnson',
@@ -109,6 +112,7 @@ const mockRequests = [
             id: 'lt2',
             name: 'Vacation',
             color: '#22c55e',
+            is_single_day: false,
             created_at: '2025-01-01',
         },
     },

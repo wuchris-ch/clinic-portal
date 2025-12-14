@@ -23,7 +23,9 @@ const mockOrganization: Organization = {
     slug: 'acme-clinic',
     admin_email: 'admin@acme.com',
     google_sheet_id: 'sheet-123',
+    settings: {},
     created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
 };
 
 describe('OrganizationProvider', () => {
