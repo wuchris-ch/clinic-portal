@@ -50,60 +50,34 @@ test.describe('Protected Documentation Page', () => {
         });
     });
 
-    test.describe('Sidebar Navigation', () => {
-        test('documentation link is NOT visible in sidebar for unauthenticated users', async ({ page }) => {
+    test.describe('Unauthenticated User Experience', () => {
+        test('unauthenticated users see clean landing page without sidebar', async ({ page }) => {
             await page.goto('/');
 
-            // Open sidebar on mobile if needed
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
+            // Unauthenticated users should NOT see sidebar chrome
+            const sidebar = page.locator('[data-sidebar="sidebar"]');
+            await expect(sidebar).not.toBeVisible();
 
-            if (await menuButton.isVisible()) {
-                await menuButton.click();
-                await page.waitForTimeout(300); // Wait for sidebar animation
-            }
-
-            // Documentation link should NOT be visible for unauthenticated users
-            const docLink = page.getByRole('link', { name: /documentation/i });
-            await expect(docLink).not.toBeVisible();
+            // Should see the landing page content directly
+            const staffHubText = page.getByText(/staffhub/i);
+            await expect(staffHubText.first()).toBeVisible();
         });
 
-        test('home link is visible in sidebar for unauthenticated users', async ({ page }) => {
-            await page.goto('/');
-
-            // Open sidebar on mobile if needed
-            const menuButton = page.getByRole('button', { name: /toggle sidebar/i })
-                .or(page.locator('[data-sidebar="trigger"]'));
-
-            if (await menuButton.isVisible()) {
-                await menuButton.click();
-                await page.waitForTimeout(300);
-            }
-
-            // Home link should be visible
-            const homeLink = page.getByRole('link', { name: /^home$/i });
-            await expect(homeLink.first()).toBeVisible();
-        });
-    });
-
-    test.describe('Header Navigation', () => {
-        test('documentation link is NOT visible in header for unauthenticated users', async ({ page }) => {
-            // Use desktop viewport to see header links
+        test('unauthenticated users do not see header navigation', async ({ page }) => {
             await page.setViewportSize({ width: 1280, height: 800 });
             await page.goto('/');
 
-            // Documentation link should NOT be in header
-            const headerDocLink = page.locator('header').getByRole('link', { name: /docs|documentation/i });
-            await expect(headerDocLink).not.toBeVisible();
+            // Header with navigation should not be present for unauthenticated users
+            const header = page.locator('header');
+            await expect(header).not.toBeVisible();
         });
 
-        test('home link IS visible in header on desktop', async ({ page }) => {
-            await page.setViewportSize({ width: 1280, height: 800 });
+        test('landing page has sign in CTA for unauthenticated users', async ({ page }) => {
             await page.goto('/');
 
-            // Home link should be visible in header
-            const headerHomeLink = page.locator('header').getByRole('link', { name: /home/i });
-            await expect(headerHomeLink.first()).toBeVisible();
+            // Should have sign in button on the landing page itself
+            const signInLink = page.getByRole('link', { name: /sign in/i });
+            await expect(signInLink.first()).toBeVisible();
         });
     });
 });

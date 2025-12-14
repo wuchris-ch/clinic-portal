@@ -14,6 +14,7 @@ import { Users, Clock, CheckCircle, XCircle } from 'lucide-react';
  */
 
 // Recreate StatsCard component for testing (mirrors the one in admin/page.tsx)
+// Updated to match new gradient-based styling
 function StatsCard({
     title,
     value,
@@ -26,28 +27,44 @@ function StatsCard({
     variant: "default" | "warning" | "success" | "destructive";
 }) {
     const variantStyles = {
-        default: "bg-card border-border/50",
-        warning: "bg-warning/10 text-warning-foreground border-warning/20",
-        success: "bg-success/10 text-success border-success/20",
-        destructive: "bg-destructive/10 text-destructive border-destructive/20",
+        default: "bg-card border-border/40 shadow-sm",
+        warning: "bg-gradient-to-br from-amber-50 to-orange-50/50 border-amber-200/60 shadow-sm shadow-amber-100/50",
+        success: "bg-gradient-to-br from-emerald-50 to-green-50/50 border-emerald-200/60 shadow-sm shadow-emerald-100/50",
+        destructive: "bg-gradient-to-br from-rose-50 to-red-50/50 border-rose-200/60 shadow-sm shadow-rose-100/50",
     };
 
-    const iconStyles = {
+    const titleStyles = {
         default: "text-muted-foreground",
-        warning: "text-warning-foreground",
-        success: "text-success",
-        destructive: "text-destructive",
+        warning: "text-amber-700",
+        success: "text-emerald-700",
+        destructive: "text-rose-700",
+    };
+
+    const valueStyles = {
+        default: "text-foreground",
+        warning: "text-amber-900",
+        success: "text-emerald-900",
+        destructive: "text-rose-900",
+    };
+
+    const iconContainerStyles = {
+        default: "bg-muted/50 text-muted-foreground",
+        warning: "bg-amber-100/80 text-amber-600",
+        success: "bg-emerald-100/80 text-emerald-600",
+        destructive: "bg-rose-100/80 text-rose-600",
     };
 
     return (
-        <div className={`border rounded-lg ${variantStyles[variant]}`} data-testid="stats-card">
-            <div className="p-3 md:p-6" data-testid="card-content">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-xs md:text-sm font-medium opacity-80" data-testid="card-title">{title}</p>
-                        <p className="text-2xl md:text-3xl font-bold" data-testid="card-value">{value}</p>
+        <div className={`border rounded-lg overflow-hidden ${variantStyles[variant]}`} data-testid="stats-card">
+            <div className="p-4 md:p-5" data-testid="card-content">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                        <p className={`text-xs md:text-sm font-medium ${titleStyles[variant]}`} data-testid="card-title">{title}</p>
+                        <p className={`text-2xl md:text-3xl font-bold tracking-tight ${valueStyles[variant]}`} data-testid="card-value">{value}</p>
                     </div>
-                    <div className={`${iconStyles[variant]} [&>svg]:w-3 [&>svg]:h-3 md:[&>svg]:w-4 md:[&>svg]:h-4`} data-testid="card-icon">{icon}</div>
+                    <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center ${iconContainerStyles[variant]}`} data-testid="card-icon">
+                        <div className="[&>svg]:w-4 [&>svg]:h-4 md:[&>svg]:w-[18px] md:[&>svg]:h-[18px]">{icon}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,8 +131,8 @@ describe('StatsCard Component', () => {
         });
 
         const cardContent = container.querySelector('[data-testid="card-content"]');
-        expect(cardContent?.className).toContain('p-3');
-        expect(cardContent?.className).toContain('md:p-6');
+        expect(cardContent?.className).toContain('p-4');
+        expect(cardContent?.className).toContain('md:p-5');
     });
 
     it('applies mobile-compact text size classes to title', () => {
@@ -152,7 +169,7 @@ describe('StatsCard Component', () => {
         expect(cardValue?.className).toContain('md:text-3xl');
     });
 
-    it('applies mobile-compact icon size classes', () => {
+    it('applies icon container with proper sizing', () => {
         act(() => {
             root.render(
                 <StatsCard
@@ -165,13 +182,15 @@ describe('StatsCard Component', () => {
         });
 
         const iconContainer = container.querySelector('[data-testid="card-icon"]');
-        expect(iconContainer?.className).toContain('[&>svg]:w-3');
-        expect(iconContainer?.className).toContain('[&>svg]:h-3');
-        expect(iconContainer?.className).toContain('md:[&>svg]:w-4');
-        expect(iconContainer?.className).toContain('md:[&>svg]:h-4');
+        // Icon container now uses fixed size with rounded-lg
+        expect(iconContainer?.className).toContain('w-8');
+        expect(iconContainer?.className).toContain('h-8');
+        expect(iconContainer?.className).toContain('md:w-9');
+        expect(iconContainer?.className).toContain('md:h-9');
+        expect(iconContainer?.className).toContain('rounded-lg');
     });
 
-    describe('variant styles', () => {
+    describe('variant styles - gradient based', () => {
         it('applies default variant styles', () => {
             act(() => {
                 root.render(
@@ -186,10 +205,11 @@ describe('StatsCard Component', () => {
 
             const card = container.querySelector('[data-testid="stats-card"]');
             expect(card?.className).toContain('bg-card');
-            expect(card?.className).toContain('border-border/50');
+            expect(card?.className).toContain('border-border/40');
+            expect(card?.className).toContain('shadow-sm');
         });
 
-        it('applies warning variant styles', () => {
+        it('applies warning variant with amber gradient', () => {
             act(() => {
                 root.render(
                     <StatsCard
@@ -202,11 +222,12 @@ describe('StatsCard Component', () => {
             });
 
             const card = container.querySelector('[data-testid="stats-card"]');
-            expect(card?.className).toContain('bg-warning/10');
-            expect(card?.className).toContain('text-warning-foreground');
+            expect(card?.className).toContain('bg-gradient-to-br');
+            expect(card?.className).toContain('from-amber-50');
+            expect(card?.className).toContain('border-amber-200/60');
         });
 
-        it('applies success variant styles', () => {
+        it('applies success variant with emerald gradient', () => {
             act(() => {
                 root.render(
                     <StatsCard
@@ -219,11 +240,12 @@ describe('StatsCard Component', () => {
             });
 
             const card = container.querySelector('[data-testid="stats-card"]');
-            expect(card?.className).toContain('bg-success/10');
-            expect(card?.className).toContain('text-success');
+            expect(card?.className).toContain('bg-gradient-to-br');
+            expect(card?.className).toContain('from-emerald-50');
+            expect(card?.className).toContain('border-emerald-200/60');
         });
 
-        it('applies destructive variant styles', () => {
+        it('applies destructive variant with rose gradient', () => {
             act(() => {
                 root.render(
                     <StatsCard
@@ -236,8 +258,9 @@ describe('StatsCard Component', () => {
             });
 
             const card = container.querySelector('[data-testid="stats-card"]');
-            expect(card?.className).toContain('bg-destructive/10');
-            expect(card?.className).toContain('text-destructive');
+            expect(card?.className).toContain('bg-gradient-to-br');
+            expect(card?.className).toContain('from-rose-50');
+            expect(card?.className).toContain('border-rose-200/60');
         });
     });
 });
@@ -335,49 +358,58 @@ describe('Stats Grid Layout', () => {
 describe('Admin Dashboard Section Order', () => {
     /**
      * Tests to verify the expected section order in the admin dashboard:
-     * 1. Email Notifications
-     * 2. Organization Settings (Google Sheets)
-     * 3. Stats Cards
+     * 1. Organization Header (compact)
+     * 2. Email Notifications
+     * 3. Google Sheets (standalone card with green branding)
      * 4. Time-Off Requests (Approval Queue)
+     * 5. Stats Cards (at the bottom)
      *
      * Since the admin page is a server component, we test the expected structure.
      */
 
     const expectedSectionOrder = [
+        'Organization Header',
         'Email Notifications',
-        'Organization Settings',
-        'Stats Cards',
+        'Google Sheets',
         'Time-Off Requests',
+        'Stats Cards',
     ];
 
-    it('defines correct section order', () => {
-        expect(expectedSectionOrder[0]).toBe('Email Notifications');
-        expect(expectedSectionOrder[1]).toBe('Organization Settings');
-        expect(expectedSectionOrder[2]).toBe('Stats Cards');
+    it('defines correct section order with 5 sections', () => {
+        expect(expectedSectionOrder.length).toBe(5);
+        expect(expectedSectionOrder[0]).toBe('Organization Header');
+        expect(expectedSectionOrder[1]).toBe('Email Notifications');
+        expect(expectedSectionOrder[2]).toBe('Google Sheets');
         expect(expectedSectionOrder[3]).toBe('Time-Off Requests');
+        expect(expectedSectionOrder[4]).toBe('Stats Cards');
     });
 
-    it('has Email Notifications before Organization Settings', () => {
+    it('has Organization Header at the top', () => {
+        const headerIndex = expectedSectionOrder.indexOf('Organization Header');
+        expect(headerIndex).toBe(0);
+    });
+
+    it('has Email Notifications before Google Sheets', () => {
         const emailIndex = expectedSectionOrder.indexOf('Email Notifications');
-        const settingsIndex = expectedSectionOrder.indexOf('Organization Settings');
-        expect(emailIndex).toBeLessThan(settingsIndex);
+        const sheetsIndex = expectedSectionOrder.indexOf('Google Sheets');
+        expect(emailIndex).toBeLessThan(sheetsIndex);
     });
 
-    it('has Organization Settings before Stats Cards', () => {
-        const settingsIndex = expectedSectionOrder.indexOf('Organization Settings');
-        const statsIndex = expectedSectionOrder.indexOf('Stats Cards');
-        expect(settingsIndex).toBeLessThan(statsIndex);
-    });
-
-    it('has Stats Cards before Time-Off Requests', () => {
-        const statsIndex = expectedSectionOrder.indexOf('Stats Cards');
+    it('has Google Sheets before Time-Off Requests', () => {
+        const sheetsIndex = expectedSectionOrder.indexOf('Google Sheets');
         const requestsIndex = expectedSectionOrder.indexOf('Time-Off Requests');
-        expect(statsIndex).toBeLessThan(requestsIndex);
+        expect(sheetsIndex).toBeLessThan(requestsIndex);
     });
 
-    it('has Time-Off Requests at the bottom', () => {
+    it('has Time-Off Requests before Stats Cards', () => {
         const requestsIndex = expectedSectionOrder.indexOf('Time-Off Requests');
-        expect(requestsIndex).toBe(expectedSectionOrder.length - 1);
+        const statsIndex = expectedSectionOrder.indexOf('Stats Cards');
+        expect(requestsIndex).toBeLessThan(statsIndex);
+    });
+
+    it('has Stats Cards at the bottom', () => {
+        const statsIndex = expectedSectionOrder.indexOf('Stats Cards');
+        expect(statsIndex).toBe(expectedSectionOrder.length - 1);
     });
 });
 

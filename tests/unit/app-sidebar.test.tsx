@@ -68,7 +68,7 @@ describe('AppSidebar', () => {
     });
 
     describe('Basic Rendering', () => {
-        it('renders with StaffHub branding', () => {
+        it('renders with StaffHub branding and default subtitle', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -78,10 +78,11 @@ describe('AppSidebar', () => {
             });
 
             expect(container.textContent).toContain('StaffHub');
+            // Shows default subtitle when no organization
             expect(container.textContent).toContain('Time Off Portal');
         });
 
-        it('renders Help Center navigation items', () => {
+        it('does not render Help Center section (removed)', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -90,12 +91,8 @@ describe('AppSidebar', () => {
                 );
             });
 
-            expect(container.textContent).toContain('Help Center');
-            expect(container.textContent).toContain('Home');
-            // Documentation is now org-scoped, not in Help Center
-            expect(container.textContent).not.toContain('Documentation');
-            // Announcements is now org-scoped, not in Help Center
-            expect(container.textContent).not.toContain('Announcements');
+            // Help Center section was removed - logo is the only way to get to landing page
+            expect(container.textContent).not.toContain('Help Center');
         });
 
         it('does not show workspace sections when user is not logged in', () => {
@@ -122,6 +119,66 @@ describe('AppSidebar', () => {
             });
 
             expect(container.textContent).toContain('Sign In');
+        });
+    });
+
+    describe('Organization Name Display', () => {
+        const mockUser = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            app_metadata: {},
+            user_metadata: {},
+            aud: 'authenticated',
+            created_at: '2025-01-01',
+        };
+
+        const mockProfile = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            full_name: 'Test User',
+            role: 'staff' as const,
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+            avatar_url: null,
+            organization_id: 'test-org-id',
+        };
+
+        const mockOrganization = {
+            id: 'test-org-id',
+            name: 'Sunrise Medical Clinic',
+            slug: 'sunrise-clinic',
+            admin_email: 'admin@test.com',
+            google_sheet_id: null,
+            settings: {},
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+        };
+
+        it('shows organization name instead of default subtitle when org is provided', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={mockOrganization} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('StaffHub');
+            expect(container.textContent).toContain('Sunrise Medical Clinic');
+            expect(container.textContent).not.toContain('Time Off Portal');
+        });
+
+        it('shows default subtitle when no organization', () => {
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppSidebar user={mockUser} profile={mockProfile} organization={null} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('StaffHub');
+            expect(container.textContent).toContain('Time Off Portal');
         });
     });
 
@@ -190,7 +247,7 @@ describe('AppSidebar', () => {
     });
 
     describe('Navigation Links', () => {
-        it('all Help Center links have onClick handlers', () => {
+        it('logo links to landing page', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -199,16 +256,13 @@ describe('AppSidebar', () => {
                 );
             });
 
-            const homeLink = container.querySelector('a[href="/"]');
-
-            // Links should exist
-            expect(homeLink).toBeTruthy();
-            // Documentation is now org-scoped, not in Help Center for unauthenticated users
-            const documentationLink = container.querySelector('a[href="/documentation"]');
-            expect(documentationLink).toBeNull();
+            // Logo should link to landing page (only way to get there now)
+            const logoLink = container.querySelector('a[href="/"]');
+            expect(logoLink).toBeTruthy();
+            expect(logoLink?.textContent).toContain('StaffHub');
         });
 
-        it('Help Center links have correct hrefs', () => {
+        it('has sign in link for unauthenticated users', () => {
             act(() => {
                 root.render(
                     <SidebarProvider>
@@ -217,10 +271,7 @@ describe('AppSidebar', () => {
                 );
             });
 
-            const homeLink = container.querySelector('a[href="/"]');
             const signInLink = container.querySelector('a[href="/login"]');
-
-            expect(homeLink).toBeTruthy();
             expect(signInLink).toBeTruthy();
         });
     });
