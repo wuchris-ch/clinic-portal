@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vite
 import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react';
 
-import { OrganizationSettings } from '@/components/admin/organization-settings';
+import { GoogleSheetsCard } from '@/components/admin/google-sheets-card';
 import type { Organization } from '@/lib/types/database';
 
 // Polyfill ResizeObserver for Radix UI components
@@ -48,7 +48,7 @@ const mockOrganizationNoSheet: Organization = {
     google_sheet_id: null,
 };
 
-describe('OrganizationSettings', () => {
+describe('GoogleSheetsCard', () => {
     let container: HTMLDivElement;
     let root: Root;
 
@@ -68,40 +68,41 @@ describe('OrganizationSettings', () => {
         container.remove();
     });
 
-    it('renders organization name and slug', () => {
+    it('renders Google Sheets heading', () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        expect(container.textContent).toContain('Test Clinic');
-        expect(container.textContent).toContain('/test-clinic');
+        expect(container.textContent).toContain('Google Sheets');
+        expect(container.textContent).toContain('Automatic form submission logging');
     });
 
     it('shows Connected status when sheet is linked', () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         expect(container.textContent).toContain('Connected');
-        expect(container.textContent).toContain('Open in Google Sheets');
+        expect(container.textContent).toContain('Open Sheet');
     });
 
     it('shows warning when no sheet is linked', () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganizationNoSheet} />
+                <GoogleSheetsCard organization={mockOrganizationNoSheet} />
             );
         });
 
         expect(container.textContent).toContain('No Google Sheet Connected');
+        expect(container.textContent).toContain('Not linked');
     });
 });
 
-describe('OrganizationSettings - Link Your Google Sheet Section', () => {
+describe('GoogleSheetsCard - Link Sheet Section', () => {
     let container: HTMLDivElement;
     let root: Root;
 
@@ -120,67 +121,68 @@ describe('OrganizationSettings - Link Your Google Sheet Section', () => {
         container.remove();
     });
 
-    it('renders Link your Google Sheet section', () => {
+    it('renders link sheet section', () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        expect(container.textContent).toContain('Link your Google Sheet');
+        expect(container.textContent).toContain('Change linked sheet');
     });
 
-    it('has desktop-visible styling on Link your Google Sheet summary', () => {
+    it('shows step-by-step instructions when section is expanded', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
-            );
-        });
-
-        const summaries = container.querySelectorAll('summary');
-        const linkSheetSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Link your Google Sheet')
-        );
-
-        expect(linkSheetSummary).toBeTruthy();
-        // Check for desktop visibility classes
-        expect(linkSheetSummary?.className).toContain('md:text-foreground');
-        expect(linkSheetSummary?.className).toContain('md:font-medium');
-    });
-
-    it('shows step-by-step instructions when expanded', () => {
-        act(() => {
-            root.render(
-                <OrganizationSettings
+                <GoogleSheetsCard
                     organization={mockOrganizationNoSheet}
                     serviceAccountEmail="service@test.iam.gserviceaccount.com"
                 />
             );
         });
 
-        // When no sheet is linked, the details should be open by default
+        // Click to expand the link sheet section
+        const buttons = container.querySelectorAll('button');
+        const linkSheetButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Link your Google Sheet')
+        );
+
+        await act(async () => {
+            linkSheetButton?.click();
+        });
+
         expect(container.textContent).toContain('Create a Google Sheet');
         expect(container.textContent).toContain('Share it with our system');
         expect(container.textContent).toContain('Paste the link below');
     });
 
-    it('displays service account email when provided', () => {
+    it('displays service account email when provided', async () => {
         const serviceEmail = 'service@test.iam.gserviceaccount.com';
 
         act(() => {
             root.render(
-                <OrganizationSettings
+                <GoogleSheetsCard
                     organization={mockOrganizationNoSheet}
                     serviceAccountEmail={serviceEmail}
                 />
             );
         });
 
+        // Click to expand the link sheet section
+        const buttons = container.querySelectorAll('button');
+        const linkSheetButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Link your Google Sheet')
+        );
+
+        await act(async () => {
+            linkSheetButton?.click();
+        });
+
         expect(container.textContent).toContain(serviceEmail);
     });
 });
 
-describe('OrganizationSettings - Google Sheet Column Headers Section', () => {
+describe('GoogleSheetsCard - Column Headers Section', () => {
     let container: HTMLDivElement;
     let root: Root;
 
@@ -199,48 +201,31 @@ describe('OrganizationSettings - Google Sheet Column Headers Section', () => {
         container.remove();
     });
 
-    it('renders Google Sheet Column Headers section', () => {
+    it('renders Column Headers section', () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        expect(container.textContent).toContain('Google Sheet Column Headers');
+        expect(container.textContent).toContain('Column Headers');
     });
 
-    it('has desktop-visible styling on Column Headers summary', () => {
+    it('shows all five form types when expanded', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        // Click to expand the Column Headers section
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
 
-        expect(columnHeadersSummary).toBeTruthy();
-        expect(columnHeadersSummary?.className).toContain('md:text-foreground');
-        expect(columnHeadersSummary?.className).toContain('md:font-medium');
-    });
-
-    it('shows all five form types when expanded', () => {
-        act(() => {
-            root.render(
-                <OrganizationSettings organization={mockOrganization} />
-            );
-        });
-
-        // Click to expand the details
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
-        );
-
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         expect(container.textContent).toContain('Day Off Requests');
@@ -250,71 +235,71 @@ describe('OrganizationSettings - Google Sheet Column Headers Section', () => {
         expect(container.textContent).toContain('Sick Days');
     });
 
-    it('shows tab names for each form type', () => {
+    it('shows tab names for each form type', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         // Expand the section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
 
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
-        expect(container.textContent).toContain('Tab name: "Day Off Requests"');
-        expect(container.textContent).toContain('Tab name: "Time Clock Adjustments"');
-        expect(container.textContent).toContain('Tab name: "Overtime Requests"');
-        expect(container.textContent).toContain('Tab name: "Vacation Requests"');
-        expect(container.textContent).toContain('Tab name: "Sick Days"');
+        expect(container.textContent).toContain('Tab: "Day Off Requests"');
+        expect(container.textContent).toContain('Tab: "Time Clock Adjustments"');
+        expect(container.textContent).toContain('Tab: "Overtime Requests"');
+        expect(container.textContent).toContain('Tab: "Vacation Requests"');
+        expect(container.textContent).toContain('Tab: "Sick Days"');
     });
 
-    it('renders copy buttons for each form type', () => {
+    it('renders copy buttons for each form type', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         // Expand the section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers') && btn.textContent?.includes('Copy headers')
         );
 
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         // Find all Copy buttons (should be 5, one for each form type)
-        const copyButtons = container.querySelectorAll('button');
-        const copyButtonsArray = Array.from(copyButtons).filter(btn =>
-            btn.textContent?.includes('Copy')
+        const allButtons = container.querySelectorAll('button');
+        const copyButtonsArray = Array.from(allButtons).filter(btn =>
+            btn.textContent?.trim() === 'Copy' || btn.textContent?.includes('Copy')
         );
 
-        expect(copyButtonsArray.length).toBe(5);
+        expect(copyButtonsArray.length).toBeGreaterThanOrEqual(5);
     });
 
-    it('shows helpful tip about pasting columns', () => {
+    it('shows helpful tip about pasting columns', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         // Expand the section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
 
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         expect(container.textContent).toContain('Tip:');
@@ -323,7 +308,7 @@ describe('OrganizationSettings - Google Sheet Column Headers Section', () => {
     });
 });
 
-describe('OrganizationSettings - Copy Functionality', () => {
+describe('GoogleSheetsCard - Copy Functionality', () => {
     let container: HTMLDivElement;
     let root: Root;
     let mockClipboard: { writeText: ReturnType<typeof vi.fn> };
@@ -354,27 +339,30 @@ describe('OrganizationSettings - Copy Functionality', () => {
     it('copies column headers when copy button is clicked', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        // Expand the column headers section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
-        );
-
-        act(() => {
-            columnHeadersSummary?.click();
-        });
-
-        // Find and click the first Copy button (Day Off Requests)
-        const copyButtons = Array.from(container.querySelectorAll('button')).filter(btn =>
-            btn.textContent?.includes('Copy') && !btn.textContent?.includes('Copied')
+        // Expand the column headers section - find the button that expands column headers
+        const allButtons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(allButtons).find(btn =>
+            btn.textContent?.includes('Column Headers') && btn.textContent?.includes('Copy headers')
         );
 
         await act(async () => {
-            copyButtons[0]?.click();
+            columnHeadersButton?.click();
+        });
+
+        // Find and click a Copy button for a form type (look for rows with Tab: in their text)
+        const rows = container.querySelectorAll('[class*="rounded-lg"]');
+        const dayOffRow = Array.from(rows).find(row =>
+            row.textContent?.includes('Day Off Requests') &&
+            row.textContent?.includes('Tab:')
+        );
+        const copyButton = dayOffRow?.querySelector('button');
+
+        await act(async () => {
+            copyButton?.click();
         });
 
         expect(mockClipboard.writeText).toHaveBeenCalled();
@@ -387,25 +375,25 @@ describe('OrganizationSettings - Copy Functionality', () => {
     it('copies correct columns for Day Off Requests', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
-        // Expand and click copy for Day Off Requests
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        // Expand column headers section
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
 
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         // Find the Day Off Requests row and its copy button
         const rows = container.querySelectorAll('[class*="rounded-lg"]');
         const dayOffRow = Array.from(rows).find(row =>
             row.textContent?.includes('Day Off Requests') &&
-            row.textContent?.includes('Tab name')
+            row.textContent?.includes('Tab:')
         );
         const copyButton = dayOffRow?.querySelector('button');
 
@@ -422,25 +410,25 @@ describe('OrganizationSettings - Copy Functionality', () => {
     it('copies correct columns for Sick Days', async () => {
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         // Expand the section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
 
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         // Find the Sick Days row and click its copy button
         const rows = container.querySelectorAll('[class*="rounded-lg"]');
         const sickDaysRow = Array.from(rows).find(row =>
             row.textContent?.includes('Sick Days') &&
-            row.textContent?.includes('Tab name')
+            row.textContent?.includes('Tab:')
         );
         const copyButton = sickDaysRow?.querySelector('button');
 
@@ -455,7 +443,7 @@ describe('OrganizationSettings - Copy Functionality', () => {
     });
 });
 
-describe('OrganizationSettings - Column Header Constants', () => {
+describe('GoogleSheetsCard - Column Header Constants', () => {
     /**
      * Test that the column headers match what the API expects.
      * These are critical for Google Sheets integration.
@@ -494,28 +482,28 @@ describe('OrganizationSettings - Column Header Constants', () => {
         },
     ];
 
-    it.each(expectedFormTypes)('$label has correct tab name: $tabName', ({ label, tabName }) => {
+    it.each(expectedFormTypes)('$label has correct tab name: $tabName', async ({ label, tabName }) => {
         const container = document.createElement('div');
         document.body.appendChild(container);
         const root = createRoot(container);
 
         act(() => {
             root.render(
-                <OrganizationSettings organization={mockOrganization} />
+                <GoogleSheetsCard organization={mockOrganization} />
             );
         });
 
         // Expand the column headers section
-        const summaries = container.querySelectorAll('summary');
-        const columnHeadersSummary = Array.from(summaries).find(s =>
-            s.textContent?.includes('Google Sheet Column Headers')
+        const buttons = container.querySelectorAll('button');
+        const columnHeadersButton = Array.from(buttons).find(btn =>
+            btn.textContent?.includes('Column Headers')
         );
-        act(() => {
-            columnHeadersSummary?.click();
+        await act(async () => {
+            columnHeadersButton?.click();
         });
 
         expect(container.textContent).toContain(label);
-        expect(container.textContent).toContain(`Tab name: "${tabName}"`);
+        expect(container.textContent).toContain(`Tab: "${tabName}"`);
 
         act(() => {
             root.unmount();

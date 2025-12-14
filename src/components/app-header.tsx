@@ -13,7 +13,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { Home, LogOut, LogIn } from "lucide-react";
+import { LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -70,28 +70,11 @@ export function AppHeader({ user, profile }: AppHeaderProps) {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto flex items-center gap-2 md:gap-4">
-        {/* Home Quick Link - Hidden on mobile */}
-        <div className="hidden md:flex items-center gap-1">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-          >
-            <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
-          </Link>
-        </div>
-        <Separator orientation="vertical" className="hidden md:block h-4" />
         {profile?.role === "admin" && (
           <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
             Admin
           </span>
         )}
-        <Link href="/" className="md:hidden">
-          <Button variant="ghost" size="icon" title="Home">
-            <Home className="w-4 h-4" />
-            <span className="sr-only">Home</span>
-          </Button>
-        </Link>
         <ThemeToggle />
         {user ? (
           <Button

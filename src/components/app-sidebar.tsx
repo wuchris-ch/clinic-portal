@@ -28,7 +28,6 @@ import {
   Shield,
   Users,
   LogOut,
-  Home,
   Megaphone,
   FileText,
   X,
@@ -42,13 +41,6 @@ interface AppSidebarProps {
   organization?: Organization | null;
 }
 
-const helpCenterItems = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-];
 
 // Admin and staff nav items are now generated inside the component with org prefixes
 
@@ -160,32 +152,13 @@ export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-lg">StaffHub</span>
-            <span className="text-xs text-muted-foreground">Time Off Portal</span>
+            <span className="text-xs text-muted-foreground truncate max-w-[140px]">
+              {organization?.name || "Time Off Portal"}
+            </span>
           </div>
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Help Center</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {helpCenterItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                  >
-                    <Link href={item.url} onClick={closeSidebarOnMobile}>
-                      <item.icon className="w-4 h-4" suppressHydrationWarning />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         {user && organization && (
           <SidebarGroup>
             <SidebarGroupLabel>My Workspace</SidebarGroupLabel>
