@@ -58,24 +58,8 @@ test.describe('Public Pages E2E Tests', () => {
         });
     });
 
-    test.describe('Documentation Page', () => {
-        test('documentation page loads', async ({ page }) => {
-            await page.goto(TEST_URLS.documentation);
-
-            // Page should load without error
-            await expect(page).not.toHaveURL(/error|404/);
-
-            // Should have documentation content
-            await expect(page.locator('body')).toContainText(/documentation|handbook|protocol/i);
-        });
-
-        test('documentation page is accessible without auth', async ({ page }) => {
-            await page.goto(TEST_URLS.documentation);
-
-            // Should NOT redirect to login
-            await expect(page).not.toHaveURL(/login/);
-        });
-    });
+    // Documentation page has been moved to org-scoped protected routes
+    // Tests for protected documentation are in documentation.spec.ts
 
     test.describe('Auth Pages Are Publicly Accessible', () => {
         test('login page is accessible', async ({ page }) => {
@@ -107,7 +91,6 @@ test.describe('Public Pages E2E Tests', () => {
 
             // Visit critical public pages
             await page.goto(TEST_URLS.home);
-            await page.goto(TEST_URLS.documentation);
             await page.goto(TEST_URLS.login);
             await page.goto(TEST_URLS.register);
 

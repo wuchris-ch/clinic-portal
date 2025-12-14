@@ -184,8 +184,8 @@ test.describe('Navigation Smoke Tests', () => {
             // Start at home
             await page.goto(TEST_URLS.home);
 
-            // Navigate to documentation
-            await page.goto(TEST_URLS.documentation);
+            // Navigate to login
+            await page.goto(TEST_URLS.login);
 
             // Go back
             await page.goBack();
