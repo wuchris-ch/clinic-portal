@@ -93,8 +93,57 @@ export default async function AdminPage({ params }: PageProps) {
 
     return (
         <div className="space-y-8">
+            {/* Email Notifications */}
+            <Card className="border-border/50">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Bell className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle>Email Notifications</CardTitle>
+                            <CardDescription>
+                                Manage who receives email notifications for new time-off requests
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <NotificationRecipients
+                        recipients={notificationRecipients}
+                        adminId={user.id}
+                        organizationId={profile.organization_id!}
+                    />
+                </CardContent>
+            </Card>
+
+            {/* Organization Settings (Google Sheets) */}
+            {organization && (
+                <Card className="border-border/50">
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Settings className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <CardTitle>Organization Settings</CardTitle>
+                                <CardDescription>
+                                    Manage your organization&apos;s configuration and integrations
+                                </CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <OrganizationSettings
+                            organization={organization}
+                            serviceAccountEmail={process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}
+                        />
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
                 <StatsCard
                     title="Total Staff"
                     value={staffCount}
@@ -121,7 +170,7 @@ export default async function AdminPage({ params }: PageProps) {
                 />
             </div>
 
-            {/* Main Content */}
+            {/* Time-Off Requests (Approval Queue) */}
             <Card className="border-border/50">
                 <CardHeader>
                     <div className="flex items-center gap-3">
@@ -157,55 +206,6 @@ export default async function AdminPage({ params }: PageProps) {
                     </Tabs>
                 </CardContent>
             </Card>
-
-            {/* Notification Recipients */}
-            <Card className="border-border/50">
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Bell className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                            <CardTitle>Email Notifications</CardTitle>
-                            <CardDescription>
-                                Manage who receives email notifications for new time-off requests
-                            </CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <NotificationRecipients
-                        recipients={notificationRecipients}
-                        adminId={user.id}
-                        organizationId={profile.organization_id!}
-                    />
-                </CardContent>
-            </Card>
-
-            {/* Organization Settings */}
-            {organization && (
-                <Card className="border-border/50">
-                    <CardHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                <Settings className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                                <CardTitle>Organization Settings</CardTitle>
-                                <CardDescription>
-                                    Manage your organization&apos;s configuration and integrations
-                                </CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <OrganizationSettings
-                            organization={organization}
-                            serviceAccountEmail={process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}
-                        />
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 }
@@ -237,13 +237,13 @@ function StatsCard({
 
     return (
         <Card className={`border ${variantStyles[variant]}`}>
-            <CardContent className="p-6">
+            <CardContent className="p-3 md:p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium opacity-80">{title}</p>
-                        <p className="text-3xl font-bold">{value}</p>
+                        <p className="text-xs md:text-sm font-medium opacity-80">{title}</p>
+                        <p className="text-2xl md:text-3xl font-bold">{value}</p>
                     </div>
-                    <div className={iconStyles[variant]}>{icon}</div>
+                    <div className={`${iconStyles[variant]} [&>svg]:w-3 [&>svg]:h-3 md:[&>svg]:w-4 md:[&>svg]:h-4`}>{icon}</div>
                 </div>
             </CardContent>
         </Card>
