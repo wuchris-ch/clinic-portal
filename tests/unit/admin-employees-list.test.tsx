@@ -193,9 +193,7 @@ describe('EmployeesList', () => {
             );
         });
 
-        // Check avatar fallbacks contain initials
-        const avatarFallbacks = container.querySelectorAll('[class*="AvatarFallback"], span.bg-primary\\/10');
-        // Initials should be JD, JS, BW
+        // Check avatar fallbacks contain initials (JD, JS, BW)
         expect(container.textContent).toContain('JD');
         expect(container.textContent).toContain('JS');
         expect(container.textContent).toContain('BW');

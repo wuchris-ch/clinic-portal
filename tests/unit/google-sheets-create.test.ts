@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 /**
  * High-Value Tests: Google Sheets Create Logic
@@ -108,25 +108,25 @@ describe('Sheet Tab Configuration', () => {
 
     describe('Common headers', () => {
         it('all tabs start with Timestamp', () => {
-            for (const [tabName, headers] of Object.entries(SHEET_TABS)) {
+            for (const headers of Object.values(SHEET_TABS)) {
                 expect(headers[0]).toBe('Timestamp');
             }
         });
 
         it('all tabs have Employee Name as second column', () => {
-            for (const [tabName, headers] of Object.entries(SHEET_TABS)) {
+            for (const headers of Object.values(SHEET_TABS)) {
                 expect(headers[1]).toBe('Employee Name');
             }
         });
 
         it('all tabs have Employee Email as third column', () => {
-            for (const [tabName, headers] of Object.entries(SHEET_TABS)) {
+            for (const headers of Object.values(SHEET_TABS)) {
                 expect(headers[2]).toBe('Employee Email');
             }
         });
 
         it('all tabs end with Status column', () => {
-            for (const [tabName, headers] of Object.entries(SHEET_TABS)) {
+            for (const headers of Object.values(SHEET_TABS)) {
                 expect(headers[headers.length - 1]).toBe('Status');
             }
         });
