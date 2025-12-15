@@ -13,6 +13,40 @@ const projectRoot = join(__dirname, '../..');
 const orgPagesBase = join(projectRoot, 'src/app/org/[slug]');
 
 describe('Org Pages Structure', () => {
+    describe('Home Page (About StaffHub)', () => {
+        const homePath = join(orgPagesBase, 'home/page.tsx');
+
+        it('exists', () => {
+            expect(existsSync(homePath)).toBe(true);
+        });
+
+        const homeContent = readFileSync(homePath, 'utf-8');
+
+        it('is a client component', () => {
+            expect(homeContent).toContain('"use client"');
+        });
+
+        it('renders landing page content within app layout', () => {
+            // Should have the main marketing content
+            expect(homeContent).toContain('About StaffHub');
+            expect(homeContent).toContain('Google Sheets');
+            expect(homeContent).toContain('Email Notifications');
+        });
+
+        it('includes interactive demo elements', () => {
+            // Interactive sheet tabs demo
+            expect(homeContent).toContain('sheetTabs');
+            expect(homeContent).toContain('activeSheetTab');
+            // Interactive email demo
+            expect(homeContent).toContain('selectedEmail');
+        });
+
+        it('shows feature cards', () => {
+            expect(homeContent).toContain('FeatureCard');
+            expect(homeContent).toContain('Submit time-off requests');
+        });
+    });
+
     describe('Dashboard Page', () => {
         const dashboardPath = join(orgPagesBase, 'dashboard/page.tsx');
 

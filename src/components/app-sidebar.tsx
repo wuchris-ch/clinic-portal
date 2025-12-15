@@ -144,7 +144,7 @@ export function AppSidebar({ user, profile, organization }: AppSidebarProps) {
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
         <Link
-          href="/"
+          href={`${basePath}/home`}
           className="flex items-center gap-3 px-2 py-3 hover:bg-sidebar-accent rounded-lg transition-colors"
         >
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">

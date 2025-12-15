@@ -30,10 +30,11 @@ beforeAll(() => {
     });
 });
 
-// Mock next/navigation
+// Mock next/navigation - default to root, tests can override
+let mockPathname = '/';
 vi.mock('next/navigation', () => {
     return {
-        usePathname: () => '/',
+        usePathname: () => mockPathname,
     };
 });
 
@@ -56,6 +57,9 @@ describe('AppHeader', () => {
         // Required by React to enable act() warnings/behavior in tests
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+        // Reset mock pathname to default
+        mockPathname = '/';
 
         container = document.createElement('div');
         document.body.appendChild(container);
@@ -175,6 +179,67 @@ describe('AppHeader', () => {
             // Home navigation link removed for all users
             const homeLinks = container.querySelectorAll('a[href="/"]');
             expect(homeLinks.length).toBe(0);
+        });
+    });
+
+    describe('Page Titles', () => {
+        const mockUser = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            app_metadata: {},
+            user_metadata: {},
+            aud: 'authenticated',
+            created_at: '2025-01-01',
+        };
+
+        const mockProfile = {
+            id: 'test-user-id',
+            email: 'test@example.com',
+            full_name: 'Test User',
+            role: 'staff' as const,
+            created_at: '2025-01-01',
+            updated_at: '2025-01-01',
+            avatar_url: null,
+            organization_id: 'test-org-id',
+        };
+
+        it('shows "About StaffHub" for /home route', () => {
+            mockPathname = '/org/testorg/home';
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppHeader user={mockUser} profile={mockProfile} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('About StaffHub');
+        });
+
+        it('shows "Dashboard" as default for unmatched routes', () => {
+            mockPathname = '/org/testorg/dashboard';
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppHeader user={mockUser} profile={mockProfile} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('Dashboard');
+        });
+
+        it('shows "Announcements" for announcements route', () => {
+            mockPathname = '/org/testorg/announcements';
+            act(() => {
+                root.render(
+                    <SidebarProvider>
+                        <AppHeader user={mockUser} profile={mockProfile} />
+                    </SidebarProvider>
+                );
+            });
+
+            expect(container.textContent).toContain('Announcements');
         });
     });
 });
